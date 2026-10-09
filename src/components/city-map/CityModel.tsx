@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { useFrame, useThree } from '@react-three/fiber'
+import { useFrame } from '@react-three/fiber'
 import { Environment, Sky } from '@react-three/drei'
-import type { CameraControls } from '@react-three/drei'
 import {
   BufferAttribute,
   BufferGeometry,
@@ -57,7 +56,7 @@ function toGeometry(buffers: MeshBuffers) {
 
 const SKY = { turbidity: 5, rayleigh: 1.4, mieCoefficient: 0.004, mieDirectionalG: 0.85 }
 
-export function Atmosphere() {
+export function Atmosphere({ focus }: { focus: Vector3 }) {
   const sun = SUN_DIRECTION.toArray()
   return (
     <>
@@ -68,21 +67,18 @@ export function Atmosphere() {
       </Environment>
       <fog attach="fog" args={['#cfdde8', 14000, 70000]} />
       <hemisphereLight args={['#d6e6f5', '#7a6f55', 0.5]} />
-      <Sun />
+      <Sun focus={focus} />
     </>
   )
 }
 
 /** Directional sunlight whose shadow frustum follows what the camera looks at. */
-function Sun() {
+function Sun({ focus: target }: { focus: Vector3 }) {
   const light = useRef<DirectionalLight>(null)
-  const controls = useThree((state) => state.controls) as CameraControls | null
-  const target = useMemo(() => new Vector3(), [])
 
   useFrame(({ camera }) => {
     const l = light.current
     if (!l) return
-    if (controls) controls.getTarget(target)
     const size = Math.min(Math.max(camera.position.distanceTo(target) * 0.8, 400), 9000)
     const shadowCamera = l.shadow.camera
     if (shadowCamera.right !== size) {

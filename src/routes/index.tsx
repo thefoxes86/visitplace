@@ -1,8 +1,9 @@
-import { Suspense, lazy, useEffect } from 'react'
-import { ClientOnly, Link, createFileRoute } from '@tanstack/react-router'
+import { Suspense, lazy, useEffect, useState } from 'react'
+import { ClientOnly, createFileRoute } from '@tanstack/react-router'
 import { z } from 'zod'
 
-import { categoryColors, categoryLabels, getPlace, places } from '#/data/places'
+import { PlaceCard } from '#/components/PlaceCard'
+import { categoryColors, getPlace, places } from '#/data/places'
 
 // three.js needs WebGL, so the scene is loaded and rendered in the browser only.
 const CityCanvas = lazy(() => import('#/components/city-map/CityCanvas'))
@@ -16,6 +17,8 @@ function Home() {
   const { place: selectedId } = Route.useSearch()
   const navigate = Route.useNavigate()
   const selected = selectedId ? getPlace(selectedId) : undefined
+  // The card only opens once the camera has finished flying to the place.
+  const [arrivedId, setArrivedId] = useState<string>()
 
   const select = (id?: string) =>
     navigate({ search: id ? { place: id } : {}, replace: true })
@@ -33,12 +36,12 @@ function Home() {
       <div className="absolute inset-0 isolate">
         <ClientOnly fallback={<MapLoading />}>
           <Suspense fallback={<MapLoading />}>
-            <CityCanvas selectedId={selected?.id} onSelect={select} />
+            <CityCanvas selectedId={selected?.id} onSelect={select} onArrive={setArrivedId} />
           </Suspense>
         </ClientOnly>
       </div>
 
-      <header className="pointer-events-none absolute inset-x-0 top-0 z-20 p-4 sm:p-6">
+      <header className="pointer-events-none absolute inset-x-0 top-0 z-20 p-4 pr-20 sm:p-6">
         <div className="pointer-events-auto inline-block max-w-sm rounded-2xl bg-white/80 p-4 shadow-lg backdrop-blur">
           <h1 className="text-2xl font-bold tracking-tight">Visit Camaiore</h1>
           <p className="mt-1 text-sm text-slate-600">
@@ -72,36 +75,8 @@ function Home() {
         ))}
       </nav>
 
-      {selected && (
-        <aside
-          key={selected.id}
-          className="absolute inset-x-4 bottom-20 z-30 rounded-2xl bg-white/90 p-5 shadow-xl backdrop-blur sm:inset-x-auto sm:bottom-6 sm:right-6 sm:w-96"
-        >
-          <span
-            className="inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold text-white"
-            style={{ backgroundColor: categoryColors[selected.category] }}
-          >
-            {categoryLabels[selected.category]}
-          </span>
-          <h2 className="mt-2 text-xl font-bold">{selected.name}</h2>
-          <p className="mt-1 text-sm text-slate-600">{selected.summary}</p>
-          <div className="mt-4 flex gap-2">
-            <Link
-              to="/places/$placeId"
-              params={{ placeId: selected.id }}
-              className="flex-1 rounded-xl bg-slate-900 px-4 py-2 text-center text-sm font-semibold text-white hover:bg-slate-700"
-            >
-              Enter
-            </Link>
-            <button
-              type="button"
-              onClick={() => select()}
-              className="rounded-xl px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100"
-            >
-              Back to map
-            </button>
-          </div>
-        </aside>
+      {selected && arrivedId === selected.id && (
+        <PlaceCard key={selected.id} place={selected} onClose={() => select()} />
       )}
     </main>
   )

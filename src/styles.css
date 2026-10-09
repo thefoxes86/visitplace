@@ -15,3 +15,61 @@ body {
   margin: 0;
 }
 
+
+/* Place card on the map: pops open once the camera lands on a place. */
+@keyframes place-card-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.6) rotate(-3deg);
+    filter: blur(10px);
+  }
+  60% {
+    opacity: 1;
+    filter: blur(0);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0);
+    filter: blur(0);
+  }
+}
+
+@keyframes place-card-image {
+  from {
+    transform: scale(1.25);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+@keyframes place-card-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.place-card {
+  animation: place-card-in 700ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.place-card-image {
+  animation: place-card-image 1600ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.place-card-rise {
+  animation: place-card-rise 600ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .place-card,
+  .place-card-image,
+  .place-card-rise {
+    animation: none;
+  }
+}
