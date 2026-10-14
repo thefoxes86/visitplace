@@ -1,0 +1,18 @@
+# Local database for development: `docker compose up -d`
+services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    # The default bridge: no new Docker network to allocate.
+    network_mode: bridge
+    environment:
+      POSTGRES_USER: visitcamaiore
+      POSTGRES_PASSWORD: visitcamaiore
+      POSTGRES_DB: visitcamaiore
+    ports:
+      - '5432:5432'
+    volumes:
+      - db-data:/var/lib/postgresql/data
+
+volumes:
+  db-data:

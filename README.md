@@ -6,8 +6,29 @@ To run this application:
 
 ```bash
 npm install
+docker compose up -d        # local Postgres on localhost:5432
+npm run db:migrate          # create the tables
+npm run db:seed             # load the initial places (only into an empty table)
+npm run db:create-admin -- you@example.com 'a-long-password' 'Your Name'
 npm run dev
 ```
+
+`.env.local` needs `DATABASE_URL`, `BETTER_AUTH_SECRET` (`openssl rand -base64 32`) and
+`BETTER_AUTH_URL` (the site's URL, e.g. `http://localhost:3000`).
+
+# Backoffice
+
+`/admin` manages the contents of the site: events, B&Bs, restaurants and cultural
+places, all stored in the `pois` table (`src/db/schema.ts`). The public pages read
+them through `usePois()`; unpublished entries stay in the admin.
+
+Users are created by an admin in `/admin/utenti` (sign-up is off), with one of two
+roles (`src/lib/permissions.ts`):
+
+- **Amministratore** (`admin`): users and every content
+- **Redattore** (`editor`): contents only
+
+Schema changes: edit `src/db/schema.ts`, then `npm run db:generate` and `npm run db:migrate`.
 
 # Building For Production
 

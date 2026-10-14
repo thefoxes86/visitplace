@@ -1,7 +1,9 @@
 import {
   HeadContent,
+  Outlet,
   Scripts,
   createRootRouteWithContext,
+  useLocation,
 } from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
@@ -9,6 +11,7 @@ import { TanStackDevtools } from '@tanstack/react-devtools'
 import TanStackQueryDevtools from '../integrations/tanstack-query/devtools'
 import { SiteMenu } from '../components/SiteMenu'
 
+import { poisQuery } from '#/data/use-pois'
 import { getLocale } from '#/paraglide/runtime'
 
 import appCss from '../styles.css?url'
@@ -27,6 +30,8 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
       document.documentElement.setAttribute('lang', getLocale())
     }
   },
+  // Every public page shows places (the menu lists them all): load them once here.
+  loader: ({ context }) => context.queryClient.ensureQueryData(poisQuery),
 
   head: () => ({
     meta: [
@@ -42,6 +47,12 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
       },
     ],
     links: [
+      { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
+      { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossOrigin: 'anonymous' },
+      {
+        rel: 'stylesheet',
+        href: 'https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;800&family=Playfair+Display:ital@1&display=swap',
+      },
       {
         rel: 'stylesheet',
         href: appCss,
@@ -49,7 +60,18 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
     ],
   }),
   shellComponent: RootDocument,
+  component: RootLayout,
 })
+
+function RootLayout() {
+  const inAdmin = useLocation({ select: (location) => location.pathname.startsWith('/admin') })
+  return (
+    <>
+      {!inAdmin && <SiteMenu />}
+      <Outlet />
+    </>
+  )
+}
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
@@ -58,7 +80,6 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body>
-        <SiteMenu />
         {children}
         <TanStackDevtools
           config={{

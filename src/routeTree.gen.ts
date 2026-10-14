@@ -10,43 +10,248 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as PlacesPlaceIdRouteImport } from './routes/places/$placeId'
+import { Route as DoveDormireRouteImport } from './routes/dove-dormire'
+import { Route as GustaRouteImport } from './routes/gusta'
+import { Route as InfoRouteImport } from './routes/info'
+import { Route as MappaRouteImport } from './routes/mappa'
+import { Route as ViviRouteImport } from './routes/vivi'
+import { Route as AdminPanelRouteImport } from './routes/admin/_panel'
+import { Route as AdminLoginRouteImport } from './routes/admin/login'
+import { Route as LuoghiPoiIdRouteImport } from './routes/luoghi/$poiId'
+import { Route as ScopriIndexRouteImport } from './routes/scopri/index'
+import { Route as ScopriTopicRouteImport } from './routes/scopri/$topic'
+import { Route as AdminPanelIndexRouteImport } from './routes/admin/_panel/index'
+import { Route as AdminPanelCategoryRouteRouteImport } from './routes/admin/_panel/$category/route'
+import { Route as AdminPanelUtentiRouteImport } from './routes/admin/_panel/utenti'
+import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as AdminPanelCategoryIndexRouteImport } from './routes/admin/_panel/$category/index'
+import { Route as AdminPanelCategoryIdRouteImport } from './routes/admin/_panel/$category/$id'
+import { Route as AdminPanelCategoryNuovoRouteImport } from './routes/admin/_panel/$category/nuovo'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PlacesPlaceIdRoute = PlacesPlaceIdRouteImport.update({
-  id: '/places/$placeId',
-  path: '/places/$placeId',
+const DoveDormireRoute = DoveDormireRouteImport.update({
+  id: '/dove-dormire',
+  path: '/dove-dormire',
   getParentRoute: () => rootRouteImport,
+} as any)
+const GustaRoute = GustaRouteImport.update({
+  id: '/gusta',
+  path: '/gusta',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InfoRoute = InfoRouteImport.update({
+  id: '/info',
+  path: '/info',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MappaRoute = MappaRouteImport.update({
+  id: '/mappa',
+  path: '/mappa',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ViviRoute = ViviRouteImport.update({
+  id: '/vivi',
+  path: '/vivi',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminPanelRoute = AdminPanelRouteImport.update({
+  id: '/admin/_panel',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminLoginRoute = AdminLoginRouteImport.update({
+  id: '/admin/login',
+  path: '/admin/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LuoghiPoiIdRoute = LuoghiPoiIdRouteImport.update({
+  id: '/luoghi/$poiId',
+  path: '/luoghi/$poiId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ScopriIndexRoute = ScopriIndexRouteImport.update({
+  id: '/scopri/',
+  path: '/scopri/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ScopriTopicRoute = ScopriTopicRouteImport.update({
+  id: '/scopri/$topic',
+  path: '/scopri/$topic',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminPanelIndexRoute = AdminPanelIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminPanelRoute,
+} as any)
+const AdminPanelCategoryRouteRoute = AdminPanelCategoryRouteRouteImport.update({
+  id: '/$category',
+  path: '/$category',
+  getParentRoute: () => AdminPanelRoute,
+} as any)
+const AdminPanelUtentiRoute = AdminPanelUtentiRouteImport.update({
+  id: '/utenti',
+  path: '/utenti',
+  getParentRoute: () => AdminPanelRoute,
+} as any)
+const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
+  id: '/api/auth/$',
+  path: '/api/auth/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminPanelCategoryIndexRoute = AdminPanelCategoryIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminPanelCategoryRouteRoute,
+} as any)
+const AdminPanelCategoryIdRoute = AdminPanelCategoryIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AdminPanelCategoryRouteRoute,
+} as any)
+const AdminPanelCategoryNuovoRoute = AdminPanelCategoryNuovoRouteImport.update({
+  id: '/nuovo',
+  path: '/nuovo',
+  getParentRoute: () => AdminPanelCategoryRouteRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/places/$placeId': typeof PlacesPlaceIdRoute
+  '/dove-dormire': typeof DoveDormireRoute
+  '/gusta': typeof GustaRoute
+  '/info': typeof InfoRoute
+  '/mappa': typeof MappaRoute
+  '/vivi': typeof ViviRoute
+  '/admin': typeof AdminPanelRouteWithChildren
+  '/admin/login': typeof AdminLoginRoute
+  '/luoghi/$poiId': typeof LuoghiPoiIdRoute
+  '/scopri/$topic': typeof ScopriTopicRoute
+  '/scopri/': typeof ScopriIndexRoute
+  '/admin/$category': typeof AdminPanelCategoryRouteRouteWithChildren
+  '/admin/utenti': typeof AdminPanelUtentiRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
+  '/admin/': typeof AdminPanelIndexRoute
+  '/admin/$category/$id': typeof AdminPanelCategoryIdRoute
+  '/admin/$category/nuovo': typeof AdminPanelCategoryNuovoRoute
+  '/admin/$category/': typeof AdminPanelCategoryIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/places/$placeId': typeof PlacesPlaceIdRoute
+  '/dove-dormire': typeof DoveDormireRoute
+  '/gusta': typeof GustaRoute
+  '/info': typeof InfoRoute
+  '/mappa': typeof MappaRoute
+  '/vivi': typeof ViviRoute
+  '/admin/login': typeof AdminLoginRoute
+  '/luoghi/$poiId': typeof LuoghiPoiIdRoute
+  '/scopri/$topic': typeof ScopriTopicRoute
+  '/scopri': typeof ScopriIndexRoute
+  '/admin/utenti': typeof AdminPanelUtentiRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
+  '/admin': typeof AdminPanelIndexRoute
+  '/admin/$category/$id': typeof AdminPanelCategoryIdRoute
+  '/admin/$category/nuovo': typeof AdminPanelCategoryNuovoRoute
+  '/admin/$category': typeof AdminPanelCategoryIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/places/$placeId': typeof PlacesPlaceIdRoute
+  '/dove-dormire': typeof DoveDormireRoute
+  '/gusta': typeof GustaRoute
+  '/info': typeof InfoRoute
+  '/mappa': typeof MappaRoute
+  '/vivi': typeof ViviRoute
+  '/admin/_panel': typeof AdminPanelRouteWithChildren
+  '/admin/login': typeof AdminLoginRoute
+  '/luoghi/$poiId': typeof LuoghiPoiIdRoute
+  '/scopri/$topic': typeof ScopriTopicRoute
+  '/scopri/': typeof ScopriIndexRoute
+  '/admin/_panel/$category': typeof AdminPanelCategoryRouteRouteWithChildren
+  '/admin/_panel/utenti': typeof AdminPanelUtentiRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
+  '/admin/_panel/': typeof AdminPanelIndexRoute
+  '/admin/_panel/$category/$id': typeof AdminPanelCategoryIdRoute
+  '/admin/_panel/$category/nuovo': typeof AdminPanelCategoryNuovoRoute
+  '/admin/_panel/$category/': typeof AdminPanelCategoryIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/places/$placeId'
+  fullPaths:
+    | '/'
+    | '/dove-dormire'
+    | '/gusta'
+    | '/info'
+    | '/mappa'
+    | '/vivi'
+    | '/admin'
+    | '/admin/login'
+    | '/luoghi/$poiId'
+    | '/scopri/$topic'
+    | '/scopri/'
+    | '/admin/$category'
+    | '/admin/utenti'
+    | '/api/auth/$'
+    | '/admin/'
+    | '/admin/$category/$id'
+    | '/admin/$category/nuovo'
+    | '/admin/$category/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/places/$placeId'
-  id: '__root__' | '/' | '/places/$placeId'
+  to:
+    | '/'
+    | '/dove-dormire'
+    | '/gusta'
+    | '/info'
+    | '/mappa'
+    | '/vivi'
+    | '/admin/login'
+    | '/luoghi/$poiId'
+    | '/scopri/$topic'
+    | '/scopri'
+    | '/admin/utenti'
+    | '/api/auth/$'
+    | '/admin'
+    | '/admin/$category/$id'
+    | '/admin/$category/nuovo'
+    | '/admin/$category'
+  id:
+    | '__root__'
+    | '/'
+    | '/dove-dormire'
+    | '/gusta'
+    | '/info'
+    | '/mappa'
+    | '/vivi'
+    | '/admin/_panel'
+    | '/admin/login'
+    | '/luoghi/$poiId'
+    | '/scopri/$topic'
+    | '/scopri/'
+    | '/admin/_panel/$category'
+    | '/admin/_panel/utenti'
+    | '/api/auth/$'
+    | '/admin/_panel/'
+    | '/admin/_panel/$category/$id'
+    | '/admin/_panel/$category/nuovo'
+    | '/admin/_panel/$category/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  PlacesPlaceIdRoute: typeof PlacesPlaceIdRoute
+  DoveDormireRoute: typeof DoveDormireRoute
+  GustaRoute: typeof GustaRoute
+  InfoRoute: typeof InfoRoute
+  MappaRoute: typeof MappaRoute
+  ViviRoute: typeof ViviRoute
+  AdminPanelRoute: typeof AdminPanelRouteWithChildren
+  AdminLoginRoute: typeof AdminLoginRoute
+  LuoghiPoiIdRoute: typeof LuoghiPoiIdRoute
+  ScopriTopicRoute: typeof ScopriTopicRoute
+  ScopriIndexRoute: typeof ScopriIndexRoute
+  ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -58,19 +263,175 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/places/$placeId': {
-      id: '/places/$placeId'
-      path: '/places/$placeId'
-      fullPath: '/places/$placeId'
-      preLoaderRoute: typeof PlacesPlaceIdRouteImport
+    '/dove-dormire': {
+      id: '/dove-dormire'
+      path: '/dove-dormire'
+      fullPath: '/dove-dormire'
+      preLoaderRoute: typeof DoveDormireRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/gusta': {
+      id: '/gusta'
+      path: '/gusta'
+      fullPath: '/gusta'
+      preLoaderRoute: typeof GustaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/info': {
+      id: '/info'
+      path: '/info'
+      fullPath: '/info'
+      preLoaderRoute: typeof InfoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mappa': {
+      id: '/mappa'
+      path: '/mappa'
+      fullPath: '/mappa'
+      preLoaderRoute: typeof MappaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/vivi': {
+      id: '/vivi'
+      path: '/vivi'
+      fullPath: '/vivi'
+      preLoaderRoute: typeof ViviRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/_panel': {
+      id: '/admin/_panel'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminPanelRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/login': {
+      id: '/admin/login'
+      path: '/admin/login'
+      fullPath: '/admin/login'
+      preLoaderRoute: typeof AdminLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/luoghi/$poiId': {
+      id: '/luoghi/$poiId'
+      path: '/luoghi/$poiId'
+      fullPath: '/luoghi/$poiId'
+      preLoaderRoute: typeof LuoghiPoiIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/scopri/': {
+      id: '/scopri/'
+      path: '/scopri'
+      fullPath: '/scopri/'
+      preLoaderRoute: typeof ScopriIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/scopri/$topic': {
+      id: '/scopri/$topic'
+      path: '/scopri/$topic'
+      fullPath: '/scopri/$topic'
+      preLoaderRoute: typeof ScopriTopicRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/_panel/': {
+      id: '/admin/_panel/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminPanelIndexRouteImport
+      parentRoute: typeof AdminPanelRoute
+    }
+    '/admin/_panel/$category': {
+      id: '/admin/_panel/$category'
+      path: '/$category'
+      fullPath: '/admin/$category'
+      preLoaderRoute: typeof AdminPanelCategoryRouteRouteImport
+      parentRoute: typeof AdminPanelRoute
+    }
+    '/admin/_panel/utenti': {
+      id: '/admin/_panel/utenti'
+      path: '/utenti'
+      fullPath: '/admin/utenti'
+      preLoaderRoute: typeof AdminPanelUtentiRouteImport
+      parentRoute: typeof AdminPanelRoute
+    }
+    '/api/auth/$': {
+      id: '/api/auth/$'
+      path: '/api/auth/$'
+      fullPath: '/api/auth/$'
+      preLoaderRoute: typeof ApiAuthSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/_panel/$category/': {
+      id: '/admin/_panel/$category/'
+      path: '/'
+      fullPath: '/admin/$category/'
+      preLoaderRoute: typeof AdminPanelCategoryIndexRouteImport
+      parentRoute: typeof AdminPanelCategoryRouteRoute
+    }
+    '/admin/_panel/$category/$id': {
+      id: '/admin/_panel/$category/$id'
+      path: '/$id'
+      fullPath: '/admin/$category/$id'
+      preLoaderRoute: typeof AdminPanelCategoryIdRouteImport
+      parentRoute: typeof AdminPanelCategoryRouteRoute
+    }
+    '/admin/_panel/$category/nuovo': {
+      id: '/admin/_panel/$category/nuovo'
+      path: '/nuovo'
+      fullPath: '/admin/$category/nuovo'
+      preLoaderRoute: typeof AdminPanelCategoryNuovoRouteImport
+      parentRoute: typeof AdminPanelCategoryRouteRoute
     }
   }
 }
 
+interface AdminPanelCategoryRouteRouteChildren {
+  AdminPanelCategoryIdRoute: typeof AdminPanelCategoryIdRoute
+  AdminPanelCategoryNuovoRoute: typeof AdminPanelCategoryNuovoRoute
+  AdminPanelCategoryIndexRoute: typeof AdminPanelCategoryIndexRoute
+}
+
+const AdminPanelCategoryRouteRouteChildren: AdminPanelCategoryRouteRouteChildren =
+  {
+    AdminPanelCategoryIdRoute: AdminPanelCategoryIdRoute,
+    AdminPanelCategoryNuovoRoute: AdminPanelCategoryNuovoRoute,
+    AdminPanelCategoryIndexRoute: AdminPanelCategoryIndexRoute,
+  }
+
+const AdminPanelCategoryRouteRouteWithChildren =
+  AdminPanelCategoryRouteRoute._addFileChildren(
+    AdminPanelCategoryRouteRouteChildren,
+  )
+
+interface AdminPanelRouteChildren {
+  AdminPanelCategoryRouteRoute: typeof AdminPanelCategoryRouteRouteWithChildren
+  AdminPanelUtentiRoute: typeof AdminPanelUtentiRoute
+  AdminPanelIndexRoute: typeof AdminPanelIndexRoute
+}
+
+const AdminPanelRouteChildren: AdminPanelRouteChildren = {
+  AdminPanelCategoryRouteRoute: AdminPanelCategoryRouteRouteWithChildren,
+  AdminPanelUtentiRoute: AdminPanelUtentiRoute,
+  AdminPanelIndexRoute: AdminPanelIndexRoute,
+}
+
+const AdminPanelRouteWithChildren = AdminPanelRoute._addFileChildren(
+  AdminPanelRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  PlacesPlaceIdRoute: PlacesPlaceIdRoute,
+  DoveDormireRoute: DoveDormireRoute,
+  GustaRoute: GustaRoute,
+  InfoRoute: InfoRoute,
+  MappaRoute: MappaRoute,
+  ViviRoute: ViviRoute,
+  AdminPanelRoute: AdminPanelRouteWithChildren,
+  AdminLoginRoute: AdminLoginRoute,
+  LuoghiPoiIdRoute: LuoghiPoiIdRoute,
+  ScopriTopicRoute: ScopriTopicRoute,
+  ScopriIndexRoute: ScopriIndexRoute,
+  ApiAuthSplatRoute: ApiAuthSplatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

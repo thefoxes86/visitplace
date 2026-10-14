@@ -1,7 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from '@tanstack/react-router'
 
-import { categoryColors, categoryLabels, places } from '#/data/places'
+import { Skyline } from '#/components/Skyline'
+import { poiCategory, poiNumber } from '#/data/pois'
+import { usePois } from '#/data/use-pois'
+import { sectionLink, sections } from '#/data/sections'
 
 // The overlay grows as a circle from the centre of the toggle button
 // (top-4 right-4, size-14 → 2.75rem from the corner).
@@ -9,6 +12,7 @@ const ORIGIN = 'at calc(100% - 2.75rem) 2.75rem'
 const EASE_OUT = 'ease-[cubic-bezier(0.22,1,0.36,1)]'
 
 export function SiteMenu() {
+  const pois = usePois()
   const [open, setOpen] = useState(false)
   const toggle = useRef<HTMLButtonElement>(null)
   const firstLink = useRef<HTMLAnchorElement>(null)
@@ -34,16 +38,13 @@ export function SiteMenu() {
   }, [open])
 
   const close = () => setOpen(false)
-  const items = [
-    { key: 'map', label: 'The map', note: 'Explore', color: '#ffffff', to: '/' as const },
-    ...places.map((place) => ({
-      key: place.id,
-      label: place.name,
-      note: categoryLabels[place.category],
-      color: categoryColors[place.category],
-      placeId: place.id,
-    })),
-  ]
+  /** Staggered rise-in for the n-th element once the circle has opened. */
+  const rise = (n: number) => ({
+    style: { transitionDelay: open ? `${250 + n * 60}ms` : '0ms' },
+    className: `transition duration-700 motion-reduce:transition-none ${EASE_OUT} ${
+      open ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
+    }`,
+  })
 
   return (
     <>
@@ -55,7 +56,7 @@ export function SiteMenu() {
         aria-controls="site-menu"
         aria-label={open ? 'Close menu' : 'Open menu'}
         className={`fixed right-4 top-4 z-50 grid size-14 place-items-center rounded-full shadow-lg backdrop-blur transition-colors duration-500 ${
-          open ? 'bg-white/10 text-white hover:bg-white/20' : 'bg-white/80 text-slate-900 hover:bg-white'
+          open ? 'bg-mint text-teal hover:bg-mint-light' : 'bg-coral text-white hover:bg-coral-dark'
         }`}
       >
         <span className="relative block h-4 w-6" aria-hidden>
@@ -79,87 +80,102 @@ export function SiteMenu() {
         aria-label="Site menu"
         inert={!open}
         style={{ clipPath: `circle(${open ? '150%' : '0%'} ${ORIGIN})` }}
-        className={`fixed inset-0 z-40 overflow-y-auto bg-slate-950 text-white transition-[clip-path] duration-700 ease-[cubic-bezier(0.77,0,0.18,1)] motion-reduce:transition-none ${
+        className={`fixed inset-0 z-40 overflow-y-auto bg-paper font-sans text-ink transition-[clip-path] duration-700 ease-[cubic-bezier(0.77,0,0.18,1)] motion-reduce:transition-none ${
           open ? '' : 'pointer-events-none'
         }`}
       >
-        {/* Soft sea-and-sunset glows behind the links */}
-        <div
-          aria-hidden
-          className="pointer-events-none fixed inset-0 bg-[radial-gradient(60rem_40rem_at_100%_0%,rgba(17,138,178,0.35),transparent),radial-gradient(50rem_35rem_at_0%_100%,rgba(231,111,81,0.25),transparent)]"
-        />
-
         <nav className="relative mx-auto flex min-h-full max-w-6xl flex-col px-6 pb-10 pt-24 sm:px-12">
-          <p
-            className={`text-xs font-semibold uppercase tracking-[0.3em] text-white/50 transition duration-700 ${EASE_OUT} ${
+          <Link
+            to="/"
+            onClick={close}
+            className={`flex items-end gap-3 border-b-[3px] border-teal outline-none transition duration-700 focus-visible:ring-2 focus-visible:ring-coral ${EASE_OUT} ${
               open ? 'translate-y-0 opacity-100 delay-200' : 'translate-y-4 opacity-0'
             }`}
           >
-            Visit Camaiore
-          </p>
+            <Skyline animate={false} className="w-20 shrink-0 text-teal" />
+            <span className="pb-2">
+              <span className="block font-display text-2xl font-extrabold uppercase leading-none tracking-wide text-coral">
+                Camaiore
+              </span>
+              <span className="block font-serif text-sm italic text-coral">Visit</span>
+            </span>
+          </Link>
 
-          <ul className="mt-6">
-            {items.map((item, i) => {
-              const className =
-                'group flex items-baseline gap-4 border-b border-white/10 py-3 outline-none focus-visible:bg-white/5 sm:gap-6'
-              const content = (
-                <>
-                  <span className="w-8 shrink-0 font-mono text-xs text-white/40">{String(i).padStart(2, '0')}</span>
-                  <span className="flex-1 text-3xl font-semibold tracking-tight transition-transform duration-300 group-hover:translate-x-2 group-focus-visible:translate-x-2 sm:text-5xl">
-                    {item.label}
-                  </span>
-                  <span className="hidden items-center gap-2 text-sm text-white/50 sm:flex">
-                    <span
-                      className="size-2.5 scale-0 rounded-full transition-transform duration-300 group-hover:scale-100 group-focus-visible:scale-100"
-                      style={{ backgroundColor: item.color }}
-                    />
-                    {item.note}
-                  </span>
-                </>
-              )
-              return (
-                <li
-                  key={item.key}
-                  // Links rise in one after another once the circle has opened.
-                  style={{ transitionDelay: open ? `${250 + i * 60}ms` : '0ms' }}
-                  className={`transition duration-700 motion-reduce:transition-none ${EASE_OUT} ${
-                    open ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
-                  }`}
-                >
-                  {'placeId' in item ? (
+          <div className="mt-6 grid gap-12 lg:grid-cols-[1fr_17rem]">
+            {/* Main sections */}
+            <ul>
+              {sections.map((section, i) => {
+                const { style, className } = rise(i)
+                return (
+                  <li key={section.id} style={style} className={className}>
                     <Link
-                      to="/places/$placeId"
-                      params={{ placeId: item.placeId! }}
+                      ref={i === 0 ? firstLink : undefined}
+                      {...sectionLink(section.id)}
                       onClick={close}
-                      className={className}
-                      activeProps={{ 'aria-current': 'page' }}
+                      className="group flex items-end gap-4 border-b-2 border-coral/30 py-3 outline-none transition-colors hover:border-coral focus-visible:border-coral sm:gap-6"
                     >
-                      {content}
+                      <span className="w-14 shrink-0 font-display text-4xl font-light leading-none text-coral sm:w-20 sm:text-5xl">
+                        {String(i + 1).padStart(2, '0')}
+                      </span>
+                      <span className="flex-1 font-display text-3xl font-extrabold uppercase tracking-wide text-teal transition duration-300 group-hover:translate-x-2 group-hover:text-coral group-focus-visible:translate-x-2 group-focus-visible:text-coral sm:text-5xl">
+                        {section.title}
+                      </span>
+                      <span className="hidden pb-1 font-serif text-sm italic text-ink/70 md:block">
+                        {section.tagline}
+                      </span>
                     </Link>
-                  ) : (
-                    <Link
-                      ref={firstLink}
-                      to={item.to}
-                      onClick={close}
-                      className={className}
-                      activeOptions={{ exact: true, includeSearch: false }}
-                    >
-                      {content}
-                    </Link>
-                  )}
-                </li>
-              )
-            })}
-          </ul>
+                  </li>
+                )
+              })}
+            </ul>
+
+            {/* The map and its places */}
+            <div {...rise(sections.length)}>
+              <Link
+                to="/mappa"
+                onClick={close}
+                activeOptions={{ includeSearch: false }}
+                className="group signpost-left flex items-center justify-center gap-2 bg-mint py-3 pl-10 pr-4 font-display text-lg font-semibold uppercase tracking-[0.12em] text-teal outline-none transition-colors hover:bg-coral hover:text-white focus-visible:bg-coral focus-visible:text-white"
+              >
+                Mappa turistica
+                <span className="transition-transform duration-300 group-hover:translate-x-1">→</span>
+              </Link>
+              <div className="mt-6 border-l-[6px] border-mint">
+                <p className="signpost-right -ml-1.5 bg-mint py-2 pl-5 pr-10 font-display font-semibold uppercase tracking-[0.15em] text-teal">
+                  Luoghi
+                </p>
+                <ul className="space-y-2 py-4 pl-5">
+                  {pois.map((place) => (
+                    <li key={place.id}>
+                      <Link
+                        to="/luoghi/$poiId"
+                        params={{ poiId: place.id }}
+                        onClick={close}
+                        className="group flex items-center gap-2 text-sm font-light outline-none transition-colors hover:text-coral focus-visible:text-coral focus-visible:underline"
+                      >
+                        <span
+                          className="grid size-6 shrink-0 place-items-center rounded-full text-[10px] font-semibold text-white"
+                          style={{ backgroundColor: poiCategory(place.category).color }}
+                        >
+                          {poiNumber(place)}
+                        </span>
+                        {place.name}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
 
           <footer
-            style={{ transitionDelay: open ? `${300 + items.length * 60}ms` : '0ms' }}
-            className={`mt-auto flex flex-wrap justify-between gap-2 pt-12 text-sm text-white/50 transition duration-700 ${EASE_OUT} ${
+            style={{ transitionDelay: open ? `${300 + (sections.length + 1) * 60}ms` : '0ms' }}
+            className={`mt-auto flex flex-wrap justify-between gap-2 pt-12 text-xs italic text-ink/70 transition duration-700 ${EASE_OUT} ${
               open ? 'opacity-100' : 'opacity-0'
             }`}
           >
-            <span>Camaiore · Versilia, Tuscany</span>
-            <span className="font-mono">43.94° N · 10.30° E</span>
+            <span>Camaiore · Versilia, Toscana</span>
+            <span>43.94° N · 10.30° E</span>
           </footer>
         </nav>
       </div>
