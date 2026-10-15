@@ -4,17 +4,19 @@ import { Link, useNavigate } from '@tanstack/react-router'
 
 import { LocationPicker } from '#/components/admin/LocationPicker'
 import { Alert, Card, Field, buttonClass, errorMessage, inputClass } from '#/components/admin/ui'
-import { poiCategory, poiImage } from '#/data/pois'
+import { useCategories } from '#/data/categories'
+import { poiImage } from '#/data/pois'
 import { scopriTopics } from '#/data/scopri'
-import { poiInput, slugify } from '#/lib/poi-input'
+import { categoryType } from '#/lib/category-types'
+import { poiInputFor, slugify } from '#/lib/poi-input'
 import { createPoi, updatePoi } from '#/server/pois'
 
 import type { AdminPoi } from '#/components/admin/queries'
-import type { PoiCategory } from '#/data/pois'
-import type { PoiInput } from '#/lib/poi-input'
+import type { Contact, DetailField, DetailValues } from '#/lib/category-types'
 
 interface PoiFormProps {
-  category: PoiCategory
+  /** Id in the `categories` table. */
+  category: string
   /** The place being edited; left out to create a new one. */
   poi?: AdminPoi
   /** Areas already in use, offered as suggestions. */
@@ -54,33 +56,74 @@ const initialValues = (poi: AdminPoi | undefined): Values => ({
 
 const orNull = (value: string) => value.trim() || null
 
+/** Form values of the type's own fields: text for inputs, booleans for toggles. */
+type DetailInputs = Record<string, string | boolean>
+
+const initialDetails = (fields: DetailField[], details: DetailValues = {}): DetailInputs =>
+  Object.fromEntries(
+    fields.map((field) => {
+      const value = details[field.key]
+      return [field.key, field.kind === 'boolean' ? value === true : value === undefined ? '' : String(value)]
+    }),
+  )
+
+/** Form values → `pois.details`: empty fields and unticked toggles are left out. */
+function toDetails(fields: DetailField[], inputs: DetailInputs): DetailValues {
+  const details: DetailValues = {}
+  for (const field of fields) {
+    const value = inputs[field.key]
+    if (field.kind === 'boolean') {
+      if (value === true) details[field.key] = true
+      continue
+    }
+    const text = String(value ?? '').trim()
+    if (!text) continue
+    details[field.key] = field.kind === 'number' ? Number(text.replace(',', '.')) : text
+  }
+  return details
+}
+
+const CONTACT_FIELDS: Record<Contact, { label: string; type: string; placeholder?: string; wide?: boolean }> = {
+  address: { label: 'Indirizzo', type: 'text', placeholder: 'Via, numero civico', wide: true },
+  phone: { label: 'Telefono', type: 'tel' },
+  email: { label: 'Email', type: 'email' },
+  website: { label: 'Sito web', type: 'url', placeholder: 'https://', wide: true },
+}
+
 export function PoiForm({ category: categoryId, poi, areas }: PoiFormProps) {
-  const category = poiCategory(categoryId)
-  const isEvent = categoryId === 'events'
-  const isCulture = categoryId === 'culture'
+  const category = useCategories().categoryOf(categoryId)
+  const type = categoryType(category.type)
   const navigate = useNavigate()
   const queryClient = useQueryClient()
 
   const [values, setValues] = useState(() => initialValues(poi))
+  const [details, setDetails] = useState(() => initialDetails(type.fields, poi?.details))
   /** The address follows the name until it is edited by hand (new places only). */
   const [idTouched, setIdTouched] = useState(Boolean(poi))
-  const [errors, setErrors] = useState<Partial<Record<keyof PoiInput, string>>>({})
+  /** By field: `name`, `startsAt`, `details.difficulty`… */
+  const [errors, setErrors] = useState<Record<string, string>>({})
   const [formError, setFormError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
 
-  /** Editing a field clears its error. */
-  const clearError = (...keys: string[]) =>
+  /** Editing a field clears its error, and the summary above the form. */
+  const clearError = (...keys: string[]) => {
+    setFormError(null)
     setErrors((prev) => (keys.some((key) => key in prev) ? Object.fromEntries(Object.entries(prev).filter(([key]) => !keys.includes(key))) : prev))
+  }
   const set = <K extends keyof Values>(key: K, value: Values[K]) => {
     setValues((prev) => ({ ...prev, [key]: value }))
     clearError(key)
+  }
+  const setDetail = (key: string, value: string | boolean) => {
+    setDetails((prev) => ({ ...prev, [key]: value }))
+    clearError(`details.${key}`)
   }
   const setPosition = useCallback((lat: number, lon: number) => {
     setValues((prev) => ({ ...prev, lat, lon }))
     clearError('lat', 'lon')
   }, [])
 
-  const text = (key: keyof Values & keyof PoiInput) => ({
+  const text = (key: Exclude<keyof Values, 'lat' | 'lon' | 'featured' | 'published' | 'sortOrder'>) => ({
     id: key,
     value: values[key] as string,
     onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => set(key, e.target.value),
@@ -91,24 +134,26 @@ export function PoiForm({ category: categoryId, poi, areas }: PoiFormProps) {
   async function submit(e: React.FormEvent) {
     e.preventDefault()
     setFormError(null)
-    const parsed = poiInput.safeParse({
+    // The type's schema clears what the type doesn't use (dates, contacts…).
+    const parsed = poiInputFor(type).safeParse({
       ...values,
       category: categoryId,
       lat: values.lat ?? undefined,
       lon: values.lon ?? undefined,
-      topic: isCulture ? orNull(values.topic) : null,
+      topic: orNull(values.topic),
       imageUrl: orNull(values.imageUrl),
       address: orNull(values.address),
       phone: orNull(values.phone),
       email: orNull(values.email),
       website: orNull(values.website),
-      startsAt: isEvent ? fromLocalInput(values.startsAt) : null,
-      endsAt: isEvent ? fromLocalInput(values.endsAt) : null,
+      startsAt: fromLocalInput(values.startsAt),
+      endsAt: fromLocalInput(values.endsAt),
+      details: toDetails(type.fields, details),
     })
     if (!parsed.success) {
       const fieldErrors: typeof errors = {}
       for (const issue of parsed.error.issues) {
-        const key = issue.path[0] as keyof PoiInput
+        const key = issue.path[0] === 'details' ? `details.${String(issue.path[1])}` : String(issue.path[0])
         fieldErrors[key] ??= issue.message
       }
       setErrors(fieldErrors)
@@ -178,7 +223,7 @@ export function PoiForm({ category: categoryId, poi, areas }: PoiFormProps) {
           </div>
         </Card>
 
-        {isEvent && (
+        {type.dates && (
           <Card title="Date">
             <div className="grid gap-4 sm:grid-cols-2">
               <Field label="Inizio" htmlFor="startsAt" error={errors.startsAt}>
@@ -223,26 +268,36 @@ export function PoiForm({ category: categoryId, poi, areas }: PoiFormProps) {
           </div>
         </Card>
 
-        <Card title="Contatti">
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Indirizzo" htmlFor="address" error={errors.address} className="sm:col-span-2">
-              <input {...text('address')} placeholder="Via, numero civico" />
-            </Field>
-            {!isEvent && (
-              <>
-                <Field label="Telefono" htmlFor="phone" error={errors.phone}>
-                  <input {...text('phone')} type="tel" />
-                </Field>
-                <Field label="Email" htmlFor="email" error={errors.email}>
-                  <input {...text('email')} type="email" />
-                </Field>
-              </>
-            )}
-            <Field label="Sito web" htmlFor="website" error={errors.website} className="sm:col-span-2">
-              <input {...text('website')} type="url" placeholder="https://" />
-            </Field>
-          </div>
-        </Card>
+        {type.fields.length > 0 && (
+          <Card title={`Dettagli · ${type.label}`}>
+            <div className="grid gap-4 sm:grid-cols-2">
+              {type.fields.map((field) => (
+                <DetailInput
+                  key={field.key}
+                  field={field}
+                  value={details[field.key]}
+                  error={errors[`details.${field.key}`]}
+                  onChange={(value) => setDetail(field.key, value)}
+                />
+              ))}
+            </div>
+          </Card>
+        )}
+
+        {type.contacts.length > 0 && (
+          <Card title="Contatti">
+            <div className="grid gap-4 sm:grid-cols-2">
+              {type.contacts.map((key) => {
+                const contact = CONTACT_FIELDS[key]
+                return (
+                  <Field key={key} label={contact.label} htmlFor={key} error={errors[key]} className={contact.wide ? 'sm:col-span-2' : ''}>
+                    <input {...text(key)} type={contact.type} placeholder={contact.placeholder} />
+                  </Field>
+                )
+              })}
+            </div>
+          </Card>
+        )}
       </div>
 
       <div className="min-w-0 space-y-6">
@@ -271,7 +326,7 @@ export function PoiForm({ category: categoryId, poi, areas }: PoiFormProps) {
           </div>
         </Card>
 
-        {isCulture && (
+        {type.topic && (
           <Card title="Sezione di Scopri">
             <Field label="Sezione" htmlFor="topic" hint="Dove compare il luogo nella pagina Scopri.">
               <select {...text('topic')}>
@@ -298,6 +353,56 @@ export function PoiForm({ category: categoryId, poi, areas }: PoiFormProps) {
         </Card>
       </div>
     </form>
+  )
+}
+
+/** An input for one of the type's own fields. */
+function DetailInput({
+  field,
+  value,
+  error,
+  onChange,
+}: {
+  field: DetailField
+  value: string | boolean | undefined
+  error?: string
+  onChange: (value: string | boolean) => void
+}) {
+  const id = `detail-${field.key}`
+  if (field.kind === 'boolean') {
+    return (
+      <div className="flex items-end sm:col-span-2">
+        <Toggle label={field.label} hint={field.hint ?? ''} checked={value === true} onChange={onChange} />
+      </div>
+    )
+  }
+  const common = {
+    id,
+    value: typeof value === 'string' ? value : '',
+    onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => onChange(e.target.value),
+    className: inputClass,
+    'aria-invalid': Boolean(error),
+  }
+  const label = `${field.label}${field.unit ? ` (${field.unit})` : ''}${field.required ? ' *' : ''}`
+  return (
+    <Field label={label} htmlFor={id} hint={field.hint} error={error} className={field.kind === 'textarea' || field.kind === 'url' ? 'sm:col-span-2' : ''}>
+      {field.kind === 'textarea' ? (
+        <textarea {...common} rows={3} />
+      ) : field.kind === 'select' ? (
+        <select {...common}>
+          <option value="">{field.required ? 'Scegli…' : '—'}</option>
+          {field.options.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+      ) : field.kind === 'number' ? (
+        <input {...common} type="number" inputMode="decimal" min={field.min} max={field.max} step={field.step ?? 'any'} />
+      ) : (
+        <input {...common} type={field.kind === 'url' ? 'url' : 'text'} placeholder={field.kind === 'url' ? 'https://' : undefined} />
+      )}
+    </Field>
   )
 }
 

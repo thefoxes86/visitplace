@@ -4,7 +4,7 @@ import { Link, Outlet, createFileRoute, redirect, useRouter } from '@tanstack/re
 
 import { Skyline } from '#/components/Skyline'
 import { CategoryIcon } from '#/components/tourist-map/CategoryIcon'
-import { poiCategories } from '#/data/pois'
+import { useCategories } from '#/data/categories'
 import { authClient } from '#/lib/auth-client'
 import { ROLES } from '#/lib/permissions'
 import { getSessionUser } from '#/server/session'
@@ -26,6 +26,7 @@ const activeNavLink = { className: 'bg-white/15 text-white' }
 
 function AdminLayout() {
   const { user } = Route.useRouteContext()
+  const { categories } = useCategories()
   const router = useRouter()
   const queryClient = useQueryClient()
   const [open, setOpen] = useState(false)
@@ -67,7 +68,7 @@ function AdminLayout() {
             Panoramica
           </Link>
           <p className="mt-5 px-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-mint">Contenuti</p>
-          {poiCategories.map((category) => (
+          {categories.map((category) => (
             <Link
               key={category.id}
               to="/admin/$category"
@@ -83,6 +84,10 @@ function AdminLayout() {
           {user.role === 'admin' && (
             <>
               <p className="mt-5 px-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-mint">Amministrazione</p>
+              <Link to="/admin/categorie" activeProps={activeNavLink} onClick={close} className={navLink}>
+                <span aria-hidden className="grid size-5 place-items-center">▦</span>
+                Categorie
+              </Link>
               <Link to="/admin/utenti" activeProps={activeNavLink} onClick={close} className={navLink}>
                 <span aria-hidden className="grid size-5 place-items-center">☺</span>
                 Utenti

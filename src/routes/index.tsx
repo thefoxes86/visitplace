@@ -2,7 +2,8 @@ import { Link, createFileRoute } from '@tanstack/react-router'
 
 import { Skyline } from '#/components/Skyline'
 import { Compass } from '#/components/tourist-map/TouristMap'
-import { poiCategories, poiImage, poiNumber } from '#/data/pois'
+import { useCategories } from '#/data/categories'
+import { poiImage, poiNumber } from '#/data/pois'
 import { usePois } from '#/data/use-pois'
 import { sectionLink, sections } from '#/data/sections'
 
@@ -12,7 +13,8 @@ const TITLE = 'Camaiore'
 
 function Home() {
   const pois = usePois()
-  const poisByCategory = poiCategories.map((category) => ({
+  const { categories } = useCategories()
+  const poisByCategory = categories.map((category) => ({
     ...category,
     list: pois.filter((poi) => poi.category === category.id),
   }))

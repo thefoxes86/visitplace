@@ -5,10 +5,14 @@
   "imports": {
     "#/*": "./src/*"
   },
+  "engines": {
+    "node": "24.x"
+  },
   "scripts": {
     "dev": "dotenv -e .env.local -- vite dev --port 3000",
     "generate-routes": "tsr generate",
     "build": "vite build",
+    "vercel-build": "bash scripts/vercel-build.sh",
     "preview": "vite preview",
     "start": "node .output/server/index.mjs",
     "db:generate": "drizzle-kit generate",

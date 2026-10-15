@@ -6,6 +6,7 @@ import { adminPoisQuery } from '#/components/admin/queries'
 import { Alert, PageHeader, buttonClass, errorMessage, inputClass } from '#/components/admin/ui'
 import { formatEventDate } from '#/data/pois'
 import { scopriTopics } from '#/data/scopri'
+import { categoryType } from '#/lib/category-types'
 import { deletePoi } from '#/server/pois'
 
 import type { AdminPoi } from '#/components/admin/queries'
@@ -26,7 +27,8 @@ function PoiList() {
   const all = data.filter((poi) => poi.category === category.id)
   const query = search.trim().toLowerCase()
   const list = query ? all.filter((poi) => `${poi.name} ${poi.area}`.toLowerCase().includes(query)) : all
-  const isEvent = category.id === 'events'
+  const type = categoryType(category.type)
+  const isEvent = Boolean(type.dates)
 
   async function remove(poi: AdminPoi) {
     if (!confirm(`Eliminare "${poi.name}"? L'operazione non si può annullare.`)) return
@@ -79,7 +81,7 @@ function PoiList() {
                 <tr>
                   <th className="px-4 py-3 font-semibold">Nome</th>
                   <th className="px-4 py-3 font-semibold">{isEvent ? 'Quando' : 'Zona'}</th>
-                  {category.id === 'culture' && <th className="px-4 py-3 font-semibold">Sezione</th>}
+                  {type.topic && <th className="px-4 py-3 font-semibold">Sezione</th>}
                   <th className="px-4 py-3 font-semibold">Stato</th>
                   <th className="px-4 py-3">
                     <span className="sr-only">Azioni</span>
@@ -107,7 +109,7 @@ function PoiList() {
                     <td className="px-4 py-3 text-xs">
                       {isEvent ? (poi.startsAt ? formatEventDate(poi.startsAt) : '—') : poi.area}
                     </td>
-                    {category.id === 'culture' && (
+                    {type.topic && (
                       <td className="px-4 py-3 text-xs">{scopriTopics.find((t) => t.id === poi.topic)?.title ?? '—'}</td>
                     )}
                     <td className="px-4 py-3">

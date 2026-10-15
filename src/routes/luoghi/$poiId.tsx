@@ -5,9 +5,12 @@ import type { ReactNode } from 'react'
 import { Skyline } from '#/components/Skyline'
 import { CategoryIcon } from '#/components/tourist-map/CategoryIcon'
 import { Compass } from '#/components/tourist-map/TouristMap'
-import { distanceKm, formatEventDate, poiCategory, poiImage, poiNumber } from '#/data/pois'
+import { useCategories } from '#/data/categories'
+import { categoryType, formatDetail } from '#/lib/category-types'
+import { distanceKm, formatEventDate, poiImage, poiNumber } from '#/data/pois'
 import { poisQuery, usePois } from '#/data/use-pois'
 
+import type { Category } from '#/data/categories'
 import type { Poi } from '#/data/pois'
 
 export const Route = createFileRoute('/luoghi/$poiId')({
@@ -36,10 +39,25 @@ export const Route = createFileRoute('/luoghi/$poiId')({
 })
 
 /** Label and value of each practical info, leaving out what is not set. */
-function infoRows(poi: Poi, categoryLabel: string) {
-  const rows: [string, ReactNode][] = [['Categoria', categoryLabel]]
+function infoRows(poi: Poi, category: Category) {
+  const rows: [string, ReactNode][] = [['Categoria', category.label]]
   if (poi.startsAt) rows.push(['Quando', formatEventDate(poi.startsAt)])
   if (poi.endsAt) rows.push(['Fino a', formatEventDate(poi.endsAt)])
+  // The fields of the category's type: difficulty of a trek, stars of a hotel…
+  for (const field of categoryType(category.type).fields) {
+    const value = formatDetail(field, poi.details[field.key])
+    if (value === null) continue
+    rows.push([
+      field.label,
+      field.kind === 'url' ? (
+        <a href={value} target="_blank" rel="noreferrer" className="break-all underline">
+          Apri
+        </a>
+      ) : (
+        <span className="whitespace-pre-line">{value}</span>
+      ),
+    ])
+  }
   rows.push(['Zona', poi.area])
   if (poi.address) rows.push(['Indirizzo', poi.address])
   if (poi.phone) rows.push(['Telefono', <a href={`tel:${poi.phone.replace(/\s/g, '')}`}>{poi.phone}</a>])
@@ -60,7 +78,8 @@ const km = (d: number) => (d < 1 ? `${Math.round(d * 1000)} m` : `${d.toFixed(1)
 
 function PoiPage() {
   const poi = Route.useLoaderData()
-  const category = poiCategory(poi.category)
+  const { categoryOf } = useCategories()
+  const category = categoryOf(poi.category)
   const nearby = usePois()
     .filter((p) => p.id !== poi.id)
     .map((p) => ({ poi: p, d: distanceKm(poi, p) }))
@@ -125,7 +144,7 @@ function PoiPage() {
                 Informazioni
               </h2>
               <dl className="grid gap-x-6 gap-y-4 sm:grid-cols-2">
-                {infoRows(poi, category.label).map(([label, value], i) => (
+                {infoRows(poi, category).map(([label, value], i) => (
                   <div key={label} className="flex items-center gap-3">
                     <span
                       className={`grid size-9 shrink-0 place-items-center text-xs font-semibold ${
@@ -185,10 +204,10 @@ function PoiPage() {
                       className="size-14 shrink-0 object-cover grayscale transition duration-500 group-hover:grayscale-0"
                     />
                     <span className="min-w-0">
-                      <span className="flex items-center gap-2 text-xs font-semibold" style={{ color: poiCategory(p.category).color }}>
+                      <span className="flex items-center gap-2 text-xs font-semibold" style={{ color: categoryOf(p.category).color }}>
                         <span
                           className="grid size-5 place-items-center rounded-full text-[9px] text-white"
-                          style={{ backgroundColor: poiCategory(p.category).color }}
+                          style={{ backgroundColor: categoryOf(p.category).color }}
                         >
                           {poiNumber(p)}
                         </span>

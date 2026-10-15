@@ -3,11 +3,13 @@ import { asc, eq, max } from 'drizzle-orm'
 import { z } from 'zod'
 
 import { db } from '#/db'
-import { pois } from '#/db/schema'
-import { poiInput } from '#/lib/poi-input'
+import { categories, pois } from '#/db/schema'
+import { categoryType } from '#/lib/category-types'
+import { poiInput, poiInputFor } from '#/lib/poi-input'
 import { requireEditor } from '#/server/session'
 
 import type { Poi } from '#/data/pois'
+import type { PoiInput } from '#/lib/poi-input'
 
 const byMapOrder = [asc(pois.sortOrder), asc(pois.createdAt), asc(pois.id)]
 
@@ -27,10 +29,20 @@ export const adminListPois = createServerFn({ method: 'GET' })
   .middleware([requireEditor])
   .handler(() => db.select().from(pois).orderBy(...byMapOrder))
 
+/** Checks a place against the fields of its category's type. */
+async function validateForCategory(input: PoiInput) {
+  const [category] = await db.select({ type: categories.type }).from(categories).where(eq(categories.id, input.category))
+  if (!category) throw new Error('Categoria non trovata')
+  const parsed = poiInputFor(categoryType(category.type)).safeParse(input)
+  if (!parsed.success) throw new Error(parsed.error.issues.map((issue) => `${issue.path.join('.')}: ${issue.message}`).join('; '))
+  return parsed.data
+}
+
 export const createPoi = createServerFn({ method: 'POST' })
   .middleware([requireEditor])
   .validator(poiInput)
-  .handler(async ({ data }) => {
+  .handler(async ({ data: input }) => {
+    const data = await validateForCategory(input)
     const [existing] = await db.select({ id: pois.id }).from(pois).where(eq(pois.id, data.id))
     if (existing) throw new Error(`L'indirizzo "${data.id}" è già usato da un altro contenuto`)
     const [{ last }] = await db.select({ last: max(pois.sortOrder) }).from(pois)
@@ -41,7 +53,8 @@ export const createPoi = createServerFn({ method: 'POST' })
 export const updatePoi = createServerFn({ method: 'POST' })
   .middleware([requireEditor])
   .validator(poiInput)
-  .handler(async ({ data: { id, ...data } }) => {
+  .handler(async ({ data: input }) => {
+    const { id, ...data } = await validateForCategory(input)
     const updated = await db.update(pois).set(data).where(eq(pois.id, id)).returning({ id: pois.id })
     if (!updated.length) throw new Error('Contenuto non trovato')
     return { id }

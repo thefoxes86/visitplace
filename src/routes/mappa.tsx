@@ -3,11 +3,12 @@ import { Link, createFileRoute } from '@tanstack/react-router'
 
 import { CategoryIcon } from '#/components/tourist-map/CategoryIcon'
 import { TouristMap } from '#/components/tourist-map/TouristMap'
-import { poiCategories, poiCategory, poiImage, poiNumber } from '#/data/pois'
+import { useCategories } from '#/data/categories'
+import { poiImage, poiNumber } from '#/data/pois'
 import { usePois } from '#/data/use-pois'
 
 import type { MapTarget } from '#/components/tourist-map/TouristMap'
-import type { Poi, PoiCategory } from '#/data/pois'
+import type { Poi } from '#/data/pois'
 
 export const Route = createFileRoute('/mappa')({
   /** ?luogo=<id> opens the map on that point. */
@@ -22,7 +23,8 @@ const numberOf = (poi: Poi) => poi.number
 
 function MapPage() {
   const pois = usePois()
-  const [active, setActive] = useState<Set<PoiCategory>>(() => new Set(poiCategories.map((c) => c.id)))
+  const { categories, categoryOf } = useCategories()
+  const [active, setActive] = useState<Set<string>>(() => new Set(categories.map((c) => c.id)))
   const { luogo } = Route.useSearch()
   const [selected, setSelected] = useState<Poi | null>(() => (luogo && pois.find((p) => p.id === luogo)) || null)
   const [target, setTarget] = useState<MapTarget | null>(() => (selected ? { poi: selected } : null))
@@ -37,7 +39,7 @@ function MapPage() {
     setTarget({ fit: visible })
   }, [visible])
 
-  const toggle = (id: PoiCategory) => {
+  const toggle = (id: string) => {
     setActive((prev) => {
       const next = new Set(prev)
       if (!next.delete(id)) next.add(id)
@@ -73,7 +75,7 @@ function MapPage() {
 
         {/* Category filter: chips on phones, a legend on wide screens */}
         <ul className="flex gap-2 overflow-x-auto px-5 pb-3 lg:flex-col lg:gap-1 lg:px-6 lg:py-4">
-          {poiCategories.map((category) => {
+          {categories.map((category) => {
             const on = active.has(category.id)
             const count = pois.filter((p) => p.category === category.id).length
             return (
@@ -125,7 +127,7 @@ function MapPage() {
                 >
                   <span
                     className="grid size-6 shrink-0 place-items-center rounded-full text-[10px] font-semibold text-white"
-                    style={{ backgroundColor: poiCategory(poi.category).color }}
+                    style={{ backgroundColor: categoryOf(poi.category).color }}
                   >
                     {String(numberOf(poi)).padStart(2, '0')}
                   </span>
@@ -159,10 +161,10 @@ function MapPage() {
               <span className="min-w-0 py-1">
                 <span
                   className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.15em]"
-                  style={{ color: poiCategory(selected.category).color }}
+                  style={{ color: categoryOf(selected.category).color }}
                 >
                   <span className="font-display text-2xl font-light leading-none">{poiNumber(selected)}</span>
-                  {poiCategory(selected.category).label}
+                  {categoryOf(selected.category).label}
                 </span>
                 <span className="mt-1 block font-display text-lg font-extrabold leading-tight text-teal transition-colors group-hover:text-coral">
                   {selected.name}
