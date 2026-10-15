@@ -13,6 +13,7 @@ import { SiteMenu } from '../components/SiteMenu'
 
 import { categoriesQuery } from '#/data/categories'
 import { poisQuery } from '#/data/use-pois'
+import { DEFAULT_DESCRIPTION, SITE_NAME } from '#/lib/seo'
 import { getLocale } from '#/paraglide/runtime'
 
 import appCss from '../styles.css?url'
@@ -47,11 +48,15 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
         name: 'viewport',
         content: 'width=device-width, initial-scale=1',
       },
-      {
-        title: 'Visit Camaiore',
-      },
+      { name: 'theme-color', content: '#2a9d8f' },
+      { property: 'og:site_name', content: SITE_NAME },
+      { property: 'og:locale', content: 'it_IT' },
+      // Pages add their own title, description, canonical and Open Graph tags with seo().
+      { title: SITE_NAME },
+      { name: 'description', content: DEFAULT_DESCRIPTION },
     ],
     links: [
+      { rel: 'sitemap', type: 'application/xml', href: '/sitemap.xml' },
       { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
       { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossOrigin: 'anonymous' },
       {

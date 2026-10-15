@@ -6,8 +6,28 @@ import { useCategories } from '#/data/categories'
 import { poiImage, poiNumber } from '#/data/pois'
 import { usePois } from '#/data/use-pois'
 import { sectionLink, sections } from '#/data/sections'
+import { DEFAULT_DESCRIPTION, SITE_NAME, absoluteUrl, seo } from '#/lib/seo'
 
-export const Route = createFileRoute('/')({ component: Home })
+export const Route = createFileRoute('/')({
+  head: () =>
+    seo({
+      path: '/',
+      jsonLd: {
+        '@graph': [
+          { '@type': 'WebSite', name: SITE_NAME, url: absoluteUrl('/'), inLanguage: 'it-IT' },
+          {
+            '@type': 'TouristDestination',
+            name: 'Camaiore',
+            description: DEFAULT_DESCRIPTION,
+            url: absoluteUrl('/'),
+            geo: { '@type': 'GeoCoordinates', latitude: 43.94, longitude: 10.3 },
+            containedInPlace: { '@type': 'AdministrativeArea', name: 'Versilia, Toscana, Italia' },
+          },
+        ],
+      },
+    }),
+  component: Home,
+})
 
 const TITLE = 'Camaiore'
 

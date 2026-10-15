@@ -3,6 +3,7 @@ import { Link, createFileRoute, notFound } from '@tanstack/react-router'
 import { MapButton, PageShell, PoiList, SignpostNav, placesCount } from '#/components/CategoryPage'
 import { usePois } from '#/data/use-pois'
 import { getScopriTopic, scopriTopics, topicImage, topicPois } from '#/data/scopri'
+import { breadcrumbs, seo } from '#/lib/seo'
 
 // Only the ids in src/data/scopri.ts match; anything else is a 404.
 export const Route = createFileRoute('/scopri/$topic')({
@@ -11,12 +12,19 @@ export const Route = createFileRoute('/scopri/$topic')({
     if (!topic) throw notFound()
     return topic
   },
-  head: ({ loaderData }) => ({
-    meta: [
-      { title: loaderData ? `${loaderData.title} · Scopri · Visit Camaiore` : 'Visit Camaiore' },
-      ...(loaderData ? [{ name: 'description', content: loaderData.tagline }] : []),
-    ],
-  }),
+  head: ({ loaderData: topic, params }) =>
+    topic
+      ? seo({
+          title: `${topic.title} · Scopri`,
+          description: topic.intro,
+          path: `/scopri/${topic.id}`,
+          image: topicImage(topic, 1200),
+          jsonLd: breadcrumbs([
+            ['Scopri', '/scopri'],
+            [topic.title, `/scopri/${topic.id}`],
+          ]),
+        })
+      : seo({ title: 'Pagina non trovata', path: `/scopri/${params.topic}`, noindex: true }),
   component: TopicPage,
   notFoundComponent: () => (
     <main className="grid min-h-dvh place-items-center bg-paper p-8 text-center font-sans text-ink">

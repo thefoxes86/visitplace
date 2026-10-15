@@ -14,6 +14,8 @@ import { Route as DoveDormireRouteImport } from './routes/dove-dormire'
 import { Route as GustaRouteImport } from './routes/gusta'
 import { Route as InfoRouteImport } from './routes/info'
 import { Route as MappaRouteImport } from './routes/mappa'
+import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as ViviRouteImport } from './routes/vivi'
 import { Route as AdminPanelRouteImport } from './routes/admin/_panel'
 import { Route as AdminLoginRouteImport } from './routes/admin/login'
@@ -55,6 +57,16 @@ const InfoRoute = InfoRouteImport.update({
 const MappaRoute = MappaRouteImport.update({
   id: '/mappa',
   path: '/mappa',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
+  id: '/robots.txt',
+  path: '/robots.txt',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ViviRoute = ViviRouteImport.update({
@@ -152,6 +164,8 @@ export interface FileRoutesByFullPath {
   '/gusta': typeof GustaRoute
   '/info': typeof InfoRoute
   '/mappa': typeof MappaRoute
+  '/robots.txt': typeof RobotsDottxtRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/vivi': typeof ViviRoute
   '/admin': typeof AdminPanelRouteWithChildren
   '/admin/login': typeof AdminLoginRoute
@@ -176,6 +190,8 @@ export interface FileRoutesByTo {
   '/gusta': typeof GustaRoute
   '/info': typeof InfoRoute
   '/mappa': typeof MappaRoute
+  '/robots.txt': typeof RobotsDottxtRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/vivi': typeof ViviRoute
   '/admin/login': typeof AdminLoginRoute
   '/luoghi/$poiId': typeof LuoghiPoiIdRoute
@@ -198,6 +214,8 @@ export interface FileRoutesById {
   '/gusta': typeof GustaRoute
   '/info': typeof InfoRoute
   '/mappa': typeof MappaRoute
+  '/robots.txt': typeof RobotsDottxtRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/vivi': typeof ViviRoute
   '/admin/_panel': typeof AdminPanelRouteWithChildren
   '/admin/login': typeof AdminLoginRoute
@@ -224,6 +242,8 @@ export interface FileRouteTypes {
     | '/gusta'
     | '/info'
     | '/mappa'
+    | '/robots.txt'
+    | '/sitemap.xml'
     | '/vivi'
     | '/admin'
     | '/admin/login'
@@ -248,6 +268,8 @@ export interface FileRouteTypes {
     | '/gusta'
     | '/info'
     | '/mappa'
+    | '/robots.txt'
+    | '/sitemap.xml'
     | '/vivi'
     | '/admin/login'
     | '/luoghi/$poiId'
@@ -269,6 +291,8 @@ export interface FileRouteTypes {
     | '/gusta'
     | '/info'
     | '/mappa'
+    | '/robots.txt'
+    | '/sitemap.xml'
     | '/vivi'
     | '/admin/_panel'
     | '/admin/login'
@@ -294,6 +318,8 @@ export interface RootRouteChildren {
   GustaRoute: typeof GustaRoute
   InfoRoute: typeof InfoRoute
   MappaRoute: typeof MappaRoute
+  RobotsDottxtRoute: typeof RobotsDottxtRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   ViviRoute: typeof ViviRoute
   AdminPanelRoute: typeof AdminPanelRouteWithChildren
   AdminLoginRoute: typeof AdminLoginRoute
@@ -338,6 +364,20 @@ declare module '@tanstack/react-router' {
       path: '/mappa'
       fullPath: '/mappa'
       preLoaderRoute: typeof MappaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/robots.txt': {
+      id: '/robots.txt'
+      path: '/robots.txt'
+      fullPath: '/robots.txt'
+      preLoaderRoute: typeof RobotsDottxtRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/vivi': {
@@ -522,6 +562,8 @@ const rootRouteChildren: RootRouteChildren = {
   GustaRoute: GustaRoute,
   InfoRoute: InfoRoute,
   MappaRoute: MappaRoute,
+  RobotsDottxtRoute: RobotsDottxtRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   ViviRoute: ViviRoute,
   AdminPanelRoute: AdminPanelRouteWithChildren,
   AdminLoginRoute: AdminLoginRoute,

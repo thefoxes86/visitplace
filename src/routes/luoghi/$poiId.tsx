@@ -5,26 +5,44 @@ import type { ReactNode } from 'react'
 import { Skyline } from '#/components/Skyline'
 import { CategoryIcon } from '#/components/tourist-map/CategoryIcon'
 import { Compass } from '#/components/tourist-map/TouristMap'
-import { useCategories } from '#/data/categories'
+import { categoriesQuery, useCategories } from '#/data/categories'
 import { categoryType, formatDetail } from '#/lib/category-types'
 import { distanceKm, formatEventDate, poiImage, poiNumber } from '#/data/pois'
 import { poisQuery, usePois } from '#/data/use-pois'
+import { absoluteUrl, breadcrumbs, seo } from '#/lib/seo'
 
 import type { Category } from '#/data/categories'
 import type { Poi } from '#/data/pois'
 
 export const Route = createFileRoute('/luoghi/$poiId')({
   loader: async ({ context, params }) => {
-    const poi = (await context.queryClient.ensureQueryData(poisQuery)).find((p) => p.id === params.poiId)
+    const [pois, categories] = await Promise.all([
+      context.queryClient.ensureQueryData(poisQuery),
+      context.queryClient.ensureQueryData(categoriesQuery),
+    ])
+    const poi = pois.find((p) => p.id === params.poiId)
     if (!poi) throw notFound()
-    return poi
+    return { poi, category: categories.find((c) => c.id === poi.category) }
   },
-  head: ({ loaderData }) => ({
-    meta: [
-      { title: loaderData ? `${loaderData.name} · Visit Camaiore` : 'Visit Camaiore' },
-      ...(loaderData ? [{ name: 'description', content: loaderData.summary }] : []),
-    ],
-  }),
+  head: ({ loaderData, params }) =>
+    loaderData
+      ? seo({
+          title: loaderData.poi.name,
+          description: `${loaderData.poi.summary.replace(/\.?$/, '.')} ${loaderData.poi.description}`,
+          path: `/luoghi/${loaderData.poi.id}`,
+          image: poiImage(loaderData.poi, 1200),
+          type: 'article',
+          jsonLd: {
+            '@graph': [
+              poiJsonLd(loaderData.poi, loaderData.category?.type),
+              breadcrumbs([
+                ['Mappa turistica', '/mappa'],
+                [loaderData.poi.name, `/luoghi/${loaderData.poi.id}`],
+              ]),
+            ],
+          },
+        })
+      : seo({ title: 'Luogo non trovato', path: `/luoghi/${params.poiId}`, noindex: true }),
   component: PoiPage,
   notFoundComponent: () => (
     <main className="grid min-h-dvh place-items-center bg-paper p-8 text-center font-sans text-ink">
@@ -37,6 +55,50 @@ export const Route = createFileRoute('/luoghi/$poiId')({
     </main>
   ),
 })
+
+/** schema.org types by category type (src/lib/category-types.ts); anything else is an attraction. */
+const SCHEMA_TYPES: Record<string, string> = {
+  event: 'Event',
+  restaurant: 'Restaurant',
+  bnb: 'BedAndBreakfast',
+  hotel: 'Hotel',
+}
+
+/** Structured data of a place, so search engines can show it as an event, restaurant, hotel… */
+function poiJsonLd(poi: Poi, type = 'place') {
+  const schemaType = SCHEMA_TYPES[type] ?? 'TouristAttraction'
+  const geo = { '@type': 'GeoCoordinates', latitude: poi.lat, longitude: poi.lon }
+  const address = {
+    '@type': 'PostalAddress',
+    streetAddress: poi.address ?? undefined,
+    addressLocality: poi.area,
+    addressRegion: 'LU',
+    addressCountry: 'IT',
+  }
+  const common = {
+    '@type': schemaType,
+    name: poi.name,
+    description: poi.description || poi.summary,
+    image: poiImage(poi, 1200),
+    url: absoluteUrl(`/luoghi/${poi.id}`),
+  }
+  if (schemaType === 'Event')
+    return {
+      ...common,
+      startDate: poi.startsAt?.toISOString(),
+      endDate: poi.endsAt?.toISOString(),
+      eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+      location: { '@type': 'Place', name: poi.address || poi.area, address, geo },
+    }
+  return {
+    ...common,
+    geo,
+    address,
+    telephone: poi.phone ?? undefined,
+    email: poi.email ?? undefined,
+    sameAs: poi.website ?? undefined,
+  }
+}
 
 /** Label and value of each practical info, leaving out what is not set. */
 function infoRows(poi: Poi, category: Category) {
@@ -77,7 +139,7 @@ function infoRows(poi: Poi, category: Category) {
 const km = (d: number) => (d < 1 ? `${Math.round(d * 1000)} m` : `${d.toFixed(1).replace('.', ',')} km`)
 
 function PoiPage() {
-  const poi = Route.useLoaderData()
+  const { poi } = Route.useLoaderData()
   const { categoryOf } = useCategories()
   const category = categoryOf(poi.category)
   const nearby = usePois()

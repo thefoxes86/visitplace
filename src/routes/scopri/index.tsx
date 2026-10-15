@@ -4,9 +4,17 @@ import { MapButton, OtherSections, PageShell, placesCount } from '#/components/C
 import { scopriTopics, topicImage, topicPois } from '#/data/scopri'
 import { usePois } from '#/data/use-pois'
 import { getSection } from '#/data/sections'
+import { breadcrumbs, seo } from '#/lib/seo'
 
 export const Route = createFileRoute('/scopri/')({
-  head: () => ({ meta: [{ title: 'Scopri · Visit Camaiore' }] }),
+  head: () =>
+    seo({
+      title: 'Scopri',
+      description:
+        'Cosa vedere a Camaiore: borghi, musei, chiese romaniche, luoghi storici, trekking sulle Apuane, natura e il mare del Lido.',
+      path: '/scopri',
+      jsonLd: breadcrumbs([['Scopri', '/scopri']]),
+    }),
   component: ScopriPage,
 })
 

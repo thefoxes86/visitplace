@@ -6,6 +6,7 @@ import { TouristMap } from '#/components/tourist-map/TouristMap'
 import { useCategories } from '#/data/categories'
 import { poiImage, poiNumber } from '#/data/pois'
 import { usePois } from '#/data/use-pois'
+import { breadcrumbs, seo } from '#/lib/seo'
 
 import type { MapTarget } from '#/components/tourist-map/TouristMap'
 import type { Poi } from '#/data/pois'
@@ -14,7 +15,14 @@ export const Route = createFileRoute('/mappa')({
   /** ?luogo=<id> opens the map on that point. */
   validateSearch: (search: Record<string, unknown>): { luogo?: string } =>
     typeof search.luogo === 'string' ? { luogo: search.luogo } : {},
-  head: () => ({ meta: [{ title: 'Mappa turistica · Visit Camaiore' }] }),
+  head: () =>
+    seo({
+      title: 'Mappa turistica',
+      description:
+        'La mappa turistica interattiva di Camaiore: ristoranti, B&B, luoghi di cultura, sentieri ed eventi, dal centro storico al Lido.',
+      path: '/mappa',
+      jsonLd: breadcrumbs([['Mappa turistica', '/mappa']]),
+    }),
   component: MapPage,
 })
 

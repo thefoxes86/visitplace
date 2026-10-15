@@ -5,11 +5,19 @@ import type { ReactNode } from 'react'
 import { OtherSections, PageShell, SignpostNav } from '#/components/CategoryPage'
 import { gettingAround, gettingHere, guides, touristOffices, webcams } from '#/data/info'
 import { getSection } from '#/data/sections'
+import { breadcrumbs, seo } from '#/lib/seo'
 
 import type { InfoItem } from '#/data/info'
 
 export const Route = createFileRoute('/info')({
-  head: () => ({ meta: [{ title: 'Info · Visit Camaiore' }] }),
+  head: () =>
+    seo({
+      title: 'Info',
+      description:
+        'Informazioni utili per visitare Camaiore: uffici turistici, come arrivare in auto, treno e aereo, come muoversi tra centro, borghi e Lido, guide e webcam.',
+      path: '/info',
+      jsonLd: breadcrumbs([['Info', '/info']]),
+    }),
   component: InfoPage,
 })
 
