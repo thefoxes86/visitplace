@@ -1,4 +1,6 @@
-import { boolean, doublePrecision, index, integer, pgEnum, pgTable, text, timestamp } from 'drizzle-orm/pg-core'
+import { boolean, doublePrecision, index, integer, jsonb, pgTable, text, timestamp } from 'drizzle-orm/pg-core'
+
+import type { DetailValues } from '../lib/category-types.ts'
 
 // ── Auth (Better Auth + its admin plugin) ────────────────────────────────────
 
@@ -72,7 +74,30 @@ export const verification = pgTable(
 
 // ── Content ──────────────────────────────────────────────────────────────────
 
-export const poiCategory = pgEnum('poi_category', ['restaurant', 'bnb', 'culture', 'events'])
+/** Kinds of places: restaurants, B&Bs, cultural places, events… */
+export const categories = pgTable('categories', {
+  /** Stable key used in code (e.g. the Gusta page lists `restaurant`). */
+  id: text().primaryKey(),
+  /** URL segment in the admin: /admin/<slug>. */
+  slug: text().notNull().unique(),
+  /** Name on the site: legends, filters, labels. */
+  label: text().notNull(),
+  /** Name of the list in the admin. */
+  adminLabel: text('admin_label').notNull(),
+  /** "Nuovo …" in the admin. */
+  singular: text().notNull(),
+  /** Marker and label colour, as #rrggbb. */
+  color: text().notNull(),
+  /** Decides the fields of its places: id in src/lib/category-types.ts. */
+  type: text().notNull().default('place'),
+  /** Order of legends, filters and the admin menu. */
+  sortOrder: integer('sort_order').notNull().default(0),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at')
+    .notNull()
+    .defaultNow()
+    .$onUpdate(() => new Date()),
+})
 
 /** Every point of the tourist map: restaurants, B&Bs, cultural places and events. */
 export const pois = pgTable(
@@ -80,7 +105,10 @@ export const pois = pgTable(
   {
     /** Also the URL: /luoghi/<id>. */
     id: text().primaryKey(),
-    category: poiCategory().notNull(),
+    category: text()
+      .notNull()
+      // A category can't be deleted while places use it.
+      .references(() => categories.id, { onUpdate: 'cascade', onDelete: 'restrict' }),
     name: text().notNull(),
     summary: text().notNull(),
     description: text().notNull(),
@@ -99,6 +127,8 @@ export const pois = pgTable(
     phone: text(),
     email: text(),
     website: text(),
+    /** Fields of the category's type (src/lib/category-types.ts), e.g. difficulty of a trek. */
+    details: jsonb().$type<DetailValues>().notNull().default({}),
     /** Events only. */
     startsAt: timestamp('starts_at'),
     endsAt: timestamp('ends_at'),

@@ -22,11 +22,15 @@ import { Route as ScopriIndexRouteImport } from './routes/scopri/index'
 import { Route as ScopriTopicRouteImport } from './routes/scopri/$topic'
 import { Route as AdminPanelIndexRouteImport } from './routes/admin/_panel/index'
 import { Route as AdminPanelCategoryRouteRouteImport } from './routes/admin/_panel/$category/route'
+import { Route as AdminPanelCategorieRouteRouteImport } from './routes/admin/_panel/categorie/route'
 import { Route as AdminPanelUtentiRouteImport } from './routes/admin/_panel/utenti'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as AdminPanelCategoryIndexRouteImport } from './routes/admin/_panel/$category/index'
 import { Route as AdminPanelCategoryIdRouteImport } from './routes/admin/_panel/$category/$id'
 import { Route as AdminPanelCategoryNuovoRouteImport } from './routes/admin/_panel/$category/nuovo'
+import { Route as AdminPanelCategorieIndexRouteImport } from './routes/admin/_panel/categorie/index'
+import { Route as AdminPanelCategorieIdRouteImport } from './routes/admin/_panel/categorie/$id'
+import { Route as AdminPanelCategorieNuovaRouteImport } from './routes/admin/_panel/categorie/nuova'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -93,6 +97,12 @@ const AdminPanelCategoryRouteRoute = AdminPanelCategoryRouteRouteImport.update({
   path: '/$category',
   getParentRoute: () => AdminPanelRoute,
 } as any)
+const AdminPanelCategorieRouteRoute =
+  AdminPanelCategorieRouteRouteImport.update({
+    id: '/categorie',
+    path: '/categorie',
+    getParentRoute: () => AdminPanelRoute,
+  } as any)
 const AdminPanelUtentiRoute = AdminPanelUtentiRouteImport.update({
   id: '/utenti',
   path: '/utenti',
@@ -118,6 +128,23 @@ const AdminPanelCategoryNuovoRoute = AdminPanelCategoryNuovoRouteImport.update({
   path: '/nuovo',
   getParentRoute: () => AdminPanelCategoryRouteRoute,
 } as any)
+const AdminPanelCategorieIndexRoute =
+  AdminPanelCategorieIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AdminPanelCategorieRouteRoute,
+  } as any)
+const AdminPanelCategorieIdRoute = AdminPanelCategorieIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AdminPanelCategorieRouteRoute,
+} as any)
+const AdminPanelCategorieNuovaRoute =
+  AdminPanelCategorieNuovaRouteImport.update({
+    id: '/nuova',
+    path: '/nuova',
+    getParentRoute: () => AdminPanelCategorieRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -132,12 +159,16 @@ export interface FileRoutesByFullPath {
   '/scopri/$topic': typeof ScopriTopicRoute
   '/scopri/': typeof ScopriIndexRoute
   '/admin/$category': typeof AdminPanelCategoryRouteRouteWithChildren
+  '/admin/categorie': typeof AdminPanelCategorieRouteRouteWithChildren
   '/admin/utenti': typeof AdminPanelUtentiRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/admin/': typeof AdminPanelIndexRoute
   '/admin/$category/$id': typeof AdminPanelCategoryIdRoute
   '/admin/$category/nuovo': typeof AdminPanelCategoryNuovoRoute
+  '/admin/categorie/$id': typeof AdminPanelCategorieIdRoute
+  '/admin/categorie/nuova': typeof AdminPanelCategorieNuovaRoute
   '/admin/$category/': typeof AdminPanelCategoryIndexRoute
+  '/admin/categorie/': typeof AdminPanelCategorieIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -155,7 +186,10 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminPanelIndexRoute
   '/admin/$category/$id': typeof AdminPanelCategoryIdRoute
   '/admin/$category/nuovo': typeof AdminPanelCategoryNuovoRoute
+  '/admin/categorie/$id': typeof AdminPanelCategorieIdRoute
+  '/admin/categorie/nuova': typeof AdminPanelCategorieNuovaRoute
   '/admin/$category': typeof AdminPanelCategoryIndexRoute
+  '/admin/categorie': typeof AdminPanelCategorieIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -171,12 +205,16 @@ export interface FileRoutesById {
   '/scopri/$topic': typeof ScopriTopicRoute
   '/scopri/': typeof ScopriIndexRoute
   '/admin/_panel/$category': typeof AdminPanelCategoryRouteRouteWithChildren
+  '/admin/_panel/categorie': typeof AdminPanelCategorieRouteRouteWithChildren
   '/admin/_panel/utenti': typeof AdminPanelUtentiRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/admin/_panel/': typeof AdminPanelIndexRoute
   '/admin/_panel/$category/$id': typeof AdminPanelCategoryIdRoute
   '/admin/_panel/$category/nuovo': typeof AdminPanelCategoryNuovoRoute
+  '/admin/_panel/categorie/$id': typeof AdminPanelCategorieIdRoute
+  '/admin/_panel/categorie/nuova': typeof AdminPanelCategorieNuovaRoute
   '/admin/_panel/$category/': typeof AdminPanelCategoryIndexRoute
+  '/admin/_panel/categorie/': typeof AdminPanelCategorieIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -193,12 +231,16 @@ export interface FileRouteTypes {
     | '/scopri/$topic'
     | '/scopri/'
     | '/admin/$category'
+    | '/admin/categorie'
     | '/admin/utenti'
     | '/api/auth/$'
     | '/admin/'
     | '/admin/$category/$id'
     | '/admin/$category/nuovo'
+    | '/admin/categorie/$id'
+    | '/admin/categorie/nuova'
     | '/admin/$category/'
+    | '/admin/categorie/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -216,7 +258,10 @@ export interface FileRouteTypes {
     | '/admin'
     | '/admin/$category/$id'
     | '/admin/$category/nuovo'
+    | '/admin/categorie/$id'
+    | '/admin/categorie/nuova'
     | '/admin/$category'
+    | '/admin/categorie'
   id:
     | '__root__'
     | '/'
@@ -231,12 +276,16 @@ export interface FileRouteTypes {
     | '/scopri/$topic'
     | '/scopri/'
     | '/admin/_panel/$category'
+    | '/admin/_panel/categorie'
     | '/admin/_panel/utenti'
     | '/api/auth/$'
     | '/admin/_panel/'
     | '/admin/_panel/$category/$id'
     | '/admin/_panel/$category/nuovo'
+    | '/admin/_panel/categorie/$id'
+    | '/admin/_panel/categorie/nuova'
     | '/admin/_panel/$category/'
+    | '/admin/_panel/categorie/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -347,6 +396,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminPanelCategoryRouteRouteImport
       parentRoute: typeof AdminPanelRoute
     }
+    '/admin/_panel/categorie': {
+      id: '/admin/_panel/categorie'
+      path: '/categorie'
+      fullPath: '/admin/categorie'
+      preLoaderRoute: typeof AdminPanelCategorieRouteRouteImport
+      parentRoute: typeof AdminPanelRoute
+    }
     '/admin/_panel/utenti': {
       id: '/admin/_panel/utenti'
       path: '/utenti'
@@ -382,6 +438,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminPanelCategoryNuovoRouteImport
       parentRoute: typeof AdminPanelCategoryRouteRoute
     }
+    '/admin/_panel/categorie/': {
+      id: '/admin/_panel/categorie/'
+      path: '/'
+      fullPath: '/admin/categorie/'
+      preLoaderRoute: typeof AdminPanelCategorieIndexRouteImport
+      parentRoute: typeof AdminPanelCategorieRouteRoute
+    }
+    '/admin/_panel/categorie/$id': {
+      id: '/admin/_panel/categorie/$id'
+      path: '/$id'
+      fullPath: '/admin/categorie/$id'
+      preLoaderRoute: typeof AdminPanelCategorieIdRouteImport
+      parentRoute: typeof AdminPanelCategorieRouteRoute
+    }
+    '/admin/_panel/categorie/nuova': {
+      id: '/admin/_panel/categorie/nuova'
+      path: '/nuova'
+      fullPath: '/admin/categorie/nuova'
+      preLoaderRoute: typeof AdminPanelCategorieNuovaRouteImport
+      parentRoute: typeof AdminPanelCategorieRouteRoute
+    }
   }
 }
 
@@ -403,14 +480,34 @@ const AdminPanelCategoryRouteRouteWithChildren =
     AdminPanelCategoryRouteRouteChildren,
   )
 
+interface AdminPanelCategorieRouteRouteChildren {
+  AdminPanelCategorieIdRoute: typeof AdminPanelCategorieIdRoute
+  AdminPanelCategorieNuovaRoute: typeof AdminPanelCategorieNuovaRoute
+  AdminPanelCategorieIndexRoute: typeof AdminPanelCategorieIndexRoute
+}
+
+const AdminPanelCategorieRouteRouteChildren: AdminPanelCategorieRouteRouteChildren =
+  {
+    AdminPanelCategorieIdRoute: AdminPanelCategorieIdRoute,
+    AdminPanelCategorieNuovaRoute: AdminPanelCategorieNuovaRoute,
+    AdminPanelCategorieIndexRoute: AdminPanelCategorieIndexRoute,
+  }
+
+const AdminPanelCategorieRouteRouteWithChildren =
+  AdminPanelCategorieRouteRoute._addFileChildren(
+    AdminPanelCategorieRouteRouteChildren,
+  )
+
 interface AdminPanelRouteChildren {
   AdminPanelCategoryRouteRoute: typeof AdminPanelCategoryRouteRouteWithChildren
+  AdminPanelCategorieRouteRoute: typeof AdminPanelCategorieRouteRouteWithChildren
   AdminPanelUtentiRoute: typeof AdminPanelUtentiRoute
   AdminPanelIndexRoute: typeof AdminPanelIndexRoute
 }
 
 const AdminPanelRouteChildren: AdminPanelRouteChildren = {
   AdminPanelCategoryRouteRoute: AdminPanelCategoryRouteRouteWithChildren,
+  AdminPanelCategorieRouteRoute: AdminPanelCategorieRouteRouteWithChildren,
   AdminPanelUtentiRoute: AdminPanelUtentiRoute,
   AdminPanelIndexRoute: AdminPanelIndexRoute,
 }

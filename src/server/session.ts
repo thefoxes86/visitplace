@@ -29,3 +29,11 @@ export const requireEditor = createMiddleware({ type: 'function' }).server(async
   if (!user) throw new Error('Accesso non autorizzato')
   return next({ context: { user } })
 })
+
+/** Server functions behind it need a signed-in admin. */
+export const requireAdmin = createMiddleware({ type: 'function' })
+  .middleware([requireEditor])
+  .server(({ context, next }) => {
+    if (context.user.role !== 'admin') throw new Error('Solo gli amministratori possono farlo')
+    return next()
+  })

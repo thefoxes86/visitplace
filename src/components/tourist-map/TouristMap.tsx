@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { APIProvider, Map, useMap } from '@vis.gl/react-google-maps'
 
-import { poiCategory } from '#/data/pois'
+import { useCategories } from '#/data/categories'
 
 import type { Poi } from '#/data/pois'
 
@@ -100,9 +100,10 @@ function Camera({ target }: { target: MapTarget | null }) {
 }
 
 function Markers({ pois, selected, onSelect, numberOf }: Omit<TouristMapProps, 'target'>) {
+  const { categoryOf } = useCategories()
   return pois.map((poi) => {
     const active = selected?.id === poi.id
-    const { color } = poiCategory(poi.category)
+    const { color } = categoryOf(poi.category)
     return (
       <HtmlMarker key={poi.id} lat={poi.lat} lng={poi.lon} zIndex={active ? 2 : 1}>
         <button

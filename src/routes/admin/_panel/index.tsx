@@ -4,7 +4,7 @@ import { Link, createFileRoute } from '@tanstack/react-router'
 import { adminPoisQuery } from '#/components/admin/queries'
 import { Card, PageHeader } from '#/components/admin/ui'
 import { CategoryIcon } from '#/components/tourist-map/CategoryIcon'
-import { poiCategories, poiCategory } from '#/data/pois'
+import { useCategories } from '#/data/categories'
 
 export const Route = createFileRoute('/admin/_panel/')({
   loader: ({ context }) => context.queryClient.ensureQueryData(adminPoisQuery),
@@ -14,6 +14,7 @@ export const Route = createFileRoute('/admin/_panel/')({
 function Dashboard() {
   const { user } = Route.useRouteContext()
   const { data: pois } = useSuspenseQuery(adminPoisQuery)
+  const { categories, categoryOf } = useCategories()
   const recent = [...pois].sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime()).slice(0, 6)
 
   return (
@@ -21,7 +22,7 @@ function Dashboard() {
       <PageHeader title={`Ciao, ${user.name.split(' ')[0]}`} subtitle="I contenuti di Visit Camaiore" />
 
       <ul className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {poiCategories.map((category) => {
+        {categories.map((category) => {
           const list = pois.filter((poi) => poi.category === category.id)
           const drafts = list.filter((poi) => !poi.published).length
           return (
@@ -57,11 +58,11 @@ function Dashboard() {
               <li key={poi.id}>
                 <Link
                   to="/admin/$category/$id"
-                  params={{ category: poiCategory(poi.category).slug, id: poi.id }}
+                  params={{ category: categoryOf(poi.category).slug, id: poi.id }}
                   className="flex items-center justify-between gap-4 py-3 text-sm hover:text-coral"
                 >
                   <span className="flex min-w-0 items-center gap-3">
-                    <span className="size-2.5 shrink-0 rounded-full" style={{ backgroundColor: poiCategory(poi.category).color }} />
+                    <span className="size-2.5 shrink-0 rounded-full" style={{ backgroundColor: categoryOf(poi.category).color }} />
                     <span className="truncate font-semibold">{poi.name}</span>
                   </span>
                   <span className="shrink-0 text-xs font-light">

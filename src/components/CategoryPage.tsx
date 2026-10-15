@@ -5,24 +5,25 @@ import type { ReactNode } from 'react'
 
 import { Skyline } from '#/components/Skyline'
 import { CategoryIcon } from '#/components/tourist-map/CategoryIcon'
-import { poiCategory, poiImage, poiNumber } from '#/data/pois'
+import { useCategories } from '#/data/categories'
+import { poiImage, poiNumber } from '#/data/pois'
 import { usePois } from '#/data/use-pois'
 import { getSection, sectionLink, sections } from '#/data/sections'
 
-import type { Poi, PoiCategory } from '#/data/pois'
+import type { Poi } from '#/data/pois'
 
 interface CategoryPageProps {
   /** Id in src/data/sections.ts: gives the title and tagline. */
   sectionId: string
-  /** Which points of the map the page lists. */
-  category: PoiCategory
+  /** Which points of the map the page lists: id in the `categories` table. */
+  category: string
   intro: string
 }
 
 /** A section page listing every place of one category, grouped by area. */
 export function CategoryPage({ sectionId, category: categoryId, intro }: CategoryPageProps) {
   const section = getSection(sectionId)!
-  const category = poiCategory(categoryId)
+  const category = useCategories().categoryOf(categoryId)
   const items = usePois().filter((poi) => poi.category === categoryId)
 
   return (

@@ -72,9 +72,8 @@ export function getScopriTopic(id: string) {
   return scopriTopics.find((topic) => topic.id === id)
 }
 
-/** Cultural places of a topic; the topic is set on each place in the admin. */
-export const topicPois = (topic: ScopriTopic, pois: Poi[]) =>
-  pois.filter((poi) => poi.category === 'culture' && poi.topic === topic.id)
+/** Places of a topic; the topic is set in the admin on places of categories of type "Luogo". */
+export const topicPois = (topic: ScopriTopic, pois: Poi[]) => pois.filter((poi) => poi.topic === topic.id)
 
 /** Demo image: replace with real photography of each topic. */
 export const topicImage = (topic: ScopriTopic, size = 800) =>

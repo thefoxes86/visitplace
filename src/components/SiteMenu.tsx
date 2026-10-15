@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from 'react'
 import { Link } from '@tanstack/react-router'
 
 import { Skyline } from '#/components/Skyline'
-import { poiCategory, poiNumber } from '#/data/pois'
+import { useCategories } from '#/data/categories'
+import { poiNumber } from '#/data/pois'
 import { usePois } from '#/data/use-pois'
 import { sectionLink, sections } from '#/data/sections'
 
@@ -13,6 +14,7 @@ const EASE_OUT = 'ease-[cubic-bezier(0.22,1,0.36,1)]'
 
 export function SiteMenu() {
   const pois = usePois()
+  const { categoryOf } = useCategories()
   const [open, setOpen] = useState(false)
   const toggle = useRef<HTMLButtonElement>(null)
   const firstLink = useRef<HTMLAnchorElement>(null)
@@ -155,7 +157,7 @@ export function SiteMenu() {
                       >
                         <span
                           className="grid size-6 shrink-0 place-items-center rounded-full text-[10px] font-semibold text-white"
-                          style={{ backgroundColor: poiCategory(place.category).color }}
+                          style={{ backgroundColor: categoryOf(place.category).color }}
                         >
                           {poiNumber(place)}
                         </span>

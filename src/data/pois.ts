@@ -1,4 +1,4 @@
-export type PoiCategory = 'restaurant' | 'bnb' | 'culture' | 'events'
+import type { DetailValues } from '#/lib/category-types'
 
 /** A point of the tourist map, as stored in the `pois` table. */
 export interface Poi {
@@ -7,7 +7,8 @@ export interface Poi {
   /** Map number, the same everywhere on the site. */
   number: number
   name: string
-  category: PoiCategory
+  /** Id in the `categories` table, see useCategories(). */
+  category: string
   summary: string
   description: string
   /** Part of the comune the place is in. */
@@ -23,6 +24,8 @@ export interface Poi {
   phone: string | null
   email: string | null
   website: string | null
+  /** Fields of the category's type (src/lib/category-types.ts). */
+  details: DetailValues
   /** Events only. */
   startsAt: Date | null
   endsAt: Date | null
@@ -31,27 +34,6 @@ export interface Poi {
 /** A place in src/db/seed-data.ts: everything optional is left out. */
 export type SeedPoi = Pick<Poi, 'id' | 'name' | 'category' | 'summary' | 'description' | 'area' | 'lat' | 'lon'> &
   Partial<Pick<Poi, 'featured' | 'topic'>>
-
-export const poiCategories: {
-  id: PoiCategory
-  label: string
-  color: string
-  /** URL segment in the admin: /admin/<slug>. */
-  slug: string
-  /** Name of the list in the admin. */
-  adminLabel: string
-  /** "Nuovo …" in the admin. */
-  singular: string
-}[] = [
-  { id: 'restaurant', label: 'Ristoranti', color: '#e5775d', slug: 'ristoranti', adminLabel: 'Ristoranti', singular: 'ristorante' },
-  { id: 'bnb', label: 'B&B', color: '#2f6e60', slug: 'bnb', adminLabel: 'B&B', singular: 'B&B' },
-  { id: 'culture', label: 'Cultura', color: '#d39a2c', slug: 'cultura', adminLabel: 'Luoghi culturali', singular: 'luogo culturale' },
-  { id: 'events', label: 'Eventi', color: '#4a6f99', slug: 'eventi', adminLabel: 'Eventi', singular: 'evento' },
-]
-
-export const poiCategory = (id: PoiCategory) => poiCategories.find((c) => c.id === id)!
-
-export const poiCategoryBySlug = (slug: string) => poiCategories.find((c) => c.slug === slug)
 
 /** Map number of a point, the same everywhere on the site. */
 export const poiNumber = (poi: Poi) => String(poi.number).padStart(2, '0')
