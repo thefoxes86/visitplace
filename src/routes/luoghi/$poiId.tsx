@@ -7,7 +7,8 @@ import { CategoryIcon } from '#/components/tourist-map/CategoryIcon'
 import { Compass } from '#/components/tourist-map/TouristMap'
 import { categoriesQuery, categoryLink, useCategories } from '#/data/categories'
 import { categoryType, formatDetail } from '#/lib/category-types'
-import { distanceKm, formatEventDate, poiImage, poiNumber } from '#/data/pois'
+import { distanceKm, poiImage, poiNumber } from '#/data/pois'
+import { currentOccurrence, formatOccurrence, formatRecurrence } from '#/lib/event-dates'
 import { poisQuery, usePois } from '#/data/use-pois'
 import { absoluteUrl, breadcrumbs, seo } from '#/lib/seo'
 
@@ -82,14 +83,16 @@ function poiJsonLd(poi: Poi, type = 'place') {
     image: poiImage(poi, 1200),
     url: absoluteUrl(`/luoghi/${poi.id}`),
   }
-  if (schemaType === 'Event')
+  if (schemaType === 'Event') {
+    const when = poi.startsAt ? currentOccurrence({ ...poi, startsAt: poi.startsAt }) : null
     return {
       ...common,
-      startDate: poi.startsAt?.toISOString(),
-      endDate: poi.endsAt?.toISOString(),
+      startDate: when?.start.toISOString(),
+      endDate: when && (poi.endsAt || poi.allDay) ? when.end.toISOString() : undefined,
       eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
       location: { '@type': 'Place', name: poi.address || poi.area, address, geo },
     }
+  }
   return {
     ...common,
     geo,
@@ -103,8 +106,12 @@ function poiJsonLd(poi: Poi, type = 'place') {
 /** Label and value of each practical info, leaving out what is not set. */
 function infoRows(poi: Poi, category: Category) {
   const rows: [string, ReactNode][] = [['Categoria', category.label]]
-  if (poi.startsAt) rows.push(['Quando', formatEventDate(poi.startsAt)])
-  if (poi.endsAt) rows.push(['Fino a', formatEventDate(poi.endsAt)])
+  if (poi.startsAt) {
+    // Repeating events show their next time, and how often they repeat.
+    const recurrence = formatRecurrence(poi)
+    rows.push([recurrence ? 'Prossima data' : 'Quando', formatOccurrence(currentOccurrence({ ...poi, startsAt: poi.startsAt }), poi.allDay)])
+    if (recurrence) rows.push(['Si ripete', recurrence])
+  }
   // The fields of the category's type: difficulty of a trek, stars of a hotel…
   for (const field of categoryType(category.type).fields) {
     const value = formatDetail(field, poi.details[field.key])

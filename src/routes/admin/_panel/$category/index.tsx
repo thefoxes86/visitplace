@@ -8,6 +8,7 @@ import { Alert, PageHeader, buttonClass, errorMessage, inputClass } from '#/comp
 import { categoryPath, sectionOf, subtreeIds, useCategories } from '#/data/categories'
 import { getSection } from '#/data/sections'
 import { formatEventDate } from '#/data/pois'
+import { RECURRENCES } from '#/lib/event-dates'
 import { categoryType } from '#/lib/category-types'
 import { deletePoi } from '#/server/pois'
 
@@ -137,6 +138,7 @@ function PoiList() {
                     </td>
                     <td className="px-4 py-3 text-xs">
                       {isEvent ? (poi.startsAt ? formatEventDate(poi.startsAt) : '—') : poi.area}
+                      {isEvent && poi.recurrence && <span className="block font-light">{RECURRENCES[poi.recurrence]}</span>}
                     </td>
                     <td className="px-4 py-3">
                       <span

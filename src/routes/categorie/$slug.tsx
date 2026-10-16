@@ -1,6 +1,7 @@
 import { Link, createFileRoute, notFound } from '@tanstack/react-router'
 
 import { CategoryContent, CategoryEyebrow, MapButton, PageShell, SignpostNav } from '#/components/CategoryPage'
+import { EventTimeline } from '#/components/EventTimeline'
 import { categoriesQuery, categoryBySlug, categoryLink, categoryPath, useCategories } from '#/data/categories'
 import { getSection, sectionLink } from '#/data/sections'
 import { breadcrumbs, seo } from '#/lib/seo'
@@ -44,10 +45,12 @@ export const Route = createFileRoute('/categorie/$slug')({
 
 function CategoryRoute() {
   const { category: loaded, section } = Route.useLoaderData()
-  const { categories } = useCategories()
+  const { categories, isEventCategory } = useCategories()
   const category = categories.find((c) => c.id === loaded.id) ?? loaded
   const parent = categories.find((c) => c.id === category.parentId)
   const siblings = categories.filter((c) => c.parentId === category.parentId && c.id !== category.id)
+  // Events go on a timeline across the whole page.
+  const events = isEventCategory(category.id)
 
   return (
     <PageShell
@@ -61,7 +64,9 @@ function CategoryRoute() {
       eyebrow={<CategoryEyebrow category={category} />}
       title={category.label}
       tagline={parent ? `Una categoria di ${parent.label}` : (section?.tagline ?? 'Dalle Apuane al mare della Versilia')}
+      wide={events}
       aside={
+        !events &&
         siblings.length > 0 && (
           <SignpostNav
             title={parent ? `Altro in ${parent.label}` : 'Altre categorie'}
@@ -76,7 +81,7 @@ function CategoryRoute() {
         )
       }
     >
-      <CategoryContent category={category} />
+      {events ? <EventTimeline category={category} /> : <CategoryContent category={category} />}
       <MapButton />
     </PageShell>
   )

@@ -151,11 +151,13 @@ interface PageShellProps {
   title: string
   tagline: string
   aside: ReactNode
+  /** The main column takes the whole page, with no signpost column. */
+  wide?: boolean
   children: ReactNode
 }
 
 /** Skyline header, main column and a signpost column, as on the place pages. */
-export function PageShell({ back: { label, ...back }, eyebrow, title, tagline, aside, children }: PageShellProps) {
+export function PageShell({ back: { label, ...back }, eyebrow, title, tagline, aside, wide = false, children }: PageShellProps) {
   return (
     <main className="min-h-dvh bg-paper font-sans text-ink">
       <div className="mx-auto max-w-6xl px-6 pb-12 pt-24 sm:px-12">
@@ -188,14 +190,20 @@ export function PageShell({ back: { label, ...back }, eyebrow, title, tagline, a
           </div>
         </header>
 
-        <div className="mt-10 grid gap-12 lg:grid-cols-[minmax(0,1fr)_17rem] lg:gap-0">
-          <div className="hero-fade lg:pr-12" style={{ animationDelay: '750ms' }}>
+        {wide ? (
+          <div className="hero-fade mt-10" style={{ animationDelay: '750ms' }}>
             {children}
           </div>
-          <div className="hero-fade self-start" style={{ animationDelay: '900ms' }}>
-            {aside}
+        ) : (
+          <div className="mt-10 grid gap-12 lg:grid-cols-[minmax(0,1fr)_17rem] lg:gap-0">
+            <div className="hero-fade lg:pr-12" style={{ animationDelay: '750ms' }}>
+              {children}
+            </div>
+            <div className="hero-fade self-start" style={{ animationDelay: '900ms' }}>
+              {aside}
+            </div>
           </div>
-        </div>
+        )}
 
         <footer className="mt-12 flex flex-wrap justify-between gap-2 text-xs italic text-ink/70">
           <span>Camaiore · Versilia, Toscana</span>

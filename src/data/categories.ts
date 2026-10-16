@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import { queryOptions, useSuspenseQuery } from '@tanstack/react-query'
 
 import { categoryPath, categoryTree, subtreeIds } from '#/lib/category-tree'
+import { isListType } from '#/lib/category-types'
 import { listCategories } from '#/server/categories'
 
 export { categoryPath, categoryTree, subtreeIds } from '#/lib/category-tree'
@@ -63,12 +64,25 @@ export function useCategories() {
       categoryOf: (id: string) => categories.find((c) => c.id === id) ?? unknownCategory(id),
       /** Ids of a category and its subcategories. */
       subtree: (id: string) => subtreeIds(categories, id),
+      /** Whether a category holds events only, shown as a timeline. */
+      isEventCategory: (id: string) => isEventCategory(categories, id),
+      /** The category of every event: the highest that holds events only. */
+      eventsCategory: categoryTree(categories)
+        .filter((c) => isEventCategory(categories, c.id))
+        .sort((a, b) => a.depth - b.depth)[0] as Category | undefined,
     }),
     [categories],
   )
 }
 
-export const categoryBySlug = (categories: Category[], slug: string) => categories.find((c) => c.slug === slug)
+/** An event category, or a list whose categories are all event categories. */
+function isEventCategory(categories: Category[], id: string) {
+  const ids = subtreeIds(categories, id)
+  const holding = categories.filter((c) => ids.has(c.id) && !isListType(c.type))
+  return holding.length > 0 && holding.every((c) => c.type === 'event')
+}
+
+export const categoryBySlug =(categories: Category[], slug: string) => categories.find((c) => c.slug === slug)
 
 /** Props for a <Link> to a category's public page. */
 export const categoryLink = (category: Pick<Category, 'slug'>) => ({ to: '/categorie/$slug' as const, params: { slug: category.slug } })

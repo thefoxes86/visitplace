@@ -2,6 +2,7 @@ import { boolean, doublePrecision, index, integer, jsonb, pgTable, text, timesta
 import type { AnyPgColumn } from 'drizzle-orm/pg-core'
 
 import type { DetailValues } from '../lib/category-types.ts'
+import type { RecurrenceId } from '../lib/event-dates.ts'
 
 // ── Auth (Better Auth + its admin plugin) ────────────────────────────────────
 
@@ -134,9 +135,15 @@ export const pois = pgTable(
     website: text(),
     /** Fields of the category's type (src/lib/category-types.ts), e.g. difficulty of a trek. */
     details: jsonb().$type<DetailValues>().notNull().default({}),
-    /** Events only. */
+    /** Events only. For repeating events, the first occurrence; for all-day events, midnight of the first and last day. */
     startsAt: timestamp('starts_at'),
     endsAt: timestamp('ends_at'),
+    /** Events only: dates without a time, each day taken whole. */
+    allDay: boolean('all_day').notNull().default(false),
+    /** Events only: how often the event repeats (src/lib/event-dates.ts); null takes place once. */
+    recurrence: text().$type<RecurrenceId>(),
+    /** Events only: last day a repetition can start on; null repeats forever. */
+    recurrenceUntil: timestamp('recurrence_until'),
     /** Order on the map, which gives each place its number. */
     sortOrder: integer('sort_order').notNull().default(0),
     createdAt: timestamp('created_at').notNull().defaultNow(),

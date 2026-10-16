@@ -35,7 +35,7 @@ const CONTACT_LABELS = { address: 'Indirizzo', phone: 'Telefono', email: 'Email'
 
 /** What a type adds to the place form, as short labels. */
 const generatedFields = (type: CategoryType) => [
-  ...(type.dates ? ['Data di inizio', 'Data di fine'] : []),
+  ...(type.dates ? ['Data di inizio', 'Data di fine', 'Tutto il giorno', 'Ripetizione'] : []),
   ...type.fields.map((field) => field.label + (field.unit ? ` (${field.unit})` : '')),
   ...type.contacts.map((contact) => CONTACT_LABELS[contact]),
 ]
