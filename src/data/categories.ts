@@ -1,11 +1,13 @@
-import { useMemo } from 'react'
+import { createContext, createElement, useContext, useMemo } from 'react'
 import { queryOptions, useSuspenseQuery } from '@tanstack/react-query'
 
-import { categoryPath, categoryTree, subtreeIds } from '#/lib/category-tree'
+import type { ReactNode } from 'react'
+
+import { categoryPath, categoryTree, hiddenIds, subtreeIds } from '#/lib/category-tree'
 import { isListType } from '#/lib/category-types'
 import { listCategories } from '#/server/categories'
 
-export { categoryPath, categoryTree, subtreeIds } from '#/lib/category-tree'
+export { categoryPath, categoryTree, hiddenIds, subtreeIds } from '#/lib/category-tree'
 
 /** A kind of place, as stored in the `categories` table. */
 export interface Category {
@@ -28,6 +30,8 @@ export interface Category {
   section: string | null
   /** Shown among the featured categories on the home page. */
   featured: boolean
+  /** Off hides the category and everything below it from the site. */
+  visible: boolean
 }
 
 /** Loaded by the root route, so always ready in pages. */
@@ -49,12 +53,23 @@ const unknownCategory = (id: string): Category => ({
   parentId: null,
   section: null,
   featured: false,
+  visible: true,
 })
 
+/** On in the admin, which shows hidden categories too; the site leaves them out. */
+const AllCategoriesContext = createContext(false)
+
+/** Gives the admin every category, hidden ones included. */
+export const AllCategories = ({ children }: { children: ReactNode }) => createElement(AllCategoriesContext.Provider, { value: true }, children)
+
+/** Categories on the site, or every category inside <AllCategories> (the admin). */
 export function useCategories() {
-  const { data: categories } = useSuspenseQuery(categoriesQuery)
-  return useMemo(
-    () => ({
+  const { data: all } = useSuspenseQuery(categoriesQuery)
+  const showHidden = useContext(AllCategoriesContext)
+  return useMemo(() => {
+    const hidden = showHidden ? new Set<string>() : hiddenIds(all)
+    const categories = hidden.size ? all.filter((c) => !hidden.has(c.id)) : all
+    return {
       categories,
       /** Every category, each followed by its subcategories, with its depth. */
       tree: categoryTree(categories),
@@ -70,9 +85,8 @@ export function useCategories() {
       eventsCategory: categoryTree(categories)
         .filter((c) => isEventCategory(categories, c.id))
         .sort((a, b) => a.depth - b.depth)[0] as Category | undefined,
-    }),
-    [categories],
-  )
+    }
+  }, [all, showHidden])
 }
 
 /** An event category, or a list whose categories are all event categories. */

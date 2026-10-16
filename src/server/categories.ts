@@ -22,11 +22,12 @@ const publicColumns = {
   parentId: categories.parentId,
   section: categories.section,
   featured: categories.featured,
+  visible: categories.visible,
 }
 
 const byMenuOrder = [asc(categories.sortOrder), asc(categories.label)]
 
-/** Every category, in menu order. */
+/** Every category, in menu order; hidden ones too, which the site leaves out (see useCategories) and the admin shows. */
 export const listCategories = createServerFn({ method: 'GET' }).handler(
   async (): Promise<Category[]> => db.select(publicColumns).from(categories).orderBy(...byMenuOrder),
 )

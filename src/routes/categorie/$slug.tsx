@@ -2,7 +2,7 @@ import { Link, createFileRoute, notFound } from '@tanstack/react-router'
 
 import { CategoryContent, CategoryEyebrow, MapButton, PageShell, SignpostNav } from '#/components/CategoryPage'
 import { EventTimeline } from '#/components/EventTimeline'
-import { categoriesQuery, categoryBySlug, categoryLink, categoryPath, useCategories } from '#/data/categories'
+import { categoriesQuery, categoryBySlug, categoryLink, categoryPath, hiddenIds, useCategories } from '#/data/categories'
 import { getSection, sectionLink } from '#/data/sections'
 import { breadcrumbs, seo } from '#/lib/seo'
 import { isListType } from '#/lib/category-types'
@@ -12,7 +12,8 @@ export const Route = createFileRoute('/categorie/$slug')({
   loader: async ({ context, params }) => {
     const categories = await context.queryClient.ensureQueryData(categoriesQuery)
     const category = categoryBySlug(categories, params.slug)
-    if (!category) throw notFound()
+    // A hidden category, or one below it, has no page on the site.
+    if (!category || hiddenIds(categories).has(category.id)) throw notFound()
     const path = categoryPath(categories, category.id)
     return { category, path, section: getSection(path[0]?.section ?? '') }
   },

@@ -18,6 +18,12 @@ const ICONS: Record<CategoryTypeId, string> = {
   trekking: 'M2 20l6-10 4 6 3-4 7 8zM8 10l1.5 2.5M5 20l3-3 2 1 3-2',
   // bulleted list
   list: 'M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01',
+  // cooking pot with steam
+  recipe: 'M4 11h16v3a6 6 0 0 1-6 6h-4a6 6 0 0 1-6-6zM2 11h20M9 3c-1 1 1 2 0 4M15 3c-1 1 1 2 0 4',
+  // jar with a label
+  product: 'M8 3h8v3H8zM7 6h10a1 1 0 0 1 1 1v12a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V7a1 1 0 0 1 1-1zM6 11h12v5H6',
+  // barn
+  producer: 'M3 21V10l9-6 9 6v11zM9 21v-6h6v6M9 15l6 6M15 15l-6 6M10 10h4',
   // carabiner
   climbing: 'M9 3h5a5 5 0 0 1 5 5v8a5 5 0 0 1-5 5H9a4 4 0 0 1-4-4V7a4 4 0 0 1 4-4zM9 8v9M9 8l3-2',
 }

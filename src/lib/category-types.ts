@@ -138,6 +138,53 @@ export const CATEGORY_TYPES = {
       season,
     ],
   },
+  recipe: {
+    label: 'Ricetta',
+    description: 'Piatti della tradizione: ingredienti e preparazione. La posizione è il luogo d’origine.',
+    contacts: [],
+    fields: [
+      { key: 'ingredients', label: 'Ingredienti', kind: 'textarea', required: true, hint: 'Uno per riga, con le dosi' },
+      { key: 'preparation', label: 'Preparazione', kind: 'textarea', required: true },
+      { key: 'servings', label: 'Persone', kind: 'number', min: 1, step: 1 },
+      { key: 'time', label: 'Tempo', kind: 'text', hint: 'Es. 2 h, più il riposo' },
+      {
+        key: 'difficulty',
+        label: 'Difficoltà',
+        kind: 'select',
+        options: [
+          { value: 'easy', label: 'Facile' },
+          { value: 'medium', label: 'Media' },
+          { value: 'hard', label: 'Impegnativa' },
+        ],
+      },
+      { key: 'occasion', label: 'Quando si prepara', kind: 'text', hint: 'Es. a Pasqua, nei giorni di festa' },
+    ],
+  },
+  product: {
+    label: 'Prodotto tipico',
+    description: 'Salumi, formaggi, olio e altre specialità. La posizione è la zona di produzione.',
+    contacts: [],
+    fields: [
+      { key: 'ingredients', label: 'Ingredienti', kind: 'textarea' },
+      { key: 'production', label: 'Come si produce', kind: 'textarea' },
+      { key: 'tasting', label: 'Come si gusta', kind: 'textarea' },
+      { key: 'whereToBuy', label: 'Dove si trova', kind: 'text', hint: 'Es. salumerie e macellerie del territorio' },
+      season,
+    ],
+  },
+  producer: {
+    label: 'Produttore',
+    description: 'Aziende agricole, frantoi, cantine, apicoltori: chi produce sul territorio.',
+    contacts: ['address', 'phone', 'email', 'website'],
+    fields: [
+      { key: 'products', label: 'Cosa produce', kind: 'textarea', required: true, hint: 'Es. olio extravergine, miele di acacia, vino rosso' },
+      { key: 'organic', label: 'Agricoltura biologica', kind: 'boolean' },
+      { key: 'directSale', label: 'Vendita diretta', kind: 'boolean' },
+      { key: 'visits', label: 'Visite e degustazioni', kind: 'boolean' },
+      { key: 'whereToBuy', label: 'Dove trovare i prodotti', kind: 'text', hint: 'Es. in azienda, ai mercati Campagna Amica' },
+      openingHours,
+    ],
+  },
   list: {
     label: 'Lista',
     description: 'Raccoglie sottocategorie di qualsiasi tipo e ne mostra l\'elenco, senza contenuti propri.',

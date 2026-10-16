@@ -98,6 +98,8 @@ export const categories = pgTable('categories', {
   parentId: text('parent_id').references((): AnyPgColumn => categories.id, { onUpdate: 'cascade', onDelete: 'restrict' }),
   /** Shown among the featured categories on the home page. */
   featured: boolean().notNull().default(false),
+  /** Off hides the category, its subcategories and their places from the site; the admin still shows them. */
+  visible: boolean().notNull().default(true),
   /** Order of legends, filters and the admin menu, among siblings. */
   sortOrder: integer('sort_order').notNull().default(0),
   createdAt: timestamp('created_at').notNull().defaultNow(),

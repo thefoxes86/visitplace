@@ -37,6 +37,13 @@ export function subtreeIds(categories: TreeNode[], id: string) {
   return ids
 }
 
+/** Ids of the categories hidden from the site: those switched off, and everything below them. */
+export function hiddenIds(categories: (TreeNode & { visible: boolean })[]) {
+  const hidden = new Set<string>()
+  for (const c of categories) if (!c.visible) for (const id of subtreeIds(categories, c.id)) hidden.add(id)
+  return hidden
+}
+
 /** A category and its parents, from the top-level one down. */
 export function categoryPath<T extends TreeNode>(categories: T[], id: string): T[] {
   const path: T[] = []
