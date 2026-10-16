@@ -4,6 +4,7 @@ import { desc, eq } from 'drizzle-orm'
 import { sections } from '#/data/sections'
 import { db } from '#/db'
 import { categories, pois } from '#/db/schema'
+import { hiddenIds } from '#/lib/category-tree'
 import { absoluteUrl } from '#/lib/seo'
 
 interface SitemapEntry {
@@ -35,12 +36,20 @@ export const Route = createFileRoute('/sitemap.xml')({
   server: {
     handlers: {
       GET: async () => {
-        const places = await db
-          .select({ id: pois.id, updatedAt: pois.updatedAt })
-          .from(pois)
-          .where(eq(pois.published, true))
-          .orderBy(desc(pois.updatedAt))
-        const categoryPages = await db.select({ slug: categories.slug, updatedAt: categories.updatedAt }).from(categories)
+        // Hidden categories, and the places in them, stay out.
+        const hidden = hiddenIds(
+          await db.select({ id: categories.id, parentId: categories.parentId, visible: categories.visible }).from(categories),
+        )
+        const places = (
+          await db
+            .select({ id: pois.id, category: pois.category, updatedAt: pois.updatedAt })
+            .from(pois)
+            .where(eq(pois.published, true))
+            .orderBy(desc(pois.updatedAt))
+        ).filter((place) => !hidden.has(place.category))
+        const categoryPages = (
+          await db.select({ id: categories.id, slug: categories.slug, updatedAt: categories.updatedAt }).from(categories)
+        ).filter((category) => !hidden.has(category.id))
         // Pages listing places change whenever one of them does.
         const lastChange = places[0]?.updatedAt
 

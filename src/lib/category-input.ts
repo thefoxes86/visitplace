@@ -27,6 +27,8 @@ export const categoryInput = z.object({
   section: z.enum(CATEGORY_SECTION_IDS, { error: 'Scegli una sezione' }).nullable(),
   /** Shown among the featured categories on the home page. */
   featured: z.boolean(),
+  /** Off hides the category and everything below it from the site. */
+  visible: z.boolean(),
 }).refine((data) => data.parentId || data.section, { path: ['section'], message: 'Scegli la sezione del sito' })
 
 /** What to do with what is inside a category being deleted. */

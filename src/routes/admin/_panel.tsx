@@ -3,7 +3,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { Link, Outlet, createFileRoute, redirect, useParams, useRouter } from '@tanstack/react-router'
 
 import { Skyline } from '#/components/Skyline'
-import { sectionOf, useCategories } from '#/data/categories'
+import { AllCategories, sectionOf, useCategories } from '#/data/categories'
 import { sections } from '#/data/sections'
 import { authClient } from '#/lib/auth-client'
 import { ROLES } from '#/lib/permissions'
@@ -17,7 +17,12 @@ export const Route = createFileRoute('/admin/_panel')({
     return { user }
   },
   head: () => ({ meta: [{ title: 'Backoffice · Visit Camaiore' }, { name: 'robots', content: 'noindex' }] }),
-  component: AdminLayout,
+  // The admin shows hidden categories too.
+  component: () => (
+    <AllCategories>
+      <AdminLayout />
+    </AllCategories>
+  ),
 })
 
 const navLink =

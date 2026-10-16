@@ -4,6 +4,7 @@ import { z } from 'zod'
 
 import { db } from '#/db'
 import { categories, pois } from '#/db/schema'
+import { hiddenIds } from '#/lib/category-tree'
 import { categoryType, isListType } from '#/lib/category-types'
 import { poiInput, poiInputFor } from '#/lib/poi-input'
 import { requireEditor } from '#/server/session'
@@ -13,14 +14,24 @@ import type { PoiInput } from '#/lib/poi-input'
 
 const byMapOrder = [asc(pois.sortOrder), asc(pois.createdAt), asc(pois.id)]
 
-/** Published places, numbered in map order. */
+/** Ids of the categories hidden from the site, with everything below them. */
+async function hiddenCategoryIds() {
+  return hiddenIds(await db.select({ id: categories.id, parentId: categories.parentId, visible: categories.visible }).from(categories))
+}
+
+/** Published places outside hidden categories, numbered in map order. */
 export const listPublicPois = createServerFn({ method: 'GET' }).handler(async (): Promise<Poi[]> => {
-  const rows = await db
-    .select()
-    .from(pois)
-    .where(eq(pois.published, true))
-    .orderBy(...byMapOrder)
-  return rows.map(({ published, sortOrder, createdAt, updatedAt, ...poi }, i) => ({ ...poi, number: i + 1 }))
+  const [rows, hidden] = await Promise.all([
+    db
+      .select()
+      .from(pois)
+      .where(eq(pois.published, true))
+      .orderBy(...byMapOrder),
+    hiddenCategoryIds(),
+  ])
+  return rows
+    .filter((poi) => !hidden.has(poi.category))
+    .map(({ published, sortOrder, createdAt, updatedAt, ...poi }, i) => ({ ...poi, number: i + 1 }))
 })
 
 // ── Admin ────────────────────────────────────────────────────────────────────

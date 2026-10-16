@@ -3,7 +3,7 @@ import { useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
 import { Link, useNavigate } from '@tanstack/react-router'
 
 import { adminCategoriesQuery } from '#/components/admin/queries'
-import { Alert, Card, Field, buttonClass, errorMessage, inputClass } from '#/components/admin/ui'
+import { Alert, Card, Field, Toggle, buttonClass, errorMessage, inputClass } from '#/components/admin/ui'
 import { TypeIcon } from '#/components/tourist-map/CategoryIcon'
 import { categoryInput } from '#/lib/category-input'
 import { sectionOf } from '#/data/categories'
@@ -25,6 +25,9 @@ const SINGULAR: Record<CategoryTypeId, string> = {
   hotel: 'albergo',
   trekking: 'percorso',
   climbing: 'falesia',
+  recipe: 'ricetta',
+  product: 'prodotto',
+  producer: 'produttore',
   list: 'categoria',
 }
 
@@ -65,6 +68,7 @@ export function CategoryForm({ category, parentId, section }: CategoryFormProps)
     parentId: initialParent?.id ?? '',
     section: category?.section ?? (CATEGORY_SECTION_IDS.find((id) => id === section) || ''),
     featured: category?.featured ?? false,
+    visible: category?.visible ?? true,
   })
   const parent = all.find((c) => c.id === values.parentId)
   /** A subcategory has its parent's type, so its places keep the same fields; under a list it picks its own. */
@@ -360,6 +364,20 @@ export function CategoryForm({ category, parentId, section }: CategoryFormProps)
               <span className="block text-xs font-light">Mostra la categoria tra quelle in evidenza della home page.</span>
             </span>
           </label>
+        </Card>
+
+        <Card title="Visibilità">
+          <Toggle
+            label="Visibile sul sito"
+            hint="Se spenta, la categoria, le sue sottocategorie e i loro contenuti spariscono dal sito ma restano nel backoffice."
+            checked={values.visible}
+            onChange={(v) => set('visible', v)}
+          />
+          {!values.visible && subcategories > 0 && (
+            <p className="mt-4 rounded-md bg-coral/10 px-3 py-2 text-xs font-semibold text-coral-dark">
+              Saranno nascoste anche le {subcategories} sottocategorie.
+            </p>
+          )}
         </Card>
 
         <Card>

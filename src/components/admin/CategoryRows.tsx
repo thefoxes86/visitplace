@@ -1,7 +1,7 @@
 import { Link } from '@tanstack/react-router'
 
 import { TypeIcon } from '#/components/tourist-map/CategoryIcon'
-import { useCategories } from '#/data/categories'
+import { hiddenIds, useCategories } from '#/data/categories'
 import { categoryType } from '#/lib/category-types'
 
 import type { AdminPoi } from '#/components/admin/queries'
@@ -17,7 +17,8 @@ interface CategoryRowsProps {
 
 /** The categories of a section or a list, one row each, opening the category. */
 export function CategoryRows({ list, pois, empty }: CategoryRowsProps) {
-  const { subtree } = useCategories()
+  const { categories, subtree } = useCategories()
+  const hidden = hiddenIds(categories)
   if (!list.length) {
     return <p className="rounded-lg border border-dashed border-ink/20 p-10 text-center font-serif italic text-teal">{empty}</p>
   }
@@ -48,7 +49,17 @@ export function CategoryRows({ list, pois, empty }: CategoryRowsProps) {
                 <TypeIcon type={category.type} className="size-5" />
               </span>
               <span className="min-w-0 flex-1">
-                <span className="block font-semibold text-teal group-hover:text-coral">{category.adminLabel}</span>
+                <span className="block font-semibold text-teal group-hover:text-coral">
+                  {category.adminLabel}
+                  {hidden.has(category.id) && (
+                    <span
+                      title={category.visible ? 'Nascosta perché lo è una categoria sopra' : 'Nascosta dal sito'}
+                      className="ml-2 rounded-full bg-ink/10 px-2 py-0.5 text-xs font-semibold text-ink/70"
+                    >
+                      Nascosta
+                    </span>
+                  )}
+                </span>
                 <span className="block text-xs font-light">
                   {categoryType(category.type).label}
                   {drafts > 0 && ` · ${drafts} non pubblicat${drafts === 1 ? 'o' : 'i'}`}
