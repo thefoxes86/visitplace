@@ -1,0 +1,1 @@
+ALTER TABLE "pois" DROP COLUMN "topic";

@@ -3,10 +3,9 @@ import { useQueryClient } from '@tanstack/react-query'
 import { Link, useNavigate } from '@tanstack/react-router'
 
 import { LocationPicker } from '#/components/admin/LocationPicker'
-import { Alert, Card, Field, buttonClass, errorMessage, inputClass } from '#/components/admin/ui'
-import { useCategories } from '#/data/categories'
+import { Alert, Card, Field, Toggle, buttonClass, errorMessage, inputClass } from '#/components/admin/ui'
+import { categoryTree, useCategories } from '#/data/categories'
 import { poiImage } from '#/data/pois'
-import { scopriTopics } from '#/data/scopri'
 import { categoryType } from '#/lib/category-types'
 import { poiInputFor, slugify } from '#/lib/poi-input'
 import { createPoi, updatePoi } from '#/server/pois'
@@ -24,7 +23,7 @@ interface PoiFormProps {
 }
 
 type Values = Record<
-  'id' | 'name' | 'summary' | 'description' | 'area' | 'topic' | 'imageUrl' | 'address' | 'phone' | 'email' | 'website' | 'startsAt' | 'endsAt',
+  'id' | 'name' | 'summary' | 'description' | 'area' | 'imageUrl' | 'address' | 'phone' | 'email' | 'website' | 'startsAt' | 'endsAt',
   string
 > & { lat: number | null; lon: number | null; featured: boolean; published: boolean; sortOrder: number }
 
@@ -39,7 +38,6 @@ const initialValues = (poi: AdminPoi | undefined): Values => ({
   summary: poi?.summary ?? '',
   description: poi?.description ?? '',
   area: poi?.area ?? '',
-  topic: poi?.topic ?? '',
   imageUrl: poi?.imageUrl ?? '',
   address: poi?.address ?? '',
   phone: poi?.phone ?? '',
@@ -90,9 +88,13 @@ const CONTACT_FIELDS: Record<Contact, { label: string; type: string; placeholder
   website: { label: 'Sito web', type: 'url', placeholder: 'https://', wide: true },
 }
 
-export function PoiForm({ category: categoryId, poi, areas }: PoiFormProps) {
-  const category = useCategories().categoryOf(categoryId)
+export function PoiForm({ category: initialCategory, poi, areas }: PoiFormProps) {
+  const { categories, categoryOf } = useCategories()
+  const [categoryId, setCategoryId] = useState(initialCategory)
+  const category = categoryOf(categoryId)
   const type = categoryType(category.type)
+  // The place can move to any category of the same type, which has the same fields.
+  const categoryOptions = categoryTree(categories).filter((c) => c.type === category.type || c.id === categoryId)
   const navigate = useNavigate()
   const queryClient = useQueryClient()
 
@@ -140,7 +142,6 @@ export function PoiForm({ category: categoryId, poi, areas }: PoiFormProps) {
       category: categoryId,
       lat: values.lat ?? undefined,
       lon: values.lon ?? undefined,
-      topic: orNull(values.topic),
       imageUrl: orNull(values.imageUrl),
       address: orNull(values.address),
       phone: orNull(values.phone),
@@ -301,6 +302,22 @@ export function PoiForm({ category: categoryId, poi, areas }: PoiFormProps) {
       </div>
 
       <div className="min-w-0 space-y-6">
+        {categoryOptions.length > 1 && (
+          <Card title="Categoria">
+            <Field label="Categoria" htmlFor="category" hint="Tra le categorie dello stesso tipo, con gli stessi campi.">
+              <select id="category" value={categoryId} onChange={(e) => setCategoryId(e.target.value)} className={inputClass}>
+                {categoryOptions.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {'\u00a0\u00a0'.repeat(c.depth)}
+                    {c.depth > 0 ? '└ ' : ''}
+                    {c.label}
+                  </option>
+                ))}
+              </select>
+            </Field>
+          </Card>
+        )}
+
         <Card title="Pubblicazione">
           <div className="space-y-3">
             <Toggle
@@ -325,21 +342,6 @@ export function PoiForm({ category: categoryId, poi, areas }: PoiFormProps) {
             </Link>
           </div>
         </Card>
-
-        {type.topic && (
-          <Card title="Sezione di Scopri">
-            <Field label="Sezione" htmlFor="topic" hint="Dove compare il luogo nella pagina Scopri.">
-              <select {...text('topic')}>
-                <option value="">Nessuna</option>
-                {scopriTopics.map((topic) => (
-                  <option key={topic.id} value={topic.id}>
-                    {topic.title}
-                  </option>
-                ))}
-              </select>
-            </Field>
-          </Card>
-        )}
 
         <Card title="Immagine">
           <Field label="Indirizzo dell'immagine" htmlFor="imageUrl" error={errors.imageUrl} hint="Senza immagine si usa una foto di prova.">
@@ -406,18 +408,3 @@ function DetailInput({
   )
 }
 
-function Toggle({ label, hint, checked, onChange }: { label: string; hint: string; checked: boolean; onChange: (v: boolean) => void }) {
-  return (
-    <label className="flex cursor-pointer items-start gap-3">
-      <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} className="peer sr-only" />
-      <span
-        aria-hidden
-        className="relative mt-0.5 h-5 w-9 shrink-0 rounded-full bg-ink/20 transition peer-checked:bg-teal peer-focus-visible:ring-2 peer-focus-visible:ring-mint after:absolute after:left-0.5 after:top-0.5 after:size-4 after:rounded-full after:bg-white after:transition peer-checked:after:translate-x-4"
-      />
-      <span>
-        <span className="block text-sm font-semibold">{label}</span>
-        <span className="block text-xs font-light text-ink/70">{hint}</span>
-      </span>
-    </label>
-  )
-}

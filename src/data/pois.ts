@@ -17,8 +17,6 @@ export interface Poi {
   lon: number
   /** Shown among the main attractions on the home page. */
   featured: boolean
-  /** Cultural places: sub-section of Scopri (id in src/data/scopri.ts). */
-  topic: string | null
   imageUrl: string | null
   address: string | null
   phone: string | null
@@ -33,7 +31,7 @@ export interface Poi {
 
 /** A place in src/db/seed-data.ts: everything optional is left out. */
 export type SeedPoi = Pick<Poi, 'id' | 'name' | 'category' | 'summary' | 'description' | 'area' | 'lat' | 'lon'> &
-  Partial<Pick<Poi, 'featured' | 'topic'>>
+  Partial<Pick<Poi, 'featured'>>
 
 /** Map number of a point, the same everywhere on the site. */
 export const poiNumber = (poi: Poi) => String(poi.number).padStart(2, '0')

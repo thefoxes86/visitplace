@@ -33,11 +33,11 @@ const TITLE = 'Camaiore'
 
 function Home() {
   const pois = usePois()
-  const { categories } = useCategories()
-  const poisByCategory = categories.map((category) => ({
-    ...category,
-    list: pois.filter((poi) => poi.category === category.id),
-  }))
+  const { roots, subtree } = useCategories()
+  const poisByCategory = roots.map((category) => {
+    const ids = subtree(category.id)
+    return { ...category, list: pois.filter((poi) => ids.has(poi.category)) }
+  })
   const featured = pois.filter((poi) => poi.featured)
 
   return (

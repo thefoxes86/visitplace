@@ -2,9 +2,11 @@ import { useState } from 'react'
 import { useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
 import { Link, createFileRoute } from '@tanstack/react-router'
 
+import { DeleteCategoryDialog } from '#/components/admin/DeleteCategoryDialog'
 import { adminCategoriesQuery } from '#/components/admin/queries'
 import { Alert, PageHeader, buttonClass, errorMessage } from '#/components/admin/ui'
 import { TypeIcon } from '#/components/tourist-map/CategoryIcon'
+import { categoryTree } from '#/lib/category-tree'
 import { categoryType } from '#/lib/category-types'
 import { deleteCategory } from '#/server/categories'
 
@@ -20,17 +22,28 @@ function CategoryList() {
   const queryClient = useQueryClient()
   const [error, setError] = useState<string | null>(null)
   const [deleting, setDeleting] = useState<string | null>(null)
+  const tree = categoryTree(categories)
+  const childCount = (id: string) => categories.filter((c) => c.parentId === id).length
+
+  /** A category with places or subcategories asks what to do with them. */
+  const [dialogFor, setDialogFor] = useState<AdminCategory | null>(null)
+
+  const refresh = () =>
+    Promise.all([
+      queryClient.invalidateQueries({ queryKey: ['categories'] }),
+      queryClient.invalidateQueries({ queryKey: ['admin', 'categories'] }),
+      queryClient.invalidateQueries({ queryKey: ['admin', 'pois'] }),
+      queryClient.invalidateQueries({ queryKey: ['pois'] }),
+    ]).then(() => undefined)
 
   async function remove(category: AdminCategory) {
+    if (category.places > 0 || childCount(category.id) > 0) return setDialogFor(category)
     if (!confirm(`Eliminare la categoria "${category.label}"?`)) return
     setDeleting(category.id)
     setError(null)
     try {
-      await deleteCategory({ data: { id: category.id } })
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ['categories'] }),
-        queryClient.invalidateQueries({ queryKey: ['admin', 'categories'] }),
-      ])
+      await deleteCategory({ data: { id: category.id, children: 'up', placesTo: null } })
+      await refresh()
     } catch (e) {
       setError(errorMessage(e))
     } finally {
@@ -42,7 +55,7 @@ function CategoryList() {
     <>
       <PageHeader
         title="Categorie"
-        subtitle="I tipi di contenuto del sito e i loro campi"
+        subtitle="I tipi di contenuto del sito, le loro sottocategorie e i campi"
         actions={
           <Link to="/admin/categorie/nuova" className={buttonClass.primary}>
             + Nuova categoria
@@ -50,10 +63,14 @@ function CategoryList() {
         }
       />
 
+      {dialogFor && (
+        <DeleteCategoryDialog category={dialogFor} all={categories} onClose={() => setDialogFor(null)} onDeleted={refresh} />
+      )}
+
       <div className="mt-6 space-y-4">
         {error && <Alert>{error}</Alert>}
         <div className="relative overflow-x-auto rounded-lg border border-ink/10 bg-white shadow-sm">
-          <table className="w-full min-w-[36rem] text-left text-sm">
+          <table className="w-full min-w-[44rem] text-left text-sm">
             <thead className="border-b border-ink/10 text-xs uppercase tracking-wider text-teal">
               <tr>
                 <th className="px-4 py-3 font-semibold">Categoria</th>
@@ -66,14 +83,22 @@ function CategoryList() {
               </tr>
             </thead>
             <tbody className="divide-y divide-ink/10">
-              {categories.map((category) => (
+              {tree.map((category) => {
+                return (
                 <tr key={category.id} className="hover:bg-paper/60">
                   <td className="px-4 py-3">
                     <Link
                       to="/admin/categorie/$id"
                       params={{ id: category.id }}
                       className="flex items-center gap-3 font-semibold text-teal hover:text-coral"
+                      // Subcategories step in under their parent.
+                      style={{ paddingLeft: `${category.depth * 1.75}rem` }}
                     >
+                      {category.depth > 0 && (
+                        <span aria-hidden className="-mr-1 text-ink/30">
+                          └
+                        </span>
+                      )}
                       <span className="grid size-8 shrink-0 place-items-center rounded-md text-white" style={{ backgroundColor: category.color }}>
                         <TypeIcon type={category.type} className="size-4" />
                       </span>
@@ -96,6 +121,13 @@ function CategoryList() {
                   <td className="px-4 py-3 text-xs">{category.sortOrder}</td>
                   <td className="whitespace-nowrap px-4 py-3 text-right">
                     <Link
+                      to="/admin/categorie/nuova"
+                      search={{ padre: category.id }}
+                      className="px-3 py-2 text-sm font-semibold text-teal hover:text-coral"
+                    >
+                      + Sottocategoria
+                    </Link>
+                    <Link
                       to="/admin/categorie/$id"
                       params={{ id: category.id }}
                       className="px-3 py-2 text-sm font-semibold text-teal hover:text-coral"
@@ -105,15 +137,15 @@ function CategoryList() {
                     <button
                       type="button"
                       onClick={() => remove(category)}
-                      disabled={deleting === category.id || category.places > 0}
-                      title={category.places > 0 ? 'Ha dei contenuti: spostali o eliminali prima' : undefined}
+                      disabled={deleting === category.id}
                       className={buttonClass.danger}
                     >
                       {deleting === category.id ? 'Elimino…' : 'Elimina'}
                     </button>
                   </td>
                 </tr>
-              ))}
+                )
+              })}
             </tbody>
           </table>
         </div>

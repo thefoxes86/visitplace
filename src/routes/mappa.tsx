@@ -31,7 +31,7 @@ const numberOf = (poi: Poi) => poi.number
 
 function MapPage() {
   const pois = usePois()
-  const { categories, categoryOf } = useCategories()
+  const { categories, tree, categoryOf, subtree } = useCategories()
   const [active, setActive] = useState<Set<string>>(() => new Set(categories.map((c) => c.id)))
   const { luogo } = Route.useSearch()
   const [selected, setSelected] = useState<Poi | null>(() => (luogo && pois.find((p) => p.id === luogo)) || null)
@@ -47,13 +47,19 @@ function MapPage() {
     setTarget({ fit: visible })
   }, [visible])
 
+  /** Switches a category on or off together with its subcategories. */
   const toggle = (id: string) => {
+    const ids = subtree(id)
+    const on = !active.has(id)
     setActive((prev) => {
       const next = new Set(prev)
-      if (!next.delete(id)) next.add(id)
+      for (const c of ids) {
+        if (on) next.add(c)
+        else next.delete(c)
+      }
       return next
     })
-    if (selected?.category === id) setSelected(null)
+    if (!on && selected && ids.has(selected.category)) setSelected(null)
   }
 
   const select = (poi: Poi) => {
@@ -83,16 +89,22 @@ function MapPage() {
 
         {/* Category filter: chips on phones, a legend on wide screens */}
         <ul className="flex gap-2 overflow-x-auto px-5 pb-3 lg:flex-col lg:gap-1 lg:px-6 lg:py-4">
-          {categories.map((category) => {
+          {tree.map((category) => {
             const on = active.has(category.id)
-            const count = pois.filter((p) => p.category === category.id).length
+            const ids = subtree(category.id)
+            const count = pois.filter((p) => ids.has(p.category)).length
             return (
-              <li key={category.id} className="shrink-0">
+              <li
+                key={category.id}
+                className="shrink-0"
+                // Subcategories step in under their parent in the legend.
+                style={{ '--indent': `${category.depth * 1.25}rem` } as React.CSSProperties}
+              >
                 <button
                   type="button"
                   aria-pressed={on}
                   onClick={() => toggle(category.id)}
-                  className={`group flex w-full items-center gap-3 rounded-full py-1 pl-1 pr-3 text-left ring-1 transition lg:rounded-sm lg:pr-2 lg:ring-0 lg:hover:bg-mint-light ${
+                  className={`group flex w-full items-center gap-3 rounded-full py-1 pl-1 pr-3 text-left ring-1 transition lg:ml-(--indent) lg:w-[calc(100%-var(--indent))] lg:rounded-sm lg:pr-2 lg:ring-0 lg:hover:bg-mint-light ${
                     on ? 'ring-mint' : 'opacity-45 ring-ink/20'
                   }`}
                 >

@@ -2,14 +2,17 @@ import { useState } from 'react'
 import { useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
 import { Link, createFileRoute } from '@tanstack/react-router'
 
+import { CategoryRows } from '#/components/admin/CategoryRows'
 import { adminPoisQuery } from '#/components/admin/queries'
 import { Alert, PageHeader, buttonClass, errorMessage, inputClass } from '#/components/admin/ui'
+import { categoryPath, sectionOf, subtreeIds, useCategories } from '#/data/categories'
+import { getSection } from '#/data/sections'
 import { formatEventDate } from '#/data/pois'
-import { scopriTopics } from '#/data/scopri'
 import { categoryType } from '#/lib/category-types'
 import { deletePoi } from '#/server/pois'
 
 import type { AdminPoi } from '#/components/admin/queries'
+import type { Category } from '#/data/categories'
 
 export const Route = createFileRoute('/admin/_panel/$category/')({
   loader: ({ context }) => context.queryClient.ensureQueryData(adminPoisQuery),
@@ -17,13 +20,17 @@ export const Route = createFileRoute('/admin/_panel/$category/')({
 })
 
 function PoiList() {
-  const { category } = Route.useRouteContext()
+  const { category, user } = Route.useRouteContext()
   const { data } = useSuspenseQuery(adminPoisQuery)
   const queryClient = useQueryClient()
   const [search, setSearch] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [deleting, setDeleting] = useState<string | null>(null)
 
+  const { categories, tree, categoryOf } = useCategories()
+  // Subcategories are listed above; the table holds the category's own places.
+  const below = subtreeIds(categories, category.id)
+  const subcategories = tree.filter((c) => c.id !== category.id && below.has(c.id))
   const all = data.filter((poi) => poi.category === category.id)
   const query = search.trim().toLowerCase()
   const list = query ? all.filter((poi) => `${poi.name} ${poi.area}`.toLowerCase().includes(query)) : all
@@ -47,17 +54,40 @@ function PoiList() {
     }
   }
 
+  if (type.list) return <SubcategoryList category={category} pois={data} canEdit={user.role === 'admin'} />
+
   return (
     <>
       <PageHeader
         title={category.adminLabel}
         subtitle={`${all.length} in totale`}
         actions={
-          <Link to="/admin/$category/nuovo" params={{ category: category.slug }} className={buttonClass.primary}>
-            + Nuovo {category.singular}
-          </Link>
+          <>
+            {user.role === 'admin' && (
+              <Link to="/admin/categorie/nuova" search={{ padre: category.id }} className={buttonClass.secondary}>
+                + Sottocategoria
+              </Link>
+            )}
+            <Link to="/admin/$category/nuovo" params={{ category: category.slug }} className={buttonClass.primary}>
+              + Nuovo {category.singular}
+            </Link>
+          </>
         }
       />
+
+      <nav aria-label="Percorso" className="mt-4 flex flex-wrap items-center gap-2 text-sm">
+        <Trail category={category} />
+      </nav>
+
+      {subcategories.length > 0 && (
+        <section className="mt-6">
+          <h2 className="mb-3 font-display text-sm font-semibold uppercase tracking-[0.15em] text-teal">Sottocategorie</h2>
+          <CategoryRows list={subcategories} pois={data} empty="" />
+          <h2 className="mt-8 font-display text-sm font-semibold uppercase tracking-[0.15em] text-teal">
+            Contenuti di {category.adminLabel}
+          </h2>
+        </section>
+      )}
 
       <div className="mt-6 space-y-4">
         {error && <Alert>{error}</Alert>}
@@ -81,7 +111,6 @@ function PoiList() {
                 <tr>
                   <th className="px-4 py-3 font-semibold">Nome</th>
                   <th className="px-4 py-3 font-semibold">{isEvent ? 'Quando' : 'Zona'}</th>
-                  {type.topic && <th className="px-4 py-3 font-semibold">Sezione</th>}
                   <th className="px-4 py-3 font-semibold">Stato</th>
                   <th className="px-4 py-3">
                     <span className="sr-only">Azioni</span>
@@ -94,7 +123,7 @@ function PoiList() {
                     <td className="px-4 py-3">
                       <Link
                         to="/admin/$category/$id"
-                        params={{ category: category.slug, id: poi.id }}
+                        params={{ category: categoryOf(poi.category).slug, id: poi.id }}
                         className="font-semibold text-teal hover:text-coral"
                       >
                         {poi.name}
@@ -109,9 +138,6 @@ function PoiList() {
                     <td className="px-4 py-3 text-xs">
                       {isEvent ? (poi.startsAt ? formatEventDate(poi.startsAt) : '—') : poi.area}
                     </td>
-                    {type.topic && (
-                      <td className="px-4 py-3 text-xs">{scopriTopics.find((t) => t.id === poi.topic)?.title ?? '—'}</td>
-                    )}
                     <td className="px-4 py-3">
                       <span
                         className={`inline-block rounded-full px-2 py-0.5 text-xs font-semibold ${
@@ -134,7 +160,7 @@ function PoiList() {
                       )}
                       <Link
                         to="/admin/$category/$id"
-                        params={{ category: category.slug, id: poi.id }}
+                        params={{ category: categoryOf(poi.category).slug, id: poi.id }}
                         className="px-3 py-2 text-sm font-semibold text-teal hover:text-coral"
                       >
                         Modifica
@@ -155,6 +181,58 @@ function PoiList() {
           </div>
         )}
       </div>
+    </>
+  )
+}
+
+/** A list category has no places of its own: it lists its subcategories. */
+function SubcategoryList({ category, pois, canEdit }: { category: Category; pois: AdminPoi[]; canEdit: boolean }) {
+  const { categories, tree } = useCategories()
+  const below = subtreeIds(categories, category.id)
+  const list = tree.filter((c) => c.id !== category.id && below.has(c.id))
+  const children = categories.filter((c) => c.parentId === category.id).length
+
+  return (
+    <>
+      <PageHeader
+        title={category.adminLabel}
+        subtitle={`Lista · ${children} sottocategori${children === 1 ? 'a' : 'e'}`}
+        actions={
+          canEdit && (
+            <Link to="/admin/categorie/nuova" search={{ padre: category.id }} className={buttonClass.primary}>
+              + Sottocategoria
+            </Link>
+          )
+        }
+      />
+      <nav aria-label="Percorso" className="mt-4 flex flex-wrap items-center gap-2 text-sm">
+        <Trail category={category} />
+      </nav>
+      <div className="mt-6">
+        <CategoryRows list={list} pois={pois} empty={`Nessuna sottocategoria ancora${canEdit ? ': aggiungine una.' : '.'}`} />
+      </div>
+    </>
+  )
+}
+
+/** Links to the section of the site and the parent categories above a category. */
+function Trail({ category }: { category: Category }) {
+  const { categories } = useCategories()
+  const parents = categoryPath(categories, category.id).slice(0, -1)
+  const section = getSection(sectionOf(categories, category.id) ?? '')
+  const link = 'font-semibold text-teal hover:text-coral'
+  return (
+    <>
+      {section && (
+        <Link to="/admin/sezione/$section" params={{ section: section.id }} className={link}>
+          {section.title} ›
+        </Link>
+      )}
+      {parents.map((parent) => (
+        <Link key={parent.id} to="/admin/$category" params={{ category: parent.slug }} className={link}>
+          {parent.adminLabel} ›
+        </Link>
+      ))}
     </>
   )
 }

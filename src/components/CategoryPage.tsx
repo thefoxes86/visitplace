@@ -5,46 +5,141 @@ import type { ReactNode } from 'react'
 
 import { Skyline } from '#/components/Skyline'
 import { CategoryIcon } from '#/components/tourist-map/CategoryIcon'
-import { useCategories } from '#/data/categories'
+import { categoryLink, useCategories } from '#/data/categories'
+import { isListType } from '#/lib/category-types'
 import { poiImage, poiNumber } from '#/data/pois'
 import { usePois } from '#/data/use-pois'
 import { getSection, sectionLink, sections } from '#/data/sections'
 
+import type { Category } from '#/data/categories'
 import type { Poi } from '#/data/pois'
 
 interface CategoryPageProps {
   /** Id in src/data/sections.ts: gives the title and tagline. */
   sectionId: string
-  /** Which points of the map the page lists: id in the `categories` table. */
-  category: string
   intro: string
 }
 
-/** A section page listing every place of one category, grouped by area. */
-export function CategoryPage({ sectionId, category: categoryId, intro }: CategoryPageProps) {
+/** A section page: the cards of the categories put in the section in the admin. */
+export function CategoryPage({ sectionId, intro }: CategoryPageProps) {
   const section = getSection(sectionId)!
-  const category = useCategories().categoryOf(categoryId)
-  const items = usePois().filter((poi) => poi.category === categoryId)
+  const list = useSectionCategories(sectionId)
 
   return (
     <PageShell
       back={{ to: '/', label: 'Home' }}
-      eyebrow={
-        <span className="flex items-center gap-2" style={{ color: category.color }}>
-          <span className="grid size-6 place-items-center rounded-sm text-white" style={{ backgroundColor: category.color }}>
-            <CategoryIcon id={categoryId} className="size-3.5" />
-          </span>
-          {category.label} · {placesCount(items.length)}
-        </span>
-      }
+      eyebrow={`${list.length} ${list.length === 1 ? 'categoria' : 'categorie'}`}
       title={section.title}
       tagline={section.tagline}
       aside={<OtherSections current={section.id} />}
     >
       <p className="max-w-2xl text-lg font-light leading-relaxed">{intro}</p>
-      <PoiList items={items} />
+      {list.length > 0 ? (
+        <CategoryCards list={list} />
+      ) : (
+        <p className="relative mt-14 border-2 border-coral px-5 py-6 font-serif italic text-coral">
+          Stiamo raccogliendo i luoghi di questa sezione: torna presto, o intanto esplora la mappa turistica.
+        </p>
+      )}
       <MapButton />
     </PageShell>
+  )
+}
+
+/** Top-level categories of a section, in menu order. */
+export const useSectionCategories = (sectionId: string) => useCategories().roots.filter((c) => c.section === sectionId)
+
+/** Icon, name and size of a category, above a page title. */
+export function CategoryEyebrow({ category }: { category: Category }) {
+  const { categories, subtree } = useCategories()
+  const ids = subtree(category.id)
+  const count = usePois().filter((poi) => ids.has(poi.category)).length
+  const children = categories.filter((c) => c.parentId === category.id).length
+  return (
+    <span className="flex items-center gap-2" style={{ color: category.color }}>
+      <span className="grid size-6 place-items-center rounded-sm text-white" style={{ backgroundColor: category.color }}>
+        <CategoryIcon id={category.id} className="size-3.5" />
+      </span>
+      {category.label} ·{' '}
+      {children > 0 || isListType(category.type) ? `${children} ${children === 1 ? 'categoria' : 'categorie'}` : placesCount(count)}
+    </span>
+  )
+}
+
+/**
+ * What a category shows: the cards of its subcategories when it has any (a list always does),
+ * then its own places.
+ */
+export function CategoryContent({ category }: { category: Category }) {
+  const children = useCategories().categories.filter((c) => c.parentId === category.id)
+  const own = usePois().filter((poi) => poi.category === category.id)
+  const comingSoon = (
+    <p className="relative mt-14 border-2 border-coral px-5 py-6 font-serif italic text-coral">
+      Stiamo raccogliendo i luoghi di questa categoria: torna presto.
+    </p>
+  )
+
+  if (!children.length && !isListType(category.type)) return own.length ? <PoiList items={own} /> : comingSoon
+  return (
+    <>
+      {children.length ? <CategoryCards list={children} /> : comingSoon}
+      {own.length > 0 && (
+        <section className="mt-20">
+          <h2 className="font-display text-2xl font-semibold uppercase tracking-[0.15em] text-teal">Luoghi</h2>
+          <PoiList items={own} />
+        </section>
+      )}
+    </>
+  )
+}
+
+/** A card for each category, opening its own page. */
+export function CategoryCards({ list }: { list: Category[] }) {
+  const { categories, subtree } = useCategories()
+  const pois = usePois()
+
+  return (
+    <ul className="mt-12 grid gap-x-8 gap-y-10 sm:grid-cols-2">
+      {list.map((child, i) => {
+        const ids = subtree(child.id)
+        const inside = pois.filter((poi) => ids.has(poi.category))
+        const nested = categories.filter((c) => c.parentId === child.id).length
+        return (
+          <li key={child.id}>
+            <Link {...categoryLink(child)} className="group block">
+              <span className="relative block">
+                {/* The photo of its first place, or a demo image. */}
+                <img
+                  src={inside[0] ? poiImage(inside[0], 600) : `https://picsum.photos/seed/camaiore-categoria-${child.id}/600/600`}
+                  alt=""
+                  loading="lazy"
+                  className="aspect-[3/2] w-full object-cover grayscale transition duration-500 group-hover:grayscale-0"
+                />
+                <span className="absolute -bottom-4 left-4 bg-paper px-2 font-display text-5xl font-light leading-none text-coral">
+                  {String(i + 1).padStart(2, '0')}
+                </span>
+              </span>
+              <span className="mt-6 block border-b-2 border-coral/30 pb-3 transition-colors group-hover:border-coral">
+                <span className="flex items-center gap-2 font-display text-xl font-semibold uppercase tracking-[0.1em] text-teal transition-colors group-hover:text-coral">
+                  <span className="grid size-6 place-items-center rounded-sm text-white" style={{ backgroundColor: child.color }}>
+                    <CategoryIcon id={child.id} className="size-3.5" />
+                  </span>
+                  {child.label}
+                </span>
+                <span className="mt-2 flex items-center justify-between text-xs font-light">
+                  {isListType(child.type)
+                    ? `${nested} ${nested === 1 ? 'categoria' : 'categorie'}`
+                    : inside.length > 0
+                      ? placesCount(inside.length)
+                      : 'In arrivo'}
+                  <span className="font-semibold text-teal transition-transform group-hover:translate-x-1">→</span>
+                </span>
+              </span>
+            </Link>
+          </li>
+        )
+      })}
+    </ul>
   )
 }
 

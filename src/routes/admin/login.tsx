@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import { createFileRoute, redirect, useRouter } from '@tanstack/react-router'
 
 import { Skyline } from '#/components/Skyline'
@@ -23,6 +24,7 @@ export const Route = createFileRoute('/admin/login')({
 function LoginPage() {
   const search = Route.useSearch()
   const router = useRouter()
+  const queryClient = useQueryClient()
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
@@ -40,6 +42,8 @@ function LoginPage() {
       setLoading(false)
       return
     }
+    // Signed in, the public site shows even in maintenance mode.
+    await queryClient.invalidateQueries({ queryKey: ['site-status'] })
     await router.invalidate()
     router.history.push(safeRedirect(search.redirect))
   }
