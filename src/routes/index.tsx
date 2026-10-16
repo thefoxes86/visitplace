@@ -1,12 +1,16 @@
+import { useEffect, useState } from 'react'
 import { Link, createFileRoute } from '@tanstack/react-router'
 
+import { CategoryCards, useSectionCategories } from '#/components/CategoryPage'
 import { Skyline } from '#/components/Skyline'
 import { Compass } from '#/components/tourist-map/TouristMap'
 import { useCategories } from '#/data/categories'
-import { poiImage, poiNumber } from '#/data/pois'
+import { formatEventDate, poiImage, poiNumber } from '#/data/pois'
 import { usePois } from '#/data/use-pois'
 import { sectionLink, sections } from '#/data/sections'
 import { DEFAULT_DESCRIPTION, SITE_NAME, absoluteUrl, seo } from '#/lib/seo'
+
+import type { Poi } from '#/data/pois'
 
 export const Route = createFileRoute('/')({
   head: () =>
@@ -31,14 +35,42 @@ export const Route = createFileRoute('/')({
 
 const TITLE = 'Camaiore'
 
+/** Upcoming events and things to do shown on the home page. */
+const EVENTS_SHOWN = 4
+const THINGS_TO_DO_SHOWN = 6
+const PICKS_SHOWN = 4
+
+function shuffle<T>(list: T[]) {
+  const copy = [...list]
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[copy[i], copy[j]] = [copy[j], copy[i]]
+  }
+  return copy
+}
+
 function Home() {
   const pois = usePois()
-  const { roots, subtree } = useCategories()
-  const poisByCategory = roots.map((category) => {
-    const ids = subtree(category.id)
-    return { ...category, list: pois.filter((poi) => ids.has(poi.category)) }
-  })
+  const { categories, categoryOf, subtree } = useCategories()
   const featured = pois.filter((poi) => poi.featured)
+  const isEvent = (poi: Poi) => categoryOf(poi.category).type === 'event'
+
+  // The first place of each category, from categories in random order.
+  const firstOfEach = categories.flatMap((c) => pois.find((poi) => poi.category === c.id) ?? [])
+  // Shuffled after hydration, so the server and the first client render agree.
+  const [picks, setPicks] = useState(() => firstOfEach.slice(0, PICKS_SHOWN))
+  useEffect(() => setPicks(shuffle(firstOfEach).slice(0, PICKS_SHOWN)), [pois, categories])
+
+  const now = new Date()
+  const upcoming = pois
+    .filter((poi) => isEvent(poi) && poi.startsAt && (poi.endsAt ?? poi.startsAt) >= now)
+    .sort((a, b) => a.startsAt!.getTime() - b.startsAt!.getTime())
+    .slice(0, EVENTS_SHOWN)
+
+  const scopriIds = new Set(useSectionCategories('scopri').flatMap((c) => [...subtree(c.id)]))
+  const thingsToDo = pois.filter((poi) => scopriIds.has(poi.category) && !isEvent(poi)).slice(0, THINGS_TO_DO_SHOWN)
+
+  const featuredCategories = categories.filter((c) => c.featured)
 
   return (
     <main className="min-h-dvh bg-paper font-sans text-ink">
@@ -162,35 +194,118 @@ function Home() {
             </ul>
           </section>
 
-          {/* Every place, by category, along the signpost's pole */}
+          {/* A few places from random categories, along the signpost's pole */}
           <section className="hero-fade border-l-[6px] border-mint" style={{ animationDelay: '1600ms' }}>
             <h2 className="signpost-right -ml-1.5 bg-mint py-3 pl-6 pr-10 font-display text-2xl font-semibold uppercase tracking-[0.15em] text-teal">
-              Luoghi
+              Da scoprire
             </h2>
-            <div className="space-y-6 py-6 pl-6">
-              {poisByCategory.map(({ id, label, list }) => (
-                <div key={id}>
-                  <h3 className="font-display text-lg font-semibold text-coral">{label}</h3>
-                  <ul className="mt-1 space-y-0.5 text-sm font-light">
-                    {list.map((place) => (
-                      <li key={place.id}>
-                        <Link
-                          to="/luoghi/$poiId"
-                          params={{ poiId: place.id }}
-                          className="transition-colors hover:text-coral focus-visible:text-coral focus-visible:underline"
-                        >
-                          {poiNumber(place)}-{place.name}
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
-            </div>
+            <ul className="space-y-6 py-6 pl-6">
+              {picks.map((place) => {
+                const category = categoryOf(place.category)
+                return (
+                  <li key={place.id}>
+                    <Link to="/luoghi/$poiId" params={{ poiId: place.id }} className="group block">
+                      <img
+                        src={poiImage(place, 400)}
+                        alt=""
+                        loading="lazy"
+                        className="aspect-[3/2] w-full object-cover grayscale transition duration-500 group-hover:grayscale-0"
+                      />
+                      <span className="mt-2 block text-xs font-semibold uppercase tracking-wider" style={{ color: category.color }}>
+                        {category.label}
+                      </span>
+                      <span className="block font-display text-lg font-semibold leading-tight text-teal transition-colors group-hover:text-coral">
+                        {place.name}
+                      </span>
+                    </Link>
+                  </li>
+                )
+              })}
+            </ul>
           </section>
         </div>
+      </div>
 
-        <footer className="mt-12 flex flex-wrap justify-between gap-2 text-xs italic text-ink/70">
+      {/* Upcoming events, on a band of their own */}
+      {upcoming.length > 0 && (
+        <section className="bg-teal text-paper">
+          <div className="mx-auto max-w-6xl px-6 py-16 sm:px-12">
+            <div className="flex flex-wrap items-end justify-between gap-4 border-b-2 border-mint/40 pb-4">
+              <h2 className="font-display text-3xl font-semibold uppercase tracking-[0.15em] sm:text-4xl">Prossimi eventi</h2>
+              <Link {...sectionLink('vivi')} className="group font-serif italic text-mint hover:underline">
+                Tutti gli eventi <span className="inline-block transition-transform group-hover:translate-x-1">→</span>
+              </Link>
+            </div>
+            <ul className="mt-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+              {upcoming.map((event) => (
+                <li key={event.id}>
+                  <Link to="/luoghi/$poiId" params={{ poiId: event.id }} className="group block">
+                    <img
+                      src={poiImage(event, 400)}
+                      alt=""
+                      loading="lazy"
+                      className="aspect-[4/3] w-full object-cover grayscale transition duration-500 group-hover:grayscale-0"
+                    />
+                    <span className="mt-4 block font-serif text-sm italic text-mint">{formatEventDate(event.startsAt!)}</span>
+                    <span className="mt-1 block font-display text-xl font-semibold leading-tight transition-colors group-hover:text-coral">
+                      {event.name}
+                    </span>
+                    <span className="mt-1 block text-sm font-light text-paper/80">{event.area}</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+      )}
+
+      <div className="mx-auto max-w-6xl px-6 pb-12 sm:px-12">
+        {/* Things to do, from the categories of the Scopri section */}
+        {thingsToDo.length > 0 && (
+          <section className="pt-20">
+            <div className="flex flex-wrap items-end justify-between gap-4 border-b-[3px] border-teal pb-4">
+              <h2 className="font-display text-3xl font-semibold uppercase tracking-[0.15em] text-coral sm:text-4xl">Cosa fare</h2>
+              <Link {...sectionLink('scopri')} className="group font-serif italic text-coral hover:underline">
+                Scopri Camaiore <span className="inline-block transition-transform group-hover:translate-x-1">→</span>
+              </Link>
+            </div>
+            <ul className="mt-10 grid gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
+              {thingsToDo.map((place) => (
+                <li key={place.id}>
+                  <Link to="/luoghi/$poiId" params={{ poiId: place.id }} className="group block">
+                    <span className="relative block">
+                      <img
+                        src={poiImage(place, 600)}
+                        alt=""
+                        loading="lazy"
+                        className="aspect-[3/2] w-full object-cover grayscale transition duration-500 group-hover:grayscale-0"
+                      />
+                      <span className="absolute -bottom-4 left-4 bg-paper px-2 font-display text-5xl font-light leading-none text-coral">
+                        {poiNumber(place)}
+                      </span>
+                    </span>
+                    <span className="mt-6 block font-display text-xl font-semibold text-teal transition-colors group-hover:text-coral">
+                      {place.name}
+                    </span>
+                    <span className="mt-1 block font-serif italic text-coral">{place.summary}</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
+        {/* Categories featured in the admin */}
+        {featuredCategories.length > 0 && (
+          <section className="pt-20">
+            <h2 className="border-b-[3px] border-teal pb-4 font-display text-3xl font-semibold uppercase tracking-[0.15em] text-coral sm:text-4xl">
+              In evidenza
+            </h2>
+            <CategoryCards list={featuredCategories} className="mt-10 sm:grid-cols-2 lg:grid-cols-3" />
+          </section>
+        )}
+
+        <footer className="mt-16 flex flex-wrap justify-between gap-2 text-xs italic text-ink/70">
           <span>Camaiore · Versilia, Toscana</span>
           <span>43.94° N · 10.30° E</span>
         </footer>

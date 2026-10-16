@@ -94,12 +94,12 @@ export function CategoryContent({ category }: { category: Category }) {
 }
 
 /** A card for each category, opening its own page. */
-export function CategoryCards({ list }: { list: Category[] }) {
+export function CategoryCards({ list, className = 'mt-12 sm:grid-cols-2' }: { list: Category[]; className?: string }) {
   const { categories, subtree } = useCategories()
   const pois = usePois()
 
   return (
-    <ul className="mt-12 grid gap-x-8 gap-y-10 sm:grid-cols-2">
+    <ul className={`grid gap-x-8 gap-y-10 ${className}`}>
       {list.map((child, i) => {
         const ids = subtree(child.id)
         const inside = pois.filter((poi) => ids.has(poi.category))

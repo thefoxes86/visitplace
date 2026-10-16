@@ -64,6 +64,7 @@ export function CategoryForm({ category, parentId, section }: CategoryFormProps)
     sortOrder: category?.sortOrder ?? 0,
     parentId: initialParent?.id ?? '',
     section: category?.section ?? (CATEGORY_SECTION_IDS.find((id) => id === section) || ''),
+    featured: category?.featured ?? false,
   })
   const parent = all.find((c) => c.id === values.parentId)
   /** A subcategory has its parent's type, so its places keep the same fields; under a list it picks its own. */
@@ -347,6 +348,18 @@ export function CategoryForm({ category, parentId, section }: CategoryFormProps)
               className={inputClass}
             />
           </Field>
+          <label className="mt-4 flex cursor-pointer items-start gap-3">
+            <input
+              type="checkbox"
+              checked={values.featured}
+              onChange={(e) => set('featured', e.target.checked)}
+              className="mt-0.5 size-4 accent-teal"
+            />
+            <span>
+              <span className="block text-sm font-semibold">In evidenza</span>
+              <span className="block text-xs font-light">Mostra la categoria tra quelle in evidenza della home page.</span>
+            </span>
+          </label>
         </Card>
 
         <Card>
