@@ -7,11 +7,13 @@ import { Alert, Card, Field, Toggle, buttonClass, errorMessage, inputClass } fro
 import { categoryTree, useCategories } from '#/data/categories'
 import { poiImage } from '#/data/pois'
 import { categoryType } from '#/lib/category-types'
+import { RECURRENCES, RECURRENCE_IDS, formatRecurrence } from '#/lib/event-dates'
 import { poiInputFor, slugify } from '#/lib/poi-input'
 import { createPoi, updatePoi } from '#/server/pois'
 
 import type { AdminPoi } from '#/components/admin/queries'
 import type { Contact, DetailField, DetailValues } from '#/lib/category-types'
+import type { RecurrenceId } from '#/lib/event-dates'
 
 interface PoiFormProps {
   /** Id in the `categories` table. */
@@ -23,14 +25,28 @@ interface PoiFormProps {
 }
 
 type Values = Record<
-  'id' | 'name' | 'summary' | 'description' | 'area' | 'imageUrl' | 'address' | 'phone' | 'email' | 'website' | 'startsAt' | 'endsAt',
+  | 'id'
+  | 'name'
+  | 'summary'
+  | 'description'
+  | 'area'
+  | 'imageUrl'
+  | 'address'
+  | 'phone'
+  | 'email'
+  | 'website'
+  | 'startsAt'
+  | 'endsAt'
+  | 'recurrence'
+  | 'recurrenceUntil',
   string
-> & { lat: number | null; lon: number | null; featured: boolean; published: boolean; sortOrder: number }
+> & { lat: number | null; lon: number | null; featured: boolean; published: boolean; allDay: boolean; sortOrder: number }
 
-/** Date ⇄ value of a datetime-local input, in the editor's time zone. */
-const toLocalInput = (date: Date | null) =>
-  date ? new Date(date.getTime() - date.getTimezoneOffset() * 60_000).toISOString().slice(0, 16) : ''
-const fromLocalInput = (value: string) => (value ? new Date(value) : null)
+/** Date ⇄ value of a datetime-local input (or a date input, with `dateOnly`), in the editor's time zone. */
+const toLocalInput = (date: Date | null, dateOnly = false) =>
+  date ? new Date(date.getTime() - date.getTimezoneOffset() * 60_000).toISOString().slice(0, dateOnly ? 10 : 16) : ''
+/** A date alone is taken at midnight. */
+const fromLocalInput = (value: string) => (value ? new Date(value.length === 10 ? `${value}T00:00` : value) : null)
 
 const initialValues = (poi: AdminPoi | undefined): Values => ({
   id: poi?.id ?? '',
@@ -43,8 +59,11 @@ const initialValues = (poi: AdminPoi | undefined): Values => ({
   phone: poi?.phone ?? '',
   email: poi?.email ?? '',
   website: poi?.website ?? '',
-  startsAt: toLocalInput(poi?.startsAt ?? null),
-  endsAt: toLocalInput(poi?.endsAt ?? null),
+  startsAt: toLocalInput(poi?.startsAt ?? null, poi?.allDay),
+  endsAt: toLocalInput(poi?.endsAt ?? null, poi?.allDay),
+  allDay: poi?.allDay ?? false,
+  recurrence: poi?.recurrence ?? '',
+  recurrenceUntil: toLocalInput(poi?.recurrenceUntil ?? null, true),
   lat: poi?.lat ?? null,
   lon: poi?.lon ?? null,
   featured: poi?.featured ?? false,
@@ -125,12 +144,27 @@ export function PoiForm({ category: initialCategory, poi, areas }: PoiFormProps)
     clearError('lat', 'lon')
   }, [])
 
-  const text = (key: Exclude<keyof Values, 'lat' | 'lon' | 'featured' | 'published' | 'sortOrder'>) => ({
+  /** All-day events take dates alone: the times are dropped, or set back to midnight. */
+  const setAllDay = (allDay: boolean) => {
+    const convert = (value: string) => (!value ? '' : allDay ? value.slice(0, 10) : `${value.slice(0, 10)}T00:00`)
+    setValues((prev) => ({ ...prev, allDay, startsAt: convert(prev.startsAt), endsAt: convert(prev.endsAt) }))
+    clearError('startsAt', 'endsAt')
+  }
+
+  const text = (key: Exclude<keyof Values, 'lat' | 'lon' | 'featured' | 'published' | 'allDay' | 'sortOrder'>) => ({
     id: key,
     value: values[key] as string,
     onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => set(key, e.target.value),
     className: inputClass,
     'aria-invalid': Boolean(errors[key]),
+  })
+
+  const recurrenceLabel = formatRecurrence({
+    startsAt: fromLocalInput(values.startsAt),
+    endsAt: null,
+    allDay: values.allDay,
+    recurrence: (values.recurrence || null) as RecurrenceId | null,
+    recurrenceUntil: fromLocalInput(values.recurrenceUntil),
   })
 
   async function submit(e: React.FormEvent) {
@@ -149,6 +183,8 @@ export function PoiForm({ category: initialCategory, poi, areas }: PoiFormProps)
       website: orNull(values.website),
       startsAt: fromLocalInput(values.startsAt),
       endsAt: fromLocalInput(values.endsAt),
+      recurrence: values.recurrence || null,
+      recurrenceUntil: fromLocalInput(values.recurrenceUntil),
       details: toDetails(type.fields, details),
     })
     if (!parsed.success) {
@@ -226,14 +262,41 @@ export function PoiForm({ category: initialCategory, poi, areas }: PoiFormProps)
 
         {type.dates && (
           <Card title="Date">
-            <div className="grid gap-4 sm:grid-cols-2">
-              <Field label="Inizio" htmlFor="startsAt" error={errors.startsAt}>
-                <input {...text('startsAt')} type="datetime-local" />
+            <Toggle
+              label="Tutto il giorno"
+              hint="Solo le date, senza orari: l'evento occupa i giorni interi."
+              checked={values.allDay}
+              onChange={setAllDay}
+            />
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              <Field label="Inizio" htmlFor="startsAt" error={errors.startsAt} hint={values.recurrence ? 'La prima volta.' : undefined}>
+                <input {...text('startsAt')} type={values.allDay ? 'date' : 'datetime-local'} />
               </Field>
-              <Field label="Fine" htmlFor="endsAt" error={errors.endsAt} hint="Facoltativa">
-                <input {...text('endsAt')} type="datetime-local" min={values.startsAt || undefined} />
+              <Field
+                label="Fine"
+                htmlFor="endsAt"
+                error={errors.endsAt}
+                hint={values.recurrence ? 'Facoltativa · fine della prima volta: ogni ripetizione dura uguale.' : 'Facoltativa'}
+              >
+                <input {...text('endsAt')} type={values.allDay ? 'date' : 'datetime-local'} min={values.startsAt || undefined} />
               </Field>
+              <Field label="Ripetizione" htmlFor="recurrence" error={errors.recurrence}>
+                <select {...text('recurrence')}>
+                  <option value="">Non si ripete</option>
+                  {RECURRENCE_IDS.map((id) => (
+                    <option key={id} value={id}>
+                      {RECURRENCES[id]}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+              {values.recurrence && (
+                <Field label="Ripeti fino al" htmlFor="recurrenceUntil" error={errors.recurrenceUntil} hint="Facoltativa · vuota si ripete sempre.">
+                  <input {...text('recurrenceUntil')} type="date" min={values.startsAt.slice(0, 10) || undefined} />
+                </Field>
+              )}
             </div>
+            {recurrenceLabel && <p className="mt-4 rounded-md bg-mint-light px-3 py-2 text-xs font-semibold text-teal">{recurrenceLabel}</p>}
           </Card>
         )}
 

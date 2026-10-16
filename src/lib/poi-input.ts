@@ -1,6 +1,7 @@
 import { z } from 'zod'
 
 import { detailsSchema } from '#/lib/category-types'
+import { RECURRENCE_IDS } from '#/lib/event-dates'
 
 import type { CategoryType } from '#/lib/category-types'
 
@@ -27,6 +28,9 @@ const poiFields = z.object({
   website: z.url('Indirizzo non valido').nullable(),
   startsAt: z.date().nullable(),
   endsAt: z.date().nullable(),
+  allDay: z.boolean(),
+  recurrence: z.enum(RECURRENCE_IDS).nullable(),
+  recurrenceUntil: z.date().nullable(),
   sortOrder: z.number().int(),
 })
 
@@ -46,11 +50,18 @@ export const poiInputFor = (type: CategoryType) =>
       path: ['endsAt'],
       error: "Deve essere dopo l'inizio",
     })
+    .refine((poi) => !poi.recurrence || !poi.startsAt || !poi.recurrenceUntil || poi.recurrenceUntil >= poi.startsAt, {
+      path: ['recurrenceUntil'],
+      error: "Deve essere dopo l'inizio",
+    })
     // Clear what the type doesn't use, so switching type leaves nothing stale behind.
     .transform((poi) => ({
       ...poi,
       startsAt: type.dates ? poi.startsAt : null,
       endsAt: type.dates ? poi.endsAt : null,
+      allDay: type.dates ? poi.allDay : false,
+      recurrence: type.dates ? poi.recurrence : null,
+      recurrenceUntil: type.dates && poi.recurrence ? poi.recurrenceUntil : null,
       address: type.contacts.includes('address') ? poi.address : null,
       phone: type.contacts.includes('phone') ? poi.phone : null,
       email: type.contacts.includes('email') ? poi.email : null,

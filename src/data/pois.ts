@@ -1,4 +1,5 @@
 import type { DetailValues } from '#/lib/category-types'
+import type { RecurrenceId } from '#/lib/event-dates'
 
 /** A point of the tourist map, as stored in the `pois` table. */
 export interface Poi {
@@ -24,9 +25,12 @@ export interface Poi {
   website: string | null
   /** Fields of the category's type (src/lib/category-types.ts). */
   details: DetailValues
-  /** Events only. */
+  /** Events only, see src/lib/event-dates.ts. */
   startsAt: Date | null
   endsAt: Date | null
+  allDay: boolean
+  recurrence: RecurrenceId | null
+  recurrenceUntil: Date | null
 }
 
 /** A place in src/db/seed-data.ts: everything optional is left out. */

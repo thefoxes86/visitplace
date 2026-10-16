@@ -4,8 +4,9 @@ import { Link, createFileRoute } from '@tanstack/react-router'
 import { CategoryCards, useSectionCategories } from '#/components/CategoryPage'
 import { Skyline } from '#/components/Skyline'
 import { Compass } from '#/components/tourist-map/TouristMap'
-import { useCategories } from '#/data/categories'
-import { formatEventDate, poiImage, poiNumber } from '#/data/pois'
+import { categoryLink, useCategories } from '#/data/categories'
+import { poiImage, poiNumber } from '#/data/pois'
+import { formatOccurrence, formatRecurrence, nextOccurrence } from '#/lib/event-dates'
 import { usePois } from '#/data/use-pois'
 import { sectionLink, sections } from '#/data/sections'
 import { DEFAULT_DESCRIPTION, SITE_NAME, absoluteUrl, seo } from '#/lib/seo'
@@ -51,7 +52,9 @@ function shuffle<T>(list: T[]) {
 
 function Home() {
   const pois = usePois()
-  const { categories, categoryOf, subtree } = useCategories()
+  const { categories, categoryOf, subtree, eventsCategory } = useCategories()
+  // The timeline of the events category, or the Vivi section until there is one.
+  const eventsLink = eventsCategory ? categoryLink(eventsCategory) : sectionLink('vivi')
   const featured = pois.filter((poi) => poi.featured)
   const isEvent = (poi: Poi) => categoryOf(poi.category).type === 'event'
 
@@ -61,10 +64,13 @@ function Home() {
   const [picks, setPicks] = useState(() => firstOfEach.slice(0, PICKS_SHOWN))
   useEffect(() => setPicks(shuffle(firstOfEach).slice(0, PICKS_SHOWN)), [pois, categories])
 
-  const now = new Date()
+  // Repeating events count from their next time.
   const upcoming = pois
-    .filter((poi) => isEvent(poi) && poi.startsAt && (poi.endsAt ?? poi.startsAt) >= now)
-    .sort((a, b) => a.startsAt!.getTime() - b.startsAt!.getTime())
+    .flatMap((poi) => {
+      const next = isEvent(poi) ? nextOccurrence(poi) : null
+      return next ? [{ ...poi, next }] : []
+    })
+    .sort((a, b) => a.next.start.getTime() - b.next.start.getTime())
     .slice(0, EVENTS_SHOWN)
 
   const scopriIds = new Set(useSectionCategories('scopri').flatMap((c) => [...subtree(c.id)]))
@@ -231,8 +237,12 @@ function Home() {
         <section className="bg-teal text-paper">
           <div className="mx-auto max-w-6xl px-6 py-16 sm:px-12">
             <div className="flex flex-wrap items-end justify-between gap-4 border-b-2 border-mint/40 pb-4">
-              <h2 className="font-display text-3xl font-semibold uppercase tracking-[0.15em] sm:text-4xl">Prossimi eventi</h2>
-              <Link {...sectionLink('vivi')} className="group font-serif italic text-mint hover:underline">
+              <h2 className="font-display text-3xl font-semibold uppercase tracking-[0.15em] sm:text-4xl">
+                <Link {...eventsLink} className="transition-colors hover:text-mint">
+                  Prossimi eventi
+                </Link>
+              </h2>
+              <Link {...eventsLink} className="group font-serif italic text-mint hover:underline">
                 Tutti gli eventi <span className="inline-block transition-transform group-hover:translate-x-1">→</span>
               </Link>
             </div>
@@ -246,7 +256,10 @@ function Home() {
                       loading="lazy"
                       className="aspect-[4/3] w-full object-cover grayscale transition duration-500 group-hover:grayscale-0"
                     />
-                    <span className="mt-4 block font-serif text-sm italic text-mint">{formatEventDate(event.startsAt!)}</span>
+                    <span className="mt-4 block font-serif text-sm italic text-mint">{formatOccurrence(event.next, event.allDay)}</span>
+                    {event.recurrence && (
+                      <span className="block text-xs font-semibold uppercase tracking-wider text-mint/80">{formatRecurrence(event)}</span>
+                    )}
                     <span className="mt-1 block font-display text-xl font-semibold leading-tight transition-colors group-hover:text-coral">
                       {event.name}
                     </span>
