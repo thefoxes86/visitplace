@@ -1,10 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { desc, eq } from 'drizzle-orm'
 
-import { scopriTopics } from '#/data/scopri'
 import { sections } from '#/data/sections'
 import { db } from '#/db'
-import { pois } from '#/db/schema'
+import { categories, pois } from '#/db/schema'
 import { absoluteUrl } from '#/lib/seo'
 
 interface SitemapEntry {
@@ -31,7 +30,7 @@ function toXml(entries: SitemapEntry[]) {
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.join('\n')}\n</urlset>\n`
 }
 
-/** Every public page: the sections, the Scopri topics and each published place. */
+/** Every public page: the sections, the categories' own pages and each published place. */
 export const Route = createFileRoute('/sitemap.xml')({
   server: {
     handlers: {
@@ -41,6 +40,7 @@ export const Route = createFileRoute('/sitemap.xml')({
           .from(pois)
           .where(eq(pois.published, true))
           .orderBy(desc(pois.updatedAt))
+        const categoryPages = await db.select({ slug: categories.slug, updatedAt: categories.updatedAt }).from(categories)
         // Pages listing places change whenever one of them does.
         const lastChange = places[0]?.updatedAt
 
@@ -53,9 +53,9 @@ export const Route = createFileRoute('/sitemap.xml')({
             changefreq: section.id === 'vivi' ? ('daily' as const) : ('weekly' as const),
             priority: 0.8,
           })),
-          ...scopriTopics.map((topic) => ({
-            path: `/scopri/${topic.id}`,
-            lastmod: lastChange,
+          ...categoryPages.map((category) => ({
+            path: `/categorie/${category.slug}`,
+            lastmod: lastChange && lastChange > category.updatedAt ? lastChange : category.updatedAt,
             changefreq: 'weekly' as const,
             priority: 0.7,
           })),

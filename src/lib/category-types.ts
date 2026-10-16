@@ -33,10 +33,10 @@ export interface CategoryType {
   description: string
   /** Start (required) and end dates. */
   dates?: boolean
-  /** Sub-section of the Scopri page. */
-  topic?: boolean
   contacts: Contact[]
   fields: DetailField[]
+  /** Holds subcategories instead of places: its page lists them. */
+  list?: boolean
 }
 
 const openingHours: DetailField = { key: 'openingHours', label: 'Orari di apertura', kind: 'textarea', hint: 'Es. Lun–Ven 9–13, 15–19' }
@@ -60,8 +60,7 @@ export const CATEGORY_TYPES = {
   },
   place: {
     label: 'Luogo',
-    description: 'Monumenti, chiese, musei, piazze: compaiono anche in Scopri.',
-    topic: true,
+    description: 'Monumenti, chiese, musei, piazze e luoghi da visitare.',
     contacts: ['address', 'phone', 'website'],
     fields: [
       openingHours,
@@ -139,6 +138,13 @@ export const CATEGORY_TYPES = {
       season,
     ],
   },
+  list: {
+    label: 'Lista',
+    description: 'Raccoglie sottocategorie di qualsiasi tipo e ne mostra l\'elenco, senza contenuti propri.',
+    list: true,
+    contacts: [],
+    fields: [],
+  },
   climbing: {
     label: 'Climbing',
     description: 'Falesie e vie di arrampicata.',
@@ -164,6 +170,9 @@ export const CATEGORY_TYPES = {
 export type CategoryTypeId = keyof typeof CATEGORY_TYPES
 
 export const CATEGORY_TYPE_IDS = Object.keys(CATEGORY_TYPES) as [CategoryTypeId, ...CategoryTypeId[]]
+
+/** Whether a category of this type holds subcategories rather than places. */
+export const isListType = (id: string) => categoryType(id).list === true
 
 /** The type of a category, falling back to a plain place for an unknown one. */
 export const categoryType = (id: string): CategoryType => CATEGORY_TYPES[id as CategoryTypeId] ?? CATEGORY_TYPES.place

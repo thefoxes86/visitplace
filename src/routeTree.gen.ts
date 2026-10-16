@@ -10,21 +10,22 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as DoveDormireRouteImport } from './routes/dove-dormire'
 import { Route as GustaRouteImport } from './routes/gusta'
 import { Route as InfoRouteImport } from './routes/info'
+import { Route as ManutenzioneRouteImport } from './routes/manutenzione'
 import { Route as MappaRouteImport } from './routes/mappa'
 import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as ViviRouteImport } from './routes/vivi'
 import { Route as AdminPanelRouteImport } from './routes/admin/_panel'
 import { Route as AdminLoginRouteImport } from './routes/admin/login'
+import { Route as CategorieSlugRouteImport } from './routes/categorie/$slug'
 import { Route as LuoghiPoiIdRouteImport } from './routes/luoghi/$poiId'
 import { Route as ScopriIndexRouteImport } from './routes/scopri/index'
-import { Route as ScopriTopicRouteImport } from './routes/scopri/$topic'
 import { Route as AdminPanelIndexRouteImport } from './routes/admin/_panel/index'
 import { Route as AdminPanelCategoryRouteRouteImport } from './routes/admin/_panel/$category/route'
 import { Route as AdminPanelCategorieRouteRouteImport } from './routes/admin/_panel/categorie/route'
+import { Route as AdminPanelImpostazioniRouteImport } from './routes/admin/_panel/impostazioni'
 import { Route as AdminPanelUtentiRouteImport } from './routes/admin/_panel/utenti'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as AdminPanelCategoryIndexRouteImport } from './routes/admin/_panel/$category/index'
@@ -33,15 +34,11 @@ import { Route as AdminPanelCategoryNuovoRouteImport } from './routes/admin/_pan
 import { Route as AdminPanelCategorieIndexRouteImport } from './routes/admin/_panel/categorie/index'
 import { Route as AdminPanelCategorieIdRouteImport } from './routes/admin/_panel/categorie/$id'
 import { Route as AdminPanelCategorieNuovaRouteImport } from './routes/admin/_panel/categorie/nuova'
+import { Route as AdminPanelSezioneSectionRouteImport } from './routes/admin/_panel/sezione/$section'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DoveDormireRoute = DoveDormireRouteImport.update({
-  id: '/dove-dormire',
-  path: '/dove-dormire',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GustaRoute = GustaRouteImport.update({
@@ -52,6 +49,11 @@ const GustaRoute = GustaRouteImport.update({
 const InfoRoute = InfoRouteImport.update({
   id: '/info',
   path: '/info',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ManutenzioneRoute = ManutenzioneRouteImport.update({
+  id: '/manutenzione',
+  path: '/manutenzione',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MappaRoute = MappaRouteImport.update({
@@ -84,6 +86,11 @@ const AdminLoginRoute = AdminLoginRouteImport.update({
   path: '/admin/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CategorieSlugRoute = CategorieSlugRouteImport.update({
+  id: '/categorie/$slug',
+  path: '/categorie/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LuoghiPoiIdRoute = LuoghiPoiIdRouteImport.update({
   id: '/luoghi/$poiId',
   path: '/luoghi/$poiId',
@@ -92,11 +99,6 @@ const LuoghiPoiIdRoute = LuoghiPoiIdRouteImport.update({
 const ScopriIndexRoute = ScopriIndexRouteImport.update({
   id: '/scopri/',
   path: '/scopri/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ScopriTopicRoute = ScopriTopicRouteImport.update({
-  id: '/scopri/$topic',
-  path: '/scopri/$topic',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminPanelIndexRoute = AdminPanelIndexRouteImport.update({
@@ -115,6 +117,11 @@ const AdminPanelCategorieRouteRoute =
     path: '/categorie',
     getParentRoute: () => AdminPanelRoute,
   } as any)
+const AdminPanelImpostazioniRoute = AdminPanelImpostazioniRouteImport.update({
+  id: '/impostazioni',
+  path: '/impostazioni',
+  getParentRoute: () => AdminPanelRoute,
+} as any)
 const AdminPanelUtentiRoute = AdminPanelUtentiRouteImport.update({
   id: '/utenti',
   path: '/utenti',
@@ -157,23 +164,30 @@ const AdminPanelCategorieNuovaRoute =
     path: '/nuova',
     getParentRoute: () => AdminPanelCategorieRouteRoute,
   } as any)
+const AdminPanelSezioneSectionRoute =
+  AdminPanelSezioneSectionRouteImport.update({
+    id: '/sezione/$section',
+    path: '/sezione/$section',
+    getParentRoute: () => AdminPanelRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/dove-dormire': typeof DoveDormireRoute
   '/gusta': typeof GustaRoute
   '/info': typeof InfoRoute
+  '/manutenzione': typeof ManutenzioneRoute
   '/mappa': typeof MappaRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/vivi': typeof ViviRoute
   '/admin': typeof AdminPanelRouteWithChildren
   '/admin/login': typeof AdminLoginRoute
+  '/categorie/$slug': typeof CategorieSlugRoute
   '/luoghi/$poiId': typeof LuoghiPoiIdRoute
-  '/scopri/$topic': typeof ScopriTopicRoute
   '/scopri/': typeof ScopriIndexRoute
   '/admin/$category': typeof AdminPanelCategoryRouteRouteWithChildren
   '/admin/categorie': typeof AdminPanelCategorieRouteRouteWithChildren
+  '/admin/impostazioni': typeof AdminPanelImpostazioniRoute
   '/admin/utenti': typeof AdminPanelUtentiRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/admin/': typeof AdminPanelIndexRoute
@@ -181,22 +195,24 @@ export interface FileRoutesByFullPath {
   '/admin/$category/nuovo': typeof AdminPanelCategoryNuovoRoute
   '/admin/categorie/$id': typeof AdminPanelCategorieIdRoute
   '/admin/categorie/nuova': typeof AdminPanelCategorieNuovaRoute
+  '/admin/sezione/$section': typeof AdminPanelSezioneSectionRoute
   '/admin/$category/': typeof AdminPanelCategoryIndexRoute
   '/admin/categorie/': typeof AdminPanelCategorieIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/dove-dormire': typeof DoveDormireRoute
   '/gusta': typeof GustaRoute
   '/info': typeof InfoRoute
+  '/manutenzione': typeof ManutenzioneRoute
   '/mappa': typeof MappaRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/vivi': typeof ViviRoute
   '/admin/login': typeof AdminLoginRoute
+  '/categorie/$slug': typeof CategorieSlugRoute
   '/luoghi/$poiId': typeof LuoghiPoiIdRoute
-  '/scopri/$topic': typeof ScopriTopicRoute
   '/scopri': typeof ScopriIndexRoute
+  '/admin/impostazioni': typeof AdminPanelImpostazioniRoute
   '/admin/utenti': typeof AdminPanelUtentiRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/admin': typeof AdminPanelIndexRoute
@@ -204,26 +220,28 @@ export interface FileRoutesByTo {
   '/admin/$category/nuovo': typeof AdminPanelCategoryNuovoRoute
   '/admin/categorie/$id': typeof AdminPanelCategorieIdRoute
   '/admin/categorie/nuova': typeof AdminPanelCategorieNuovaRoute
+  '/admin/sezione/$section': typeof AdminPanelSezioneSectionRoute
   '/admin/$category': typeof AdminPanelCategoryIndexRoute
   '/admin/categorie': typeof AdminPanelCategorieIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/dove-dormire': typeof DoveDormireRoute
   '/gusta': typeof GustaRoute
   '/info': typeof InfoRoute
+  '/manutenzione': typeof ManutenzioneRoute
   '/mappa': typeof MappaRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/vivi': typeof ViviRoute
   '/admin/_panel': typeof AdminPanelRouteWithChildren
   '/admin/login': typeof AdminLoginRoute
+  '/categorie/$slug': typeof CategorieSlugRoute
   '/luoghi/$poiId': typeof LuoghiPoiIdRoute
-  '/scopri/$topic': typeof ScopriTopicRoute
   '/scopri/': typeof ScopriIndexRoute
   '/admin/_panel/$category': typeof AdminPanelCategoryRouteRouteWithChildren
   '/admin/_panel/categorie': typeof AdminPanelCategorieRouteRouteWithChildren
+  '/admin/_panel/impostazioni': typeof AdminPanelImpostazioniRoute
   '/admin/_panel/utenti': typeof AdminPanelUtentiRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/admin/_panel/': typeof AdminPanelIndexRoute
@@ -231,6 +249,7 @@ export interface FileRoutesById {
   '/admin/_panel/$category/nuovo': typeof AdminPanelCategoryNuovoRoute
   '/admin/_panel/categorie/$id': typeof AdminPanelCategorieIdRoute
   '/admin/_panel/categorie/nuova': typeof AdminPanelCategorieNuovaRoute
+  '/admin/_panel/sezione/$section': typeof AdminPanelSezioneSectionRoute
   '/admin/_panel/$category/': typeof AdminPanelCategoryIndexRoute
   '/admin/_panel/categorie/': typeof AdminPanelCategorieIndexRoute
 }
@@ -238,20 +257,21 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/dove-dormire'
     | '/gusta'
     | '/info'
+    | '/manutenzione'
     | '/mappa'
     | '/robots.txt'
     | '/sitemap.xml'
     | '/vivi'
     | '/admin'
     | '/admin/login'
+    | '/categorie/$slug'
     | '/luoghi/$poiId'
-    | '/scopri/$topic'
     | '/scopri/'
     | '/admin/$category'
     | '/admin/categorie'
+    | '/admin/impostazioni'
     | '/admin/utenti'
     | '/api/auth/$'
     | '/admin/'
@@ -259,22 +279,24 @@ export interface FileRouteTypes {
     | '/admin/$category/nuovo'
     | '/admin/categorie/$id'
     | '/admin/categorie/nuova'
+    | '/admin/sezione/$section'
     | '/admin/$category/'
     | '/admin/categorie/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/dove-dormire'
     | '/gusta'
     | '/info'
+    | '/manutenzione'
     | '/mappa'
     | '/robots.txt'
     | '/sitemap.xml'
     | '/vivi'
     | '/admin/login'
+    | '/categorie/$slug'
     | '/luoghi/$poiId'
-    | '/scopri/$topic'
     | '/scopri'
+    | '/admin/impostazioni'
     | '/admin/utenti'
     | '/api/auth/$'
     | '/admin'
@@ -282,25 +304,27 @@ export interface FileRouteTypes {
     | '/admin/$category/nuovo'
     | '/admin/categorie/$id'
     | '/admin/categorie/nuova'
+    | '/admin/sezione/$section'
     | '/admin/$category'
     | '/admin/categorie'
   id:
     | '__root__'
     | '/'
-    | '/dove-dormire'
     | '/gusta'
     | '/info'
+    | '/manutenzione'
     | '/mappa'
     | '/robots.txt'
     | '/sitemap.xml'
     | '/vivi'
     | '/admin/_panel'
     | '/admin/login'
+    | '/categorie/$slug'
     | '/luoghi/$poiId'
-    | '/scopri/$topic'
     | '/scopri/'
     | '/admin/_panel/$category'
     | '/admin/_panel/categorie'
+    | '/admin/_panel/impostazioni'
     | '/admin/_panel/utenti'
     | '/api/auth/$'
     | '/admin/_panel/'
@@ -308,23 +332,24 @@ export interface FileRouteTypes {
     | '/admin/_panel/$category/nuovo'
     | '/admin/_panel/categorie/$id'
     | '/admin/_panel/categorie/nuova'
+    | '/admin/_panel/sezione/$section'
     | '/admin/_panel/$category/'
     | '/admin/_panel/categorie/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  DoveDormireRoute: typeof DoveDormireRoute
   GustaRoute: typeof GustaRoute
   InfoRoute: typeof InfoRoute
+  ManutenzioneRoute: typeof ManutenzioneRoute
   MappaRoute: typeof MappaRoute
   RobotsDottxtRoute: typeof RobotsDottxtRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   ViviRoute: typeof ViviRoute
   AdminPanelRoute: typeof AdminPanelRouteWithChildren
   AdminLoginRoute: typeof AdminLoginRoute
+  CategorieSlugRoute: typeof CategorieSlugRoute
   LuoghiPoiIdRoute: typeof LuoghiPoiIdRoute
-  ScopriTopicRoute: typeof ScopriTopicRoute
   ScopriIndexRoute: typeof ScopriIndexRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
@@ -336,13 +361,6 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/dove-dormire': {
-      id: '/dove-dormire'
-      path: '/dove-dormire'
-      fullPath: '/dove-dormire'
-      preLoaderRoute: typeof DoveDormireRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/gusta': {
@@ -357,6 +375,13 @@ declare module '@tanstack/react-router' {
       path: '/info'
       fullPath: '/info'
       preLoaderRoute: typeof InfoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/manutenzione': {
+      id: '/manutenzione'
+      path: '/manutenzione'
+      fullPath: '/manutenzione'
+      preLoaderRoute: typeof ManutenzioneRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/mappa': {
@@ -401,6 +426,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/categorie/$slug': {
+      id: '/categorie/$slug'
+      path: '/categorie/$slug'
+      fullPath: '/categorie/$slug'
+      preLoaderRoute: typeof CategorieSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/luoghi/$poiId': {
       id: '/luoghi/$poiId'
       path: '/luoghi/$poiId'
@@ -413,13 +445,6 @@ declare module '@tanstack/react-router' {
       path: '/scopri'
       fullPath: '/scopri/'
       preLoaderRoute: typeof ScopriIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/scopri/$topic': {
-      id: '/scopri/$topic'
-      path: '/scopri/$topic'
-      fullPath: '/scopri/$topic'
-      preLoaderRoute: typeof ScopriTopicRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/_panel/': {
@@ -441,6 +466,13 @@ declare module '@tanstack/react-router' {
       path: '/categorie'
       fullPath: '/admin/categorie'
       preLoaderRoute: typeof AdminPanelCategorieRouteRouteImport
+      parentRoute: typeof AdminPanelRoute
+    }
+    '/admin/_panel/impostazioni': {
+      id: '/admin/_panel/impostazioni'
+      path: '/impostazioni'
+      fullPath: '/admin/impostazioni'
+      preLoaderRoute: typeof AdminPanelImpostazioniRouteImport
       parentRoute: typeof AdminPanelRoute
     }
     '/admin/_panel/utenti': {
@@ -499,6 +531,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminPanelCategorieNuovaRouteImport
       parentRoute: typeof AdminPanelCategorieRouteRoute
     }
+    '/admin/_panel/sezione/$section': {
+      id: '/admin/_panel/sezione/$section'
+      path: '/sezione/$section'
+      fullPath: '/admin/sezione/$section'
+      preLoaderRoute: typeof AdminPanelSezioneSectionRouteImport
+      parentRoute: typeof AdminPanelRoute
+    }
   }
 }
 
@@ -541,15 +580,19 @@ const AdminPanelCategorieRouteRouteWithChildren =
 interface AdminPanelRouteChildren {
   AdminPanelCategoryRouteRoute: typeof AdminPanelCategoryRouteRouteWithChildren
   AdminPanelCategorieRouteRoute: typeof AdminPanelCategorieRouteRouteWithChildren
+  AdminPanelImpostazioniRoute: typeof AdminPanelImpostazioniRoute
   AdminPanelUtentiRoute: typeof AdminPanelUtentiRoute
   AdminPanelIndexRoute: typeof AdminPanelIndexRoute
+  AdminPanelSezioneSectionRoute: typeof AdminPanelSezioneSectionRoute
 }
 
 const AdminPanelRouteChildren: AdminPanelRouteChildren = {
   AdminPanelCategoryRouteRoute: AdminPanelCategoryRouteRouteWithChildren,
   AdminPanelCategorieRouteRoute: AdminPanelCategorieRouteRouteWithChildren,
+  AdminPanelImpostazioniRoute: AdminPanelImpostazioniRoute,
   AdminPanelUtentiRoute: AdminPanelUtentiRoute,
   AdminPanelIndexRoute: AdminPanelIndexRoute,
+  AdminPanelSezioneSectionRoute: AdminPanelSezioneSectionRoute,
 }
 
 const AdminPanelRouteWithChildren = AdminPanelRoute._addFileChildren(
@@ -558,17 +601,17 @@ const AdminPanelRouteWithChildren = AdminPanelRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  DoveDormireRoute: DoveDormireRoute,
   GustaRoute: GustaRoute,
   InfoRoute: InfoRoute,
+  ManutenzioneRoute: ManutenzioneRoute,
   MappaRoute: MappaRoute,
   RobotsDottxtRoute: RobotsDottxtRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   ViviRoute: ViviRoute,
   AdminPanelRoute: AdminPanelRouteWithChildren,
   AdminLoginRoute: AdminLoginRoute,
+  CategorieSlugRoute: CategorieSlugRoute,
   LuoghiPoiIdRoute: LuoghiPoiIdRoute,
-  ScopriTopicRoute: ScopriTopicRoute,
   ScopriIndexRoute: ScopriIndexRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
 }

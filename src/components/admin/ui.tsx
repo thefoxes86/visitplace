@@ -69,3 +69,20 @@ export function Alert({ children }: { children: ReactNode }) {
 
 export const errorMessage = (error: unknown) =>
   error instanceof Error ? error.message : typeof error === 'string' ? error : 'Qualcosa è andato storto'
+
+/** An on/off switch with a label and a hint. */
+export function Toggle({ label, hint, checked, onChange }: { label: string; hint: string; checked: boolean; onChange: (v: boolean) => void }) {
+  return (
+    <label className="flex cursor-pointer items-start gap-3">
+      <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} className="peer sr-only" />
+      <span
+        aria-hidden
+        className="relative mt-0.5 h-5 w-9 shrink-0 rounded-full bg-ink/20 transition peer-checked:bg-teal peer-focus-visible:ring-2 peer-focus-visible:ring-mint after:absolute after:left-0.5 after:top-0.5 after:size-4 after:rounded-full after:bg-white after:transition peer-checked:after:translate-x-4"
+      />
+      <span>
+        <span className="block text-sm font-semibold">{label}</span>
+        <span className="block text-xs font-light text-ink/70">{hint}</span>
+      </span>
+    </label>
+  )
+}

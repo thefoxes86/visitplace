@@ -1,9 +1,10 @@
 import { z } from 'zod'
 
+import { CATEGORY_SECTION_IDS } from '#/data/sections'
 import { CATEGORY_TYPE_IDS } from '#/lib/category-types'
 
 /** Admin pages a category slug would hide: /admin/<slug>. */
-const RESERVED_SLUGS = ['categorie', 'utenti', 'login', 'nuovo', 'nuova']
+const RESERVED_SLUGS = ['categorie', 'sezione', 'impostazioni', 'utenti', 'login', 'nuovo', 'nuova']
 
 const slug = z
   .string()
@@ -20,6 +21,19 @@ export const categoryInput = z.object({
   type: z.enum(CATEGORY_TYPE_IDS, { error: 'Scegli un tipo' }),
   color: z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Colore non valido'),
   sortOrder: z.number().int().min(0),
+  /** Parent category, for subcategories. */
+  parentId: slug.nullable(),
+  /** Section of the site: required for top-level categories, left out for subcategories. */
+  section: z.enum(CATEGORY_SECTION_IDS, { error: 'Scegli una sezione' }).nullable(),
+}).refine((data) => data.parentId || data.section, { path: ['section'], message: 'Scegli la sezione del sito' })
+
+/** What to do with what is inside a category being deleted. */
+export const deleteCategoryInput = z.object({
+  id: z.string(),
+  /** Subcategories: moved up to the deleted category's parent, or deleted with it. */
+  children: z.enum(['up', 'delete']),
+  /** Category the places move to; null deletes them. */
+  placesTo: z.string().nullable(),
 })
 
 export type CategoryInput = z.infer<typeof categoryInput>

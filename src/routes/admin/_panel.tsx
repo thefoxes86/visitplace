@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
-import { Link, Outlet, createFileRoute, redirect, useRouter } from '@tanstack/react-router'
+import { Link, Outlet, createFileRoute, redirect, useParams, useRouter } from '@tanstack/react-router'
 
 import { Skyline } from '#/components/Skyline'
-import { CategoryIcon } from '#/components/tourist-map/CategoryIcon'
-import { useCategories } from '#/data/categories'
+import { sectionOf, useCategories } from '#/data/categories'
+import { sections } from '#/data/sections'
 import { authClient } from '#/lib/auth-client'
 import { ROLES } from '#/lib/permissions'
 import { getSessionUser } from '#/server/session'
@@ -27,6 +27,10 @@ const activeNavLink = { className: 'bg-white/15 text-white' }
 function AdminLayout() {
   const { user } = Route.useRouteContext()
   const { categories } = useCategories()
+  // A section stays highlighted on the pages of its categories too.
+  const params = useParams({ strict: false })
+  const currentSection =
+    params.section ?? (params.category ? sectionOf(categories, categories.find((c) => c.slug === params.category)?.id ?? '') : null)
   const router = useRouter()
   const queryClient = useQueryClient()
   const [open, setOpen] = useState(false)
@@ -34,6 +38,7 @@ function AdminLayout() {
   async function signOut() {
     await authClient.signOut()
     queryClient.removeQueries({ queryKey: ['admin'] })
+    await queryClient.invalidateQueries({ queryKey: ['site-status'] })
     await router.invalidate()
     router.navigate({ to: '/admin/login' })
   }
@@ -67,18 +72,18 @@ function AdminLayout() {
             <span aria-hidden className="grid size-5 place-items-center">◎</span>
             Panoramica
           </Link>
-          <p className="mt-5 px-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-mint">Contenuti</p>
-          {categories.map((category) => (
+          {/* The sections of the site: their categories are listed inside */}
+          <p className="mt-5 px-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-mint">Sezioni</p>
+          {sections.map((section) => (
             <Link
-              key={category.id}
-              to="/admin/$category"
-              params={{ category: category.slug }}
-              activeProps={activeNavLink}
+              key={section.id}
+              to="/admin/sezione/$section"
+              params={{ section: section.id }}
               onClick={close}
-              className={navLink}
+              className={`${navLink} ${section.id === currentSection ? activeNavLink.className : ''}`}
             >
-              <CategoryIcon id={category.id} className="size-5" />
-              {category.adminLabel}
+              <span aria-hidden className="size-3 shrink-0 rounded-full" style={{ backgroundColor: section.color }} />
+              {section.title}
             </Link>
           ))}
           {user.role === 'admin' && (
@@ -91,6 +96,10 @@ function AdminLayout() {
               <Link to="/admin/utenti" activeProps={activeNavLink} onClick={close} className={navLink}>
                 <span aria-hidden className="grid size-5 place-items-center">☺</span>
                 Utenti
+              </Link>
+              <Link to="/admin/impostazioni" activeProps={activeNavLink} onClick={close} className={navLink}>
+                <span aria-hidden className="grid size-5 place-items-center">⚙</span>
+                Impostazioni
               </Link>
             </>
           )}

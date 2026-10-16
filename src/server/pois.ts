@@ -4,7 +4,7 @@ import { z } from 'zod'
 
 import { db } from '#/db'
 import { categories, pois } from '#/db/schema'
-import { categoryType } from '#/lib/category-types'
+import { categoryType, isListType } from '#/lib/category-types'
 import { poiInput, poiInputFor } from '#/lib/poi-input'
 import { requireEditor } from '#/server/session'
 
@@ -33,6 +33,7 @@ export const adminListPois = createServerFn({ method: 'GET' })
 async function validateForCategory(input: PoiInput) {
   const [category] = await db.select({ type: categories.type }).from(categories).where(eq(categories.id, input.category))
   if (!category) throw new Error('Categoria non trovata')
+  if (isListType(category.type)) throw new Error('Una lista non ha contenuti propri: scegli una sua sottocategoria')
   const parsed = poiInputFor(categoryType(category.type)).safeParse(input)
   if (!parsed.success) throw new Error(parsed.error.issues.map((issue) => `${issue.path.join('.')}: ${issue.message}`).join('; '))
   return parsed.data

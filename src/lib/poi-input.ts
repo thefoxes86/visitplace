@@ -20,7 +20,6 @@ const poiFields = z.object({
   lon: z.number({ error: 'Scegli la posizione' }).min(-180).max(180),
   featured: z.boolean(),
   published: z.boolean(),
-  topic: z.string().nullable(),
   imageUrl: z.url('Indirizzo non valido').nullable(),
   address: z.string().trim().nullable(),
   phone: z.string().trim().nullable(),
@@ -50,7 +49,6 @@ export const poiInputFor = (type: CategoryType) =>
     // Clear what the type doesn't use, so switching type leaves nothing stale behind.
     .transform((poi) => ({
       ...poi,
-      topic: type.topic ? poi.topic : null,
       startsAt: type.dates ? poi.startsAt : null,
       endsAt: type.dates ? poi.endsAt : null,
       address: type.contacts.includes('address') ? poi.address : null,

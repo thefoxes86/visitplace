@@ -2,7 +2,7 @@ import { Link, createFileRoute } from '@tanstack/react-router'
 
 import type { ReactNode } from 'react'
 
-import { OtherSections, PageShell, SignpostNav } from '#/components/CategoryPage'
+import { CategoryCards, OtherSections, PageShell, SignpostNav, useSectionCategories } from '#/components/CategoryPage'
 import { gettingAround, gettingHere, guides, touristOffices, webcams } from '#/data/info'
 import { getSection } from '#/data/sections'
 import { breadcrumbs, seo } from '#/lib/seo'
@@ -35,6 +35,7 @@ const mapsSearch = (query: string) => `https://www.google.com/maps/search/?api=1
 
 function InfoPage() {
   const section = getSection('info')!
+  const categories = useSectionCategories('info')
 
   const content: Record<BlockId, ReactNode> = {
     'uffici-turistici': (
@@ -79,11 +80,10 @@ function InfoPage() {
       <>
         <ItemList items={guides} />
         <Link
-          to="/scopri/$topic"
-          params={{ topic: 'trekking' }}
+          to="/scopri"
           className="group mt-6 inline-flex items-center gap-1 text-sm font-semibold text-teal hover:text-coral"
         >
-          Sentieri ed escursioni
+          Sentieri, luoghi e paesaggi
           <span className="transition-transform group-hover:translate-x-1">→</span>
         </Link>
       </>
@@ -143,6 +143,13 @@ function InfoPage() {
           {content[block.id]}
         </section>
       ))}
+
+      {categories.length > 0 && (
+        <section className="mt-20">
+          <h2 className="font-display text-2xl font-semibold uppercase tracking-[0.15em] text-teal">Categorie</h2>
+          <CategoryCards list={categories} />
+        </section>
+      )}
     </PageShell>
   )
 }

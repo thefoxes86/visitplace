@@ -1,15 +1,23 @@
 /**
- * Initial contents of the `pois` table, loaded by `npm run db:seed`.
- * Once seeded, edit places in the admin (/admin), not here.
+ * Initial contents of the `categories` and `pois` tables, loaded by `npm run db:seed`.
+ * Once seeded, edit them in the admin (/admin), not here.
  */
+import type { CategorySectionId } from '../data/sections.ts'
 import type { SeedPoi } from '../data/pois.ts'
+
+/** Top-level categories of each section, all lists of categories: add their subcategories in the admin. */
+export const seedCategories: Record<CategorySectionId, string[]> = {
+  scopri: ['Borghi', 'Musei', 'Luoghi storici', 'Siti naturalistici', 'Palazzi', 'Chiese e luoghi sacri'],
+  vivi: ['Esperienze', 'Itinerari culturali', 'Eventi', 'Mercati'],
+  gusta: ['Ricette', 'Prodotti tipici', 'I produttori camaioresi'],
+  info: [],
+}
 
 export const seedPois: SeedPoi[] = [
   {
     id: 'piazza-san-bernardino',
     name: 'Piazza San Bernardino',
     category: 'culture',
-    topic: 'luoghi-storici',
     summary: 'Il cuore vivace del centro storico.',
     description:
       "La piazza principale di Camaiore, circondata dalle antiche case del borgo e dai caffè. È il punto di partenza naturale per una passeggiata tra le vie medievali del centro.",
@@ -22,7 +30,6 @@ export const seedPois: SeedPoi[] = [
     id: 'collegiata',
     name: 'Collegiata di Santa Maria Assunta',
     category: 'culture',
-    topic: 'chiese',
     summary: 'Chiesa romanica con il suo campanile.',
     description:
       'La chiesa principale di Camaiore, del XIII secolo, con una sobria facciata romanica e un alto campanile che domina il profilo del centro storico.',
@@ -35,7 +42,6 @@ export const seedPois: SeedPoi[] = [
     id: 'badia-san-pietro',
     name: 'Badia di San Pietro',
     category: 'culture',
-    topic: 'chiese',
     summary: 'Antica abbazia benedettina appena fuori le mura.',
     description:
       "Uno dei luoghi religiosi più antichi della Versilia: un'abbazia benedettina di origine altomedievale, tra i campi ai margini del paese.",
@@ -47,7 +53,6 @@ export const seedPois: SeedPoi[] = [
     id: 'museo-arte-sacra',
     name: "Museo d'Arte Sacra",
     category: 'culture',
-    topic: 'musei',
     summary: "La collezione d'arte sacra del territorio di Camaiore.",
     description:
       'Un piccolo museo che raccoglie dipinti, sculture, tessuti e oggetti liturgici provenienti dalle chiese di Camaiore e dei dintorni.',

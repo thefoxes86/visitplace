@@ -14,7 +14,7 @@ export const Route = createFileRoute('/admin/_panel/')({
 function Dashboard() {
   const { user } = Route.useRouteContext()
   const { data: pois } = useSuspenseQuery(adminPoisQuery)
-  const { categories, categoryOf } = useCategories()
+  const { roots, categoryOf, subtree } = useCategories()
   const recent = [...pois].sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime()).slice(0, 6)
 
   return (
@@ -22,8 +22,9 @@ function Dashboard() {
       <PageHeader title={`Ciao, ${user.name.split(' ')[0]}`} subtitle="I contenuti di Visit Camaiore" />
 
       <ul className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {categories.map((category) => {
-          const list = pois.filter((poi) => poi.category === category.id)
+        {roots.map((category) => {
+          const ids = subtree(category.id)
+          const list = pois.filter((poi) => ids.has(poi.category))
           const drafts = list.filter((poi) => !poi.published).length
           return (
             <li key={category.id}>

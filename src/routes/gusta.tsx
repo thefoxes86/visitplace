@@ -14,5 +14,5 @@ export const Route = createFileRoute('/gusta')({
       path: '/gusta',
       jsonLd: breadcrumbs([['Gusta', '/gusta']]),
     }),
-  component: () => <CategoryPage sectionId="gusta" category="restaurant" intro={INTRO} />,
+  component: () => <CategoryPage sectionId="gusta" intro={INTRO} />,
 })

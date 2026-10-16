@@ -1,4 +1,5 @@
 import { boolean, doublePrecision, index, integer, jsonb, pgTable, text, timestamp } from 'drizzle-orm/pg-core'
+import type { AnyPgColumn } from 'drizzle-orm/pg-core'
 
 import type { DetailValues } from '../lib/category-types.ts'
 
@@ -88,9 +89,13 @@ export const categories = pgTable('categories', {
   singular: text().notNull(),
   /** Marker and label colour, as #rrggbb. */
   color: text().notNull(),
-  /** Decides the fields of its places: id in src/lib/category-types.ts. */
+  /** Decides the fields of its places: id in src/lib/category-types.ts. Subcategories share their parent's, except under a list. */
   type: text().notNull().default('place'),
-  /** Order of legends, filters and the admin menu. */
+  /** Section of the site it belongs to (src/data/sections.ts): required for top-level categories, subcategories follow their parent. */
+  section: text(),
+  /** Parent category, for subcategories: nests to any depth. */
+  parentId: text('parent_id').references((): AnyPgColumn => categories.id, { onUpdate: 'cascade', onDelete: 'restrict' }),
+  /** Order of legends, filters and the admin menu, among siblings. */
   sortOrder: integer('sort_order').notNull().default(0),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at')
@@ -120,8 +125,6 @@ export const pois = pgTable(
     featured: boolean().notNull().default(false),
     /** Unpublished entries are only visible in the admin. */
     published: boolean().notNull().default(true),
-    /** Cultural places: sub-section of Scopri (id in src/data/scopri.ts). */
-    topic: text(),
     imageUrl: text('image_url'),
     address: text(),
     phone: text(),
@@ -142,3 +145,15 @@ export const pois = pgTable(
   },
   (t) => [index('pois_category_idx').on(t.category)],
 )
+
+// ── Settings ─────────────────────────────────────────────────────────────────
+
+/** Site settings changed in the admin, one row per key (src/lib/settings.ts). */
+export const settings = pgTable('settings', {
+  key: text().primaryKey(),
+  value: jsonb().notNull(),
+  updatedAt: timestamp('updated_at')
+    .notNull()
+    .defaultNow()
+    .$onUpdate(() => new Date()),
+})

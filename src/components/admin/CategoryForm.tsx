@@ -1,11 +1,15 @@
 import { useState } from 'react'
-import { useQueryClient } from '@tanstack/react-query'
+import { useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
 import { Link, useNavigate } from '@tanstack/react-router'
 
+import { adminCategoriesQuery } from '#/components/admin/queries'
 import { Alert, Card, Field, buttonClass, errorMessage, inputClass } from '#/components/admin/ui'
 import { TypeIcon } from '#/components/tourist-map/CategoryIcon'
 import { categoryInput } from '#/lib/category-input'
-import { CATEGORY_TYPES, CATEGORY_TYPE_IDS } from '#/lib/category-types'
+import { sectionOf } from '#/data/categories'
+import { categoryTree, subtreeIds } from '#/lib/category-tree'
+import { CATEGORY_TYPES, CATEGORY_TYPE_IDS, isListType } from '#/lib/category-types'
+import { CATEGORY_SECTION_IDS, getSection } from '#/data/sections'
 import { slugify } from '#/lib/poi-input'
 import { createCategory, updateCategory } from '#/server/categories'
 
@@ -21,6 +25,7 @@ const SINGULAR: Record<CategoryTypeId, string> = {
   hotel: 'albergo',
   trekking: 'percorso',
   climbing: 'falesia',
+  list: 'categoria',
 }
 
 /** Colours that sit well on the tourist map. */
@@ -32,22 +37,43 @@ const CONTACT_LABELS = { address: 'Indirizzo', phone: 'Telefono', email: 'Email'
 const generatedFields = (type: CategoryType) => [
   ...(type.dates ? ['Data di inizio', 'Data di fine'] : []),
   ...type.fields.map((field) => field.label + (field.unit ? ` (${field.unit})` : '')),
-  ...(type.topic ? ['Sezione di Scopri'] : []),
   ...type.contacts.map((contact) => CONTACT_LABELS[contact]),
 ]
 
-export function CategoryForm({ category }: { category?: AdminCategory }) {
+interface CategoryFormProps {
+  /** The category being edited; left out to create a new one. */
+  category?: AdminCategory
+  /** Parent of a new category, when created as a subcategory. */
+  parentId?: string
+  /** Section of a new top-level category, when created from a section's page. */
+  section?: string
+}
+
+export function CategoryForm({ category, parentId, section }: CategoryFormProps) {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
+  const { data: all } = useSuspenseQuery(adminCategoriesQuery)
+  const initialParent = all.find((c) => c.id === (category ? category.parentId : parentId))
   const [values, setValues] = useState({
     label: category?.label ?? '',
     adminLabel: category?.adminLabel ?? '',
     singular: category?.singular ?? '',
     slug: category?.slug ?? '',
-    type: (category?.type ?? '') as CategoryTypeId | '',
-    color: category?.color ?? COLORS[0],
+    type: (category?.type ?? initialParent?.type ?? '') as CategoryTypeId | '',
+    color: category?.color ?? initialParent?.color ?? COLORS[0],
     sortOrder: category?.sortOrder ?? 0,
+    parentId: initialParent?.id ?? '',
+    section: category?.section ?? (CATEGORY_SECTION_IDS.find((id) => id === section) || ''),
   })
+  const parent = all.find((c) => c.id === values.parentId)
+  /** A subcategory has its parent's type, so its places keep the same fields; under a list it picks its own. */
+  const typeLocked = Boolean(parent && !isListType(parent.type))
+  /** Subcategories follow the section of their top-level category. */
+  const parentSection = parent ? getSection(sectionOf(all, parent.id) ?? '') : undefined
+  // A category can't go under itself or one of its subcategories.
+  const ownSubtree = category ? subtreeIds(all, category.id) : new Set<string>()
+  const parentOptions = categoryTree(all).filter((c) => !ownSubtree.has(c.id))
+  const subcategories = ownSubtree.size - 1
   /** Fields that follow the name until edited by hand (new categories only). */
   const [touched, setTouched] = useState(() => new Set(category ? ['slug', 'adminLabel', 'singular'] : []))
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -72,6 +98,12 @@ export function CategoryForm({ category }: { category?: AdminCategory }) {
     if (!touched.has('singular')) set('singular', SINGULAR[type])
   }
 
+  function setParent(id: string) {
+    set('parentId', id)
+    const next = all.find((c) => c.id === id)
+    if (next && !isListType(next.type)) setType(next.type as CategoryTypeId)
+  }
+
   const typeChanged = category && values.type !== category.type && category.places > 0
 
   async function submit(e: React.FormEvent) {
@@ -82,6 +114,8 @@ export function CategoryForm({ category }: { category?: AdminCategory }) {
       // The id is the first address and never changes: places point to it.
       id: category?.id ?? values.slug,
       type: values.type || undefined,
+      parentId: values.parentId || null,
+      section: values.section || null,
     })
     if (!parsed.success) {
       const fieldErrors: Record<string, string> = {}
@@ -111,8 +145,56 @@ export function CategoryForm({ category }: { category?: AdminCategory }) {
       <div className="min-w-0 space-y-6">
         {formError && <Alert>{formError}</Alert>}
 
+        <Card title="Posizione">
+          <Field
+            label="Categoria padre"
+            htmlFor="parentId"
+            error={errors.parentId}
+            hint="Scegline una per creare una sottocategoria: i suoi contenuti compaiono anche nella categoria padre."
+          >
+            <select id="parentId" value={values.parentId} onChange={(e) => setParent(e.target.value)} className={inputClass}>
+              <option value="">Nessuna · categoria principale</option>
+              {parentOptions.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {'\u00a0\u00a0'.repeat(c.depth)}
+                  {c.depth > 0 ? '└ ' : ''}
+                  {c.label}
+                </option>
+              ))}
+            </select>
+          </Field>
+          {parent ? (
+            <p className="mt-4 text-sm font-light">
+              Sezione del sito: <span className="font-semibold text-teal">{parentSection?.title ?? '—'}</span>, come la categoria padre.
+            </p>
+          ) : (
+            <Field
+              label="Sezione del sito"
+              htmlFor="section"
+              error={errors.section}
+              hint="La categoria compare in questa sezione del sito e sotto di essa nel menu del backoffice."
+              className="mt-4"
+            >
+              <select id="section" value={values.section} onChange={(e) => set('section', e.target.value)} className={inputClass}>
+                <option value="" disabled>
+                  Scegli una sezione…
+                </option>
+                {CATEGORY_SECTION_IDS.map((id) => (
+                  <option key={id} value={id}>
+                    {getSection(id)?.title}
+                  </option>
+                ))}
+              </select>
+            </Field>
+          )}
+        </Card>
+
         <Card title="Tipo">
-          <p className="mb-4 text-sm font-light">Il tipo decide i campi della scheda di ogni contenuto della categoria.</p>
+          <p className="mb-4 text-sm font-light">
+            {typeLocked
+              ? `Le sottocategorie usano il tipo della categoria padre (${parent!.label}).`
+              : 'Il tipo decide i campi della scheda di ogni contenuto della categoria. Una Lista raccoglie solo sottocategorie.'}
+          </p>
           <div role="radiogroup" aria-label="Tipo" className="grid gap-3 sm:grid-cols-2">
             {CATEGORY_TYPE_IDS.map((id) => {
               const type = CATEGORY_TYPES[id]
@@ -120,11 +202,19 @@ export function CategoryForm({ category }: { category?: AdminCategory }) {
               return (
                 <label
                   key={id}
-                  className={`flex cursor-pointer items-start gap-3 rounded-md border p-3 transition ${
-                    checked ? 'border-teal bg-mint-light/60 ring-1 ring-teal' : 'border-ink/15 hover:border-teal'
-                  }`}
+                  className={`flex items-start gap-3 rounded-md border p-3 transition ${
+                    checked ? 'border-teal bg-mint-light/60 ring-1 ring-teal' : 'border-ink/15'
+                  } ${typeLocked ? (checked ? '' : 'opacity-40') : 'cursor-pointer hover:border-teal'}`}
                 >
-                  <input type="radio" name="type" value={id} checked={checked} onChange={() => setType(id)} className="sr-only" />
+                  <input
+                    type="radio"
+                    name="type"
+                    value={id}
+                    checked={checked}
+                    disabled={typeLocked}
+                    onChange={() => setType(id)}
+                    className="sr-only"
+                  />
                   <span
                     className={`grid size-9 shrink-0 place-items-center rounded-md ${checked ? 'bg-teal text-white' : 'bg-paper text-teal'}`}
                   >
@@ -140,7 +230,7 @@ export function CategoryForm({ category }: { category?: AdminCategory }) {
           </div>
           {errors.type && <p className="mt-2 text-xs font-semibold text-coral-dark">{errors.type}</p>}
 
-          {selectedType && (
+          {selectedType && !isListType(values.type) && (
             <div className="mt-5 border-t border-ink/10 pt-4">
               <p className="text-xs font-semibold uppercase tracking-wider text-teal">Campi generati</p>
               <p className="mt-1 text-xs font-light">Oltre a nome, descrizione, posizione e immagine:</p>
@@ -153,7 +243,17 @@ export function CategoryForm({ category }: { category?: AdminCategory }) {
               </ul>
             </div>
           )}
-          {typeChanged && (
+          {category && values.type === 'list' && category.places > 0 && (
+            <p className="mt-4 rounded-md bg-coral/10 px-3 py-2 text-xs font-semibold text-coral-dark">
+              La categoria ha {category.places} contenuti: una Lista non ne ha di propri, spostali prima in una sottocategoria.
+            </p>
+          )}
+          {category && values.type !== category.type && values.type !== 'list' && subcategories > 0 && (
+            <p className="mt-4 rounded-md bg-coral/10 px-3 py-2 text-xs font-semibold text-coral-dark">
+              Anche le {subcategories} sottocategorie passeranno al nuovo tipo.
+            </p>
+          )}
+          {typeChanged && values.type !== 'list' && (
             <p className="mt-4 rounded-md bg-coral/10 px-3 py-2 text-xs font-semibold text-coral-dark">
               La categoria ha {category.places} contenuti: i dettagli che il nuovo tipo non prevede non saranno più mostrati,
               e verranno tolti quando ciascun contenuto sarà salvato di nuovo.
@@ -188,7 +288,7 @@ export function CategoryForm({ category }: { category?: AdminCategory }) {
                 className={inputClass}
               />
             </Field>
-            <Field label="Indirizzo nel backoffice" htmlFor="slug" error={errors.slug} hint={`/admin/${values.slug || '…'}`}>
+            <Field label="Indirizzo" htmlFor="slug" error={errors.slug} hint={`/admin/${values.slug || '…'} e /categorie/${values.slug || '…'} sul sito`}>
               <input
                 id="slug"
                 value={values.slug}
@@ -236,7 +336,7 @@ export function CategoryForm({ category }: { category?: AdminCategory }) {
               {values.label || 'Anteprima'}
             </span>
           </div>
-          <Field label="Ordine" htmlFor="sortOrder" error={errors.sortOrder} hint={category ? 'Posizione nei filtri e nel menu: prima i numeri più bassi.' : 'Posizione nei filtri e nel menu. Lascia 0 per metterla in fondo.'} className="mt-4">
+          <Field label="Ordine" htmlFor="sortOrder" error={errors.sortOrder} hint={category ? 'Posizione tra le categorie dello stesso livello: prima i numeri più bassi.' : 'Posizione tra le categorie dello stesso livello. Lascia 0 per metterla in fondo.'} className="mt-4">
             <input
               id="sortOrder"
               type="number"

@@ -5,7 +5,7 @@ import type { ReactNode } from 'react'
 import { Skyline } from '#/components/Skyline'
 import { CategoryIcon } from '#/components/tourist-map/CategoryIcon'
 import { Compass } from '#/components/tourist-map/TouristMap'
-import { categoriesQuery, useCategories } from '#/data/categories'
+import { categoriesQuery, categoryLink, useCategories } from '#/data/categories'
 import { categoryType, formatDetail } from '#/lib/category-types'
 import { distanceKm, formatEventDate, poiImage, poiNumber } from '#/data/pois'
 import { poisQuery, usePois } from '#/data/use-pois'
@@ -171,7 +171,10 @@ function PoiPage() {
               <span className="grid size-6 place-items-center rounded-sm text-white" style={{ backgroundColor: category.color }}>
                 <CategoryIcon id={poi.category} className="size-3.5" />
               </span>
-              {category.label} · {poi.area}
+              <Link {...categoryLink(category)} className="hover:underline">
+                {category.label}
+              </Link>{' '}
+              · {poi.area}
             </p>
             <h1
               className="hero-fade mt-2 font-display text-[clamp(2rem,6vw,4.5rem)] font-extrabold uppercase leading-[0.95] tracking-wide text-coral"

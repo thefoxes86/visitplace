@@ -1,24 +1,8 @@
 import { createMiddleware, createServerFn } from '@tanstack/react-start'
-import { getRequestHeaders } from '@tanstack/react-start/server'
 
-import { auth } from '#/lib/auth'
-import { isRole } from '#/lib/permissions'
+import { currentUser } from '#/server/current-user'
 
-import type { Role } from '#/lib/permissions'
-
-export interface SessionUser {
-  id: string
-  name: string
-  email: string
-  role: Role
-}
-
-async function currentUser(): Promise<SessionUser | null> {
-  const session = await auth.api.getSession({ headers: getRequestHeaders() })
-  if (!session || !isRole(session.user.role) || session.user.banned) return null
-  const { id, name, email, role } = session.user
-  return { id, name, email, role }
-}
+export type { SessionUser } from '#/server/current-user'
 
 /** The signed-in backoffice user, or null. */
 export const getSessionUser = createServerFn({ method: 'GET' }).handler(currentUser)
