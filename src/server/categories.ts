@@ -21,6 +21,7 @@ const publicColumns = {
   type: categories.type,
   parentId: categories.parentId,
   section: categories.section,
+  featured: categories.featured,
 }
 
 const byMenuOrder = [asc(categories.sortOrder), asc(categories.label)]

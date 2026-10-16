@@ -25,6 +25,8 @@ export interface Category {
   parentId: string | null
   /** Section of the site it belongs to (scopri, vivi, gusta, info): set on top-level categories only. */
   section: string | null
+  /** Shown among the featured categories on the home page. */
+  featured: boolean
 }
 
 /** Loaded by the root route, so always ready in pages. */
@@ -45,6 +47,7 @@ const unknownCategory = (id: string): Category => ({
   type: 'place',
   parentId: null,
   section: null,
+  featured: false,
 })
 
 export function useCategories() {

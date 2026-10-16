@@ -95,6 +95,8 @@ export const categories = pgTable('categories', {
   section: text(),
   /** Parent category, for subcategories: nests to any depth. */
   parentId: text('parent_id').references((): AnyPgColumn => categories.id, { onUpdate: 'cascade', onDelete: 'restrict' }),
+  /** Shown among the featured categories on the home page. */
+  featured: boolean().notNull().default(false),
   /** Order of legends, filters and the admin menu, among siblings. */
   sortOrder: integer('sort_order').notNull().default(0),
   createdAt: timestamp('created_at').notNull().defaultNow(),

@@ -25,6 +25,8 @@ export const categoryInput = z.object({
   parentId: slug.nullable(),
   /** Section of the site: required for top-level categories, left out for subcategories. */
   section: z.enum(CATEGORY_SECTION_IDS, { error: 'Scegli una sezione' }).nullable(),
+  /** Shown among the featured categories on the home page. */
+  featured: z.boolean(),
 }).refine((data) => data.parentId || data.section, { path: ['section'], message: 'Scegli la sezione del sito' })
 
 /** What to do with what is inside a category being deleted. */
