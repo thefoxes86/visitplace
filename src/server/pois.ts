@@ -1,5 +1,5 @@
 import { createServerFn } from '@tanstack/react-start'
-import { asc, eq, max } from 'drizzle-orm'
+import { and, asc, eq, max } from 'drizzle-orm'
 import { z } from 'zod'
 
 import { db } from '#/db'
@@ -11,6 +11,7 @@ import { requireEditor } from '#/server/session'
 
 import type { Poi } from '#/data/pois'
 import type { PoiInput } from '#/lib/poi-input'
+import type { Track } from '#/lib/media'
 
 const byMapOrder = [asc(pois.sortOrder), asc(pois.createdAt), asc(pois.id)]
 
@@ -29,10 +30,22 @@ export const listPublicPois = createServerFn({ method: 'GET' }).handler(async ()
       .orderBy(...byMapOrder),
     hiddenCategoryIds(),
   ])
+  // Tracks stay out: they can be large, and only the place's own page draws one.
   return rows
     .filter((poi) => !hidden.has(poi.category))
-    .map(({ published, sortOrder, createdAt, updatedAt, ...poi }, i) => ({ ...poi, number: i + 1 }))
+    .map(({ published, sortOrder, createdAt, updatedAt, track, ...poi }, i) => ({ ...poi, hasTrack: track !== null, number: i + 1 }))
 })
+
+/** The GPS track of a published place, for its page. */
+export const getPoiTrack = createServerFn({ method: 'GET' })
+  .validator(z.object({ id: z.string() }))
+  .handler(async ({ data }): Promise<Track | null> => {
+    const [row] = await db
+      .select({ track: pois.track })
+      .from(pois)
+      .where(and(eq(pois.id, data.id), eq(pois.published, true)))
+    return row?.track ?? null
+  })
 
 // ── Admin ────────────────────────────────────────────────────────────────────
 

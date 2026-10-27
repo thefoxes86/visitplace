@@ -19,6 +19,7 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as ViviRouteImport } from './routes/vivi'
 import { Route as AdminPanelRouteImport } from './routes/admin/_panel'
 import { Route as AdminLoginRouteImport } from './routes/admin/login'
+import { Route as ApiUploadRouteImport } from './routes/api/upload'
 import { Route as CategorieSlugRouteImport } from './routes/categorie/$slug'
 import { Route as LuoghiPoiIdRouteImport } from './routes/luoghi/$poiId'
 import { Route as ScopriIndexRouteImport } from './routes/scopri/index'
@@ -84,6 +85,11 @@ const AdminPanelRoute = AdminPanelRouteImport.update({
 const AdminLoginRoute = AdminLoginRouteImport.update({
   id: '/admin/login',
   path: '/admin/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiUploadRoute = ApiUploadRouteImport.update({
+  id: '/api/upload',
+  path: '/api/upload',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CategorieSlugRoute = CategorieSlugRouteImport.update({
@@ -182,6 +188,7 @@ export interface FileRoutesByFullPath {
   '/vivi': typeof ViviRoute
   '/admin': typeof AdminPanelRouteWithChildren
   '/admin/login': typeof AdminLoginRoute
+  '/api/upload': typeof ApiUploadRoute
   '/categorie/$slug': typeof CategorieSlugRoute
   '/luoghi/$poiId': typeof LuoghiPoiIdRoute
   '/scopri/': typeof ScopriIndexRoute
@@ -209,6 +216,7 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/vivi': typeof ViviRoute
   '/admin/login': typeof AdminLoginRoute
+  '/api/upload': typeof ApiUploadRoute
   '/categorie/$slug': typeof CategorieSlugRoute
   '/luoghi/$poiId': typeof LuoghiPoiIdRoute
   '/scopri': typeof ScopriIndexRoute
@@ -236,6 +244,7 @@ export interface FileRoutesById {
   '/vivi': typeof ViviRoute
   '/admin/_panel': typeof AdminPanelRouteWithChildren
   '/admin/login': typeof AdminLoginRoute
+  '/api/upload': typeof ApiUploadRoute
   '/categorie/$slug': typeof CategorieSlugRoute
   '/luoghi/$poiId': typeof LuoghiPoiIdRoute
   '/scopri/': typeof ScopriIndexRoute
@@ -266,6 +275,7 @@ export interface FileRouteTypes {
     | '/vivi'
     | '/admin'
     | '/admin/login'
+    | '/api/upload'
     | '/categorie/$slug'
     | '/luoghi/$poiId'
     | '/scopri/'
@@ -293,6 +303,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/vivi'
     | '/admin/login'
+    | '/api/upload'
     | '/categorie/$slug'
     | '/luoghi/$poiId'
     | '/scopri'
@@ -319,6 +330,7 @@ export interface FileRouteTypes {
     | '/vivi'
     | '/admin/_panel'
     | '/admin/login'
+    | '/api/upload'
     | '/categorie/$slug'
     | '/luoghi/$poiId'
     | '/scopri/'
@@ -348,6 +360,7 @@ export interface RootRouteChildren {
   ViviRoute: typeof ViviRoute
   AdminPanelRoute: typeof AdminPanelRouteWithChildren
   AdminLoginRoute: typeof AdminLoginRoute
+  ApiUploadRoute: typeof ApiUploadRoute
   CategorieSlugRoute: typeof CategorieSlugRoute
   LuoghiPoiIdRoute: typeof LuoghiPoiIdRoute
   ScopriIndexRoute: typeof ScopriIndexRoute
@@ -424,6 +437,13 @@ declare module '@tanstack/react-router' {
       path: '/admin/login'
       fullPath: '/admin/login'
       preLoaderRoute: typeof AdminLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/upload': {
+      id: '/api/upload'
+      path: '/api/upload'
+      fullPath: '/api/upload'
+      preLoaderRoute: typeof ApiUploadRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/categorie/$slug': {
@@ -610,6 +630,7 @@ const rootRouteChildren: RootRouteChildren = {
   ViviRoute: ViviRoute,
   AdminPanelRoute: AdminPanelRouteWithChildren,
   AdminLoginRoute: AdminLoginRoute,
+  ApiUploadRoute: ApiUploadRoute,
   CategorieSlugRoute: CategorieSlugRoute,
   LuoghiPoiIdRoute: LuoghiPoiIdRoute,
   ScopriIndexRoute: ScopriIndexRoute,

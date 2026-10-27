@@ -3,6 +3,7 @@ import type { AnyPgColumn } from 'drizzle-orm/pg-core'
 
 import type { DetailValues } from '../lib/category-types.ts'
 import type { RecurrenceId } from '../lib/event-dates.ts'
+import type { GalleryPhoto, Track } from '../lib/media.ts'
 
 // ── Auth (Better Auth + its admin plugin) ────────────────────────────────────
 
@@ -137,6 +138,10 @@ export const pois = pgTable(
     website: text(),
     /** Fields of the category's type (src/lib/category-types.ts), e.g. difficulty of a trek. */
     details: jsonb().$type<DetailValues>().notNull().default({}),
+    /** Photos shown on the place's page, in order (src/lib/media.ts). */
+    gallery: jsonb().$type<GalleryPhoto[]>().notNull().default([]),
+    /** GPS track from a .gpx file, drawn on the place's page; null without one. */
+    track: jsonb().$type<Track>(),
     /** Events only. For repeating events, the first occurrence; for all-day events, midnight of the first and last day. */
     startsAt: timestamp('starts_at'),
     endsAt: timestamp('ends_at'),

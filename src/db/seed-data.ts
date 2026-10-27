@@ -30,6 +30,7 @@ export const seedCategories: Record<CategorySectionId, (string | SeedCategory)[]
     { label: 'Siti naturalistici', children: [places('Montagne, grotte e cascate'), places('Mare e parchi')] },
     { label: 'Palazzi', children: [places('Palazzi, ville e teatri')] },
     { label: 'Chiese e luoghi sacri', children: [places('Chiese del centro'), places('Pievi e abbazie')] },
+    { label: 'Outdoor', children: [{ label: 'Trekking', type: 'trekking', singular: 'percorso' }] },
   ],
   vivi: ['Esperienze', 'Itinerari culturali', 'Eventi', 'Mercati'],
   gusta: [
@@ -89,6 +90,50 @@ const scopriPois: SeedPoi[] = [
     area: 'Valle della Freddana',
     lat: 43.92047,
     lon: 10.37171,
+  },
+  {
+    id: 'metato',
+    name: 'Metato',
+    category: 'borghi-di-collina',
+    summary: 'Il borgo dei seccatoi di castagne sulle pendici del Prana, con la vista fino alle isole.',
+    description:
+      "Arroccato a 414 metri sulle pendici del Monte Prana, Metato prende il nome dal metato, il seccatoio delle castagne. Il paese prese forma soprattutto nel Settecento, quando furono costruiti la chiesa di Santa Maria Assunta, il campanile e la fontana. Fino alla fine degli anni Settanta non aveva luce elettrica né strada: ci si arrivava solo a piedi, in un'ora di sentiero da Vado. Si viveva di olive e castagne, e ogni famiglia aveva il suo forno per il pane, le torte salate e la scarpaccia.\n\nDal borgo lo sguardo scende sulla piana di Camaiore e, oltre i colli di Pedona e Monteggiori, fino al mare; nelle giornate più limpide si vedono Capraia, la Gorgona e forse la Corsica. Sulla piazza della chiesa, una lapide riporta i versi del poeta Bruno Moriconi dedicati al paese. Poco lontano, nella Buca del Tasso, sono stati trovati i resti di un uomo di Neanderthal di circa 40.000 anni fa.",
+    area: 'Colline di Camaiore',
+    lat: 43.95238,
+    lon: 10.32897,
+  },
+  {
+    id: 'salapreti-summonti',
+    name: 'Salapreti e Summonti',
+    category: 'borghi-di-collina',
+    summary: 'Piccole località sulle colline sotto il Prana, affacciate sulla conca di Camaiore.',
+    description:
+      "Salapreti e Summonti sono piccoli nuclei di case sparsi sulle colline tra la Pieve e Metato, ai piedi del Monte Prana, con la vista aperta sulla conca di Camaiore e fino al mare. Sono attraversati da alcuni sentieri: la Via del Lucente, che da Gombitelli scende a mezza costa sul Prana passando per Torcigliano, Buchignano, Peralla e Salapreti, e l'anello facile che dalla Badia sale a Metato e torna per Summonti. Da Salapreti, in occasione delle processioni, si impartisce la benedizione sulla vallata di Camaiore.",
+    area: 'Colline di Camaiore',
+    lat: 43.93696,
+    lon: 10.3306,
+  },
+  {
+    id: 'candalla',
+    name: 'Candalla',
+    category: 'borghi-di-collina',
+    summary: 'La valle dei mulini lungo il Lombricese, tra acqua fredda e pareti di roccia.',
+    description:
+      "Candalla è il piccolo nucleo raccolto lungo il Rio Lombricese, ai piedi delle pareti del Monte Penna. Per secoli la forza dell'acqua ha mosso decine di opifici: lungo il torrente si incontrano ancora i resti dei mulini Marchetti e Pardini, del Cinquecento, del Molino Moriconi (1648), del Molinaccio (1690), del frantoio Benedetti e del mulino e polverificio Benetti (1834) e del pastificio Beragna, dell'Ottocento, oltre all'antica ferriera Barsi, ancora in attività.\n\nDal vecchio mulino di Candalla parte un sentiero facile e ombreggiato, di circa 5 km e 310 metri di dislivello, che risale le cascatelle d'acqua fredda dove d'estate si fa il bagno; le pareti intorno sono amate dagli arrampicatori. Si arriva seguendo le indicazioni per Vado e Casoli; i parcheggi sono pochi e in estate il Comune organizza una navetta. Alcuni ruderi sono pericolanti: meglio non entrarci.",
+    area: 'Valle del Lombricese',
+    lat: 43.95739,
+    lon: 10.32394,
+  },
+  {
+    id: 'orbicciano',
+    name: 'Orbicciano',
+    category: 'borghi-di-collina',
+    summary: 'Case sparse sulle colline della Freddana, con due chiese romaniche e una villa del Cinquecento.',
+    description:
+      "Orbicciano non ha un vero centro: è un insieme di nuclei sparsi sulle colline della val Freddana, a metà strada tra Camaiore e Lucca, come Brentaccio, Campo, Piana di Colle e Misigliano. Il nome è di origine romana e ricorda probabilmente un antico proprietario del fondo. Nel 1183 gli uomini del castello di Urbicciano giurarono fedeltà al Comune di Lucca, e dal 1617 il paese fa parte della Vicaria di Camaiore.\n\nLa chiesa di San Lorenzo, del IX secolo, è la più antica e conserva i tratti romanici, con il portale laterale ad archivolto bicolore. La parrocchiale di San Giorgio, citata già nel 967, è stata ampliata nel Settecento e nell'Ottocento, ma mantiene il campanile dell'XI secolo. Tra le case si trova anche la cinquecentesca Villa Cenami Spada.",
+    area: 'Valle della Freddana',
+    lat: 43.90985,
+    lon: 10.39437,
   },
   {
     id: 'casoli',
@@ -235,6 +280,39 @@ const scopriPois: SeedPoi[] = [
     lon: 10.3554,
   },
   {
+    id: 'monte-matanna',
+    name: 'Monte Matanna',
+    category: 'montagne-grotte-e-cascate',
+    summary: 'La piramide di roccia più alta delle Apuane meridionali, sopra Casoli.',
+    description:
+      "Con i suoi 1.317 metri, il Matanna è la cima più alta delle Apuane meridionali: la vetta, dalla caratteristica forma a piramide, si trova nel comune di Stazzema, ma le sue pendici scendono su Casoli e sulla Grotta all'Onda. Il massiccio comprende anche il Monte Nona e il Procinto, separati dalla vetta dal Passo del Callare; vicino alla cima c'è un piccolo laghetto, il Bozzone. Nel 1910 una funicolare saliva dalla Grotta all'Onda fino alla Foce del Pallone.\n\nIn alto la roccia nuda si alterna a piccoli prati fioriti, più in basso boschi di faggi e conifere, dove vivono mufloni, caprioli e daini; nel cielo si vede l'aquila reale. Nessun sentiero CAI arriva in vetta, che si raggiunge per tracce di cresta, ma i sentieri 3, 5, 109 e 121 girano attorno al massiccio. Dalla cima la vista abbraccia tutta la catena apuana e gran parte della Toscana settentrionale. Per una sosta ci sono il Ristoro Alto Matanna, a 1.038 metri, e il rifugio CAI Forte dei Marmi, a 865.",
+    area: 'Valle del Lombricese',
+    lat: 43.98392,
+    lon: 10.336,
+  },
+  {
+    id: 'monte-pedone',
+    name: 'Monte Pedone',
+    category: 'montagne-grotte-e-cascate',
+    summary: 'La cima più meridionale delle Apuane, un prato panoramico tra Lucchesia e mare.',
+    description:
+      "Alto 1.013 metri, il Pedone chiude a sud la cresta del Monte Prana ed è considerato la cima più meridionale delle Alpi Apuane: oltre, i rilievi scendono in colline verso Massarosa e il Pisano. È una montagna erbosa, che ricorda l'Appennino, con rimboschimenti di conifere più in basso e agrifogli lungo il sentiero. Dalla vetta, segnata da un gruppo di sassi, la vista corre dal Piglione e dalla Pania Secca alla piana di Camaiore, alla costa con le isole, alla Corsica e al lago di Massaciuccoli.\n\nNon ci sono sentieri segnati fino in cima, ma la salita è semplice per chi sa orientarsi. Il percorso più comodo parte dal Passo del Lucese, dove sorge l'antica chiesa di San Jacopo: si segue il sentiero 101 fino al bivio per le Case Stradone e si sale per la Casa del Maestro fino alla vetta. Altre tracce partono da Torcigliano, da Buchignano e da Agliano-Peralla.",
+    area: 'Valle della Freddana',
+    lat: 43.93741,
+    lon: 10.36336,
+  },
+  {
+    id: 'grotta-del-tambugione',
+    name: 'Grotta del Tambugione',
+    category: 'montagne-grotte-e-cascate',
+    summary: "Una grande caverna sopra Metato, usata come sepolcro collettivo nell'età del Rame.",
+    description:
+      "Sul versante occidentale del Monte Ciurlaglia, sopra Metato, si apre una grande caverna larga all'ingresso oltre 12 metri e profonda 24, con un'ampia volta a cupola. Circa 5.000 anni fa, nell'età del Rame, fu usata come luogo di sepoltura collettiva: gli scavi di Nello Puccioni, nel 1914, hanno riportato alla luce le ossa di almeno sei persone, tra adulti, un ragazzo e un bambino, con un corredo semplice di ceramiche, un raschiatoio e due punte di freccia in pietra, insieme a resti di capre, caprioli e cinghiali.\n\nSi raggiunge con una breve deviazione, circa 40 minuti andata e ritorno, dalla mulattiera di Metato, lungo l'anello Candalla – Casoli – Metato. Il bivio è segnato in rosso con la scritta \"grotta Tambugione\"; vicino alle sorgenti la traccia sembra sparire, ma i segni riprendono poco dopo. Non c'è parcheggio vicino: si lascia l'auto a Candalla.",
+    area: 'Valle del Lombricese',
+    lat: 43.9584,
+    lon: 10.33447,
+  },
+  {
     id: 'pontile-lido-di-camaiore',
     name: 'Pontile Bellavista Vittoria',
     category: 'mare-e-parchi',
@@ -288,10 +366,11 @@ const scopriPois: SeedPoi[] = [
     id: 'collegiata',
     name: 'Collegiata di Santa Maria Assunta',
     category: 'chiese-del-centro',
-    summary: 'La chiesa principale di Camaiore, del 1278, con il suo campanile.',
+    summary: 'La chiesa madre del centro, nata nel 1278, con il campanile trecentesco sulla piazza.',
     description:
-      "Costruita nel 1278 su Piazza San Bernardino, ha una facciata romanica con un piccolo rosone; il campanile, del 1365, domina il profilo del centro storico. All'interno, a tre navate, si trovano uno degli organi più antichi della Toscana, del Cinquecento, un crocifisso ligneo del Trecento, la Madonna del Carmine di Giovanni Marracci e la Comunione degli Apostoli di Pier Dandini. Il fonte battesimale è ricavato da un sarcofago romano.",
+      "Nasce nel 1278, quando il borgo, fino ad allora legato alla Badia di San Pietro, si allarga a nuovo centro di Camaiore. Diventa chiesa battesimale nel 1387 e collegiata nel 1515, per volere di papa Leone X su richiesta della Repubblica di Lucca. Dopo il terremoto del 1536 e gli ampliamenti barocchi del Settecento, all'inizio del Novecento ha ritrovato fuori l'aspetto romanico: una facciata asimmetrica in pietra squadrata, con due portali e un rosone, e a sinistra il campanile quadrato, alzato tra il 1350 e il 1365.\n\nL'interno a croce latina, a tre navate con cupola, conserva il fonte battesimale del 1387, le pale di Giovanni Marracci, l'Annunciazione di Stefano Tofanelli e la Comunione degli Apostoli di Pier Dandini, l'Incoronazione della Vergine affrescata da Benedetto Brandimarte nella cupola e un crocifisso ligneo del Trecento. Sopra l'ingresso, l'organo costruito da Paolino Bertolucci nel 1866.",
     area: 'Centro storico',
+    address: 'Piazza San Bernardino da Siena',
     lat: 43.93801,
     lon: 10.30431,
     featured: true,
@@ -322,9 +401,9 @@ const scopriPois: SeedPoi[] = [
     id: 'badia-san-pietro',
     name: 'Badia di San Pietro',
     category: 'pievi-e-abbazie',
-    summary: 'Abbazia benedettina di origine longobarda, tappa della Via Francigena.',
+    summary: 'L’abbazia già citata nel 761, per secoli tappa dei pellegrini della Via Francigena.',
     description:
-      "Fondata dai monaci benedettini nell'alto Medioevo, lungo la strada tra Lucca e Luni, la Badia è stata per secoli un punto di riferimento per i pellegrini della Via Francigena. Nel XII secolo, anche grazie ai doni di Matilde di Canossa, la chiesa fu ampliata a tre navate. Conserva l'impianto romanico originale, l'abside, la parte bassa della facciata e i resti delle mura merlate del monastero; si entra dalla vecchia porta del convento. L'organo seicentesco è il protagonista, ogni estate, del Festival Organistico Internazionale Città di Camaiore.",
+      "Documentata già nel 761, in età longobarda, la Badia crebbe nei secoli in un complesso di chiesa, campanile, cimitero e monastero chiuso da mura merlate, e all'inizio del XII secolo il suo abate governava anche la vita civile del territorio. In quegli anni, grazie anche a una donazione di Matilde di Canossa, la chiesa a navata unica fu ampliata con le navate laterali, la facciata e l'abside. Nel Duecento passò ai monaci florensi; nel 1315 e nel 1329 fu saccheggiata e incendiata insieme a Camaiore, da Castruccio Castracani e poi da Marco Visconti.\n\nSi entra dall'arco in pietra, unico resto delle mura, attraverso il prato dell'antico cimitero. La facciata romanica ha sul portale un affresco della Madonna in trono tra due santi; accanto all'abside si alza il campanile coronato da merli ghibellini. Dentro, tre navate su pilastri quadrati e due immagini trecentesche sui pilastri, Santa Maria Egiziaca e la Madonna della Pietà. L'organo Mascioni del 1995 è il protagonista, ogni estate, del Festival Organistico Internazionale Città di Camaiore.",
     area: 'Centro storico',
     address: 'Via Badia 15',
     lat: 43.93856,
@@ -504,8 +583,155 @@ const gustaPois: SeedPoi[] = [
   },
 ]
 
+/**
+ * Hikes of the Outdoor section, each placed at its starting point: routes from escursioniapuane.com,
+ * SeiVersilia and CAI Firenze; lengths, gains and times only where a source gives them.
+ */
+const trekkingPois: SeedPoi[] = [
+  {
+    id: 'trekking-matanna-da-casoli',
+    name: 'Monte Matanna da Casoli',
+    category: 'trekking',
+    summary: 'Il grande anello del Matanna da Trescolli, per crinali facili e panoramici.',
+    description:
+      "Dalla frazione di Trescolli, sopra Casoli, il sentiero 106 sale alla Foce di San Rocchino, con la cappella di San Rocco, e il 3 raggiunge la Foce di Grattaculo e poi, a mezza costa sul versante sud, la Foce del Pallone, con una marginetta in marmo. Da qui il crinale est-sud-est, facile e panoramico, porta in vetta a 1.317 metri. Si scende per il crinale nord-ovest, segnato in blu, fino al Callare del Matanna con il suo grande crocifisso, poi con il 5 al rifugio Forte dei Marmi e con il 121 si torna a Grattaculo, chiudendo l'anello.\n\nDalla vetta la vista abbraccia le Panie, le Apuane, il lago di Massaciuccoli, il mare e, nelle giornate limpide, l'Arcipelago Toscano.",
+    area: 'Valle del Lombricese',
+    lat: 43.96428,
+    lon: 10.32424,
+    details: {
+      difficulty: 'E',
+      elevationGain: 1000,
+      duration: '6–7 h',
+      start: 'Trescolli, frazione di Casoli (523 m)',
+      loop: true,
+    },
+  },
+  {
+    id: 'trekking-prana-da-metato',
+    name: 'Monte Prana da Metato',
+    category: 'trekking',
+    summary: 'La salita classica al Prana sul sentiero 104, dal borgo dei seccatoi.',
+    description:
+      "Da Metato (414 m), raggiunto da Lombrici con una strada a tornanti, il sentiero CAI 104 sale per le Casette fino al colle a 914 metri, poi per la valletta sommitale e la cresta nord-ovest arriva alla grande croce di ferro della vetta, a 1.221 metri. È la via normale, senza difficoltà. Si può tornare per la stessa strada o chiudere un anello sul versante occidentale.\n\nDalla vetta la vista corre dalla costa alle isole, dall'Altissimo e dalle Panie alle colline di Lucca e di Pisa.",
+    area: 'Colline di Camaiore',
+    lat: 43.95238,
+    lon: 10.32897,
+    details: {
+      difficulty: 'E',
+      length: 9.8,
+      elevationGain: 800,
+      duration: '4 h 30',
+      start: 'Metato (414 m)',
+      loop: true,
+    },
+  },
+  {
+    id: 'trekking-prana-da-passo-del-lucese',
+    name: 'Monte Prana dal Passo del Lucese',
+    category: 'trekking',
+    summary: 'Al Prana dal valico tra Camaiore e la Pedogna, sul sentiero 101.',
+    description:
+      "Dal Passo del Lucese (558 m), con l'antica chiesa di San Jacopo, il sentiero CAI 101 sale prima su asfalto ripido, poi su sterrato, fino alla Focetta di San Vincenzo (912 m), dove si prende il 104 per la vetta (1.221 m). In alternativa, dalla Casa Bianca (775 m) si sale per tracce non segnate lungo la cresta sud-est. Il percorso è adatto anche a escursionisti poco allenati, ma sul crinale ci sono alcuni tratti esposti.",
+    area: 'Valle della Freddana',
+    lat: 43.93648,
+    lon: 10.38217,
+    details: {
+      difficulty: 'E',
+      length: 12,
+      elevationGain: 700,
+      duration: '5–6 h',
+      start: 'Passo del Lucese (558 m)',
+    },
+  },
+  {
+    id: 'trekking-gabberi-da-la-culla',
+    name: 'Monte Gabberi da La Culla',
+    category: 'trekking',
+    summary: 'La salita più panoramica al Gabberi, ripida, sul sentiero 107.',
+    description:
+      "Da La Culla (451 m) il sentiero 107 sale per le Case ai Lecci (601 m) e la Foce dell'Arsiccio. Verso i 950 metri si attraversa il Ripiano dei Pennati, dove la roccia è incisa da tante figure a forma di roncola; poco oltre c'è la vetta, a 1.108 metri, con una grande croce di metallo. È la via più panoramica, ma anche ripida e faticosa.\n\nDalla cima, cantata da D'Annunzio, si vede la costa da Livorno a La Spezia con le isole e la piana dal lago di Massaciuccoli a Camaiore. Si può tornare per la stessa via o scendere con il 107 alla Foce di San Rocchino.",
+    area: 'Colline di Camaiore',
+    lat: 43.95749,
+    lon: 10.27613,
+    details: {
+      difficulty: 'E',
+      elevationGain: 660,
+      start: 'La Culla (451 m)',
+    },
+  },
+  {
+    id: 'trekking-gabberi-da-casoli',
+    name: 'Monte Gabberi da Casoli',
+    category: 'trekking',
+    summary: 'Da Trescolli a San Rocchino e poi per la cresta est, con vista sul mare.',
+    description:
+      "Da Trescolli (523 m), frazione di Casoli, il sentiero 106 sale alla Foce di San Rocchino (801 m). Da qui si segue per circa 2 km la cresta est del Gabberi, tenendosi sul versante sud con il mare davanti, con alcuni facili passaggi su roccia nel tratto finale, fino alla croce della vetta (1.108 m).",
+    area: 'Valle del Lombricese',
+    lat: 43.96428,
+    lon: 10.32424,
+    details: {
+      difficulty: 'E',
+      elevationGain: 590,
+      start: 'Trescolli, frazione di Casoli (523 m)',
+    },
+  },
+  {
+    id: 'trekking-gabberi-da-santanna',
+    name: "Monte Gabberi da Sant'Anna",
+    category: 'trekking',
+    summary: "Dal paese della memoria al Gabberi, per i boschi della Foce di Farnocchia.",
+    description:
+      "Da Sant'Anna di Stazzema (650 m) il sentiero 4 passa per le Case Sennari e le Case di Berna e, attraverso il bosco, raggiunge la Foce di Farnocchia (873 m). Da qui la cresta nord-ovest, segnata in blu, porta alla vetta (1.108 m). Si può chiudere un anello passando per il Monte Lieto e la Foce di Sant'Anna.\n\nSant'Anna è il paese della strage del 12 agosto 1944, in cui furono uccisi oltre 560 civili: oggi è Parco Nazionale della Pace e merita una visita al museo e all'ossario del Col di Cava.",
+    area: 'Colline di Camaiore',
+    lat: 43.97412,
+    lon: 10.27353,
+    details: {
+      difficulty: 'E',
+      length: 9.5,
+      elevationGain: 700,
+      duration: '4 h, più le soste',
+      start: "Sant'Anna di Stazzema (650 m)",
+      loop: true,
+    },
+  },
+  {
+    id: 'trekking-pedone-da-passo-del-lucese',
+    name: 'Monte Pedone dal Passo del Lucese',
+    category: 'trekking',
+    summary: 'Alla cima più meridionale delle Apuane, per la Casa del Maestro.',
+    description:
+      "Dal Passo del Lucese (558 m) si segue il sentiero 101 fino al bivio segnato per le Case Stradone, poi una traccia evidente fino alla Casa del Maestro (887 m), rifugio per chi sale al Prana e al Pedone. Si prosegue nel bosco e poi allo scoperto, in un tratto molto panoramico, fino alla vetta erbosa (1.013 m). Dal bivio in poi il percorso non è segnato: è semplice, ma serve un minimo di orientamento. Si può chiudere un anello scendendo per la cresta sud-est verso la Casa Bernardi.",
+    area: 'Valle della Freddana',
+    lat: 43.93648,
+    lon: 10.38217,
+    details: {
+      difficulty: 'E',
+      elevationGain: 455,
+      start: 'Passo del Lucese (558 m)',
+    },
+  },
+  {
+    id: 'trekking-traversata-frazioni-camaioresi',
+    name: 'Traversata delle Frazioni Camaioresi',
+    category: 'trekking',
+    summary: 'I sentieri camaioresi da Santa Lucia a Migliano, attraverso undici frazioni.',
+    description:
+      "Detta anche Via Bassa, la traversata collega per circa 30 km undici frazioni sulle colline e le prime pendici delle Apuane meridionali, da Santa Lucia fino a Migliano, nelle Seimiglia, su sentieri e antiche mulattiere. Tocca Monteggiori, La Culla, Greppolungo, Casoli, Metato, Summonti, Peralla, Torcigliano e Gombitelli, sempre con la vista sulla conca di Camaiore, sulla piana di Capezzano e sul mare.\n\nÈ segnata in bianco e giallo, con pannelli informativi in diversi paesi, ma in alcuni tratti i segni sono radi. Si può percorrere a tappe, scegliendo i tratti tra una frazione e l'altra.",
+    area: 'Colline di Camaiore',
+    lat: 43.94118,
+    lon: 10.27158,
+    details: {
+      difficulty: 'E',
+      length: 30,
+      duration: 'Più giorni, a tappe',
+      start: 'Santa Lucia (arrivo a Migliano)',
+    },
+  },
+]
+
 export const seedPois: SeedPoi[] = [
   ...scopriPois,
+  ...trekkingPois,
   ...gustaPois,
   // Demo listings: replace with real restaurants, B&Bs and events.
   {

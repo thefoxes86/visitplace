@@ -1,5 +1,6 @@
 import type { DetailValues } from '#/lib/category-types'
 import type { RecurrenceId } from '#/lib/event-dates'
+import type { GalleryPhoto } from '#/lib/media'
 
 /** A point of the tourist map, as stored in the `pois` table. */
 export interface Poi {
@@ -31,6 +32,10 @@ export interface Poi {
   allDay: boolean
   recurrence: RecurrenceId | null
   recurrenceUntil: Date | null
+  /** Photos of the place's page, in order. */
+  gallery: GalleryPhoto[]
+  /** Whether it has a GPS track: the points load with its page only (getPoiTrack). */
+  hasTrack: boolean
 }
 
 /** A place in src/db/seed-data.ts: everything optional is left out. */

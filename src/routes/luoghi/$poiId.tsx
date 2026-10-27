@@ -10,6 +10,9 @@ import { categoryType, formatDetail } from '#/lib/category-types'
 import { distanceKm, poiImage, poiNumber } from '#/data/pois'
 import { currentOccurrence, formatOccurrence, formatRecurrence } from '#/lib/event-dates'
 import { poisQuery, usePois } from '#/data/use-pois'
+import { PoiGallery } from '#/components/PoiGallery'
+import { TrackMap } from '#/components/TrackMap'
+import { getPoiTrack } from '#/server/pois'
 import { absoluteUrl, breadcrumbs, seo } from '#/lib/seo'
 
 import type { Category } from '#/data/categories'
@@ -23,7 +26,9 @@ export const Route = createFileRoute('/luoghi/$poiId')({
     ])
     const poi = pois.find((p) => p.id === params.poiId)
     if (!poi) throw notFound()
-    return { poi, category: categories.find((c) => c.id === poi.category) }
+    // The track loads with the page only: the list of places leaves it out.
+    const track = poi.hasTrack ? await getPoiTrack({ data: { id: poi.id } }) : null
+    return { poi, track, category: categories.find((c) => c.id === poi.category) }
   },
   head: ({ loaderData, params }) =>
     loaderData
@@ -146,7 +151,7 @@ function infoRows(poi: Poi, category: Category) {
 const km = (d: number) => (d < 1 ? `${Math.round(d * 1000)} m` : `${d.toFixed(1).replace('.', ',')} km`)
 
 function PoiPage() {
-  const { poi } = Route.useLoaderData()
+  const { poi, track } = Route.useLoaderData()
   const { categoryOf } = useCategories()
   const category = categoryOf(poi.category)
   const nearby = usePois()
@@ -207,8 +212,11 @@ function PoiPage() {
               <span className="block self-start border-b-2 border-coral text-right font-display text-7xl font-light leading-none text-coral">
                 {poiNumber(poi)}
               </span>
-              <p className="text-lg font-light leading-relaxed">{poi.description}</p>
+              <p className="whitespace-pre-line text-lg font-light leading-relaxed">{poi.description}</p>
             </div>
+
+            <PoiGallery photos={poi.gallery} name={poi.name} />
+            {track && <TrackMap track={track} name={poi.name} />}
 
             {/* Practical info, framed like the legend of the map */}
             <section className="relative mt-14 border-2 border-coral px-5 pb-5 pt-8">

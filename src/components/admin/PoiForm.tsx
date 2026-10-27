@@ -3,6 +3,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { Link, useNavigate } from '@tanstack/react-router'
 
 import { LocationPicker } from '#/components/admin/LocationPicker'
+import { GalleryEditor, TrackEditor, uploadPhoto } from '#/components/admin/MediaEditors'
 import { Alert, Card, Field, Toggle, buttonClass, errorMessage, inputClass } from '#/components/admin/ui'
 import { categoryTree, useCategories } from '#/data/categories'
 import { poiImage } from '#/data/pois'
@@ -14,6 +15,7 @@ import { createPoi, updatePoi } from '#/server/pois'
 import type { AdminPoi } from '#/components/admin/queries'
 import type { Contact, DetailField, DetailValues } from '#/lib/category-types'
 import type { RecurrenceId } from '#/lib/event-dates'
+import type { GalleryPhoto, Track } from '#/lib/media'
 
 interface PoiFormProps {
   /** Id in the `categories` table. */
@@ -119,6 +121,9 @@ export function PoiForm({ category: initialCategory, poi, areas }: PoiFormProps)
 
   const [values, setValues] = useState(() => initialValues(poi))
   const [details, setDetails] = useState(() => initialDetails(type.fields, poi?.details))
+  const [gallery, setGallery] = useState<GalleryPhoto[]>(() => poi?.gallery ?? [])
+  const [track, setTrack] = useState<Track | null>(() => poi?.track ?? null)
+  const [imageUploading, setImageUploading] = useState(false)
   /** The address follows the name until it is edited by hand (new places only). */
   const [idTouched, setIdTouched] = useState(Boolean(poi))
   /** By field: `name`, `startsAt`, `details.difficulty`… */
@@ -185,6 +190,8 @@ export function PoiForm({ category: initialCategory, poi, areas }: PoiFormProps)
       endsAt: fromLocalInput(values.endsAt),
       recurrence: values.recurrence || null,
       recurrenceUntil: fromLocalInput(values.recurrenceUntil),
+      gallery: gallery.map((photo) => ({ ...photo, caption: photo.caption.trim() })),
+      track,
       details: toDetails(type.fields, details),
     })
     if (!parsed.success) {
@@ -348,6 +355,18 @@ export function PoiForm({ category: initialCategory, poi, areas }: PoiFormProps)
           </Card>
         )}
 
+        <GalleryEditor poiId={values.id} photos={gallery} onChange={setGallery} error={errors.gallery} />
+
+        <TrackEditor
+          track={track}
+          onChange={(next) => {
+            setTrack(next)
+            clearError('track')
+          }}
+          onUseStart={setPosition}
+          error={errors.track}
+        />
+
         {type.contacts.length > 0 && (
           <Card title="Contatti">
             <div className="grid gap-4 sm:grid-cols-2">
@@ -407,9 +426,31 @@ export function PoiForm({ category: initialCategory, poi, areas }: PoiFormProps)
         </Card>
 
         <Card title="Immagine">
-          <Field label="Indirizzo dell'immagine" htmlFor="imageUrl" error={errors.imageUrl} hint="Senza immagine si usa una foto di prova.">
+          <Field label="Indirizzo dell'immagine" htmlFor="imageUrl" error={errors.imageUrl} hint="Incolla un indirizzo o carica una foto. Senza immagine si usa una foto di prova.">
             <input {...text('imageUrl')} type="url" placeholder="https://" />
           </Field>
+          <input
+            type="file"
+            accept="image/jpeg,image/png,image/webp,image/avif"
+            className="sr-only"
+            id="image-file"
+            onChange={async (e) => {
+              const file = e.target.files?.[0]
+              e.target.value = ''
+              if (!file) return
+              setImageUploading(true)
+              try {
+                set('imageUrl', await uploadPhoto(file, values.id))
+              } catch (error) {
+                setErrors((prev) => ({ ...prev, imageUrl: errorMessage(error) }))
+              } finally {
+                setImageUploading(false)
+              }
+            }}
+          />
+          <label htmlFor="image-file" className={`${buttonClass.secondary} mt-3 cursor-pointer ${imageUploading ? 'pointer-events-none opacity-50' : ''}`}>
+            {imageUploading ? 'Caricamento…' : 'Carica una foto'}
+          </label>
           <img
             src={poiImage({ id: values.id || 'nuovo', imageUrl: orNull(values.imageUrl) }, 600)}
             alt=""

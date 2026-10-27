@@ -2,6 +2,7 @@ import { z } from 'zod'
 
 import { detailsSchema } from '#/lib/category-types'
 import { RECURRENCE_IDS } from '#/lib/event-dates'
+import { gallerySchema, trackSchema } from '#/lib/media'
 
 import type { CategoryType } from '#/lib/category-types'
 
@@ -31,6 +32,8 @@ const poiFields = z.object({
   allDay: z.boolean(),
   recurrence: z.enum(RECURRENCE_IDS).nullable(),
   recurrenceUntil: z.date().nullable(),
+  gallery: gallerySchema,
+  track: trackSchema.nullable(),
   sortOrder: z.number().int(),
 })
 
