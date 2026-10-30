@@ -165,16 +165,58 @@ export function distances(points: TrackPoint[]) {
   return out
 }
 
+// ── Links ────────────────────────────────────────────────────────────────────
+
+/** A page about the place elsewhere: a climbing report, a guide, an official site. */
+export interface PoiLink {
+  /** Shown as the link's text: "Relazione Versante Apuano". */
+  label: string
+  url: string
+}
+
+export const MAX_LINKS = 20
+
+export const linksSchema = z
+  .array(z.object({ label: z.string().trim().min(1, 'Scrivi il nome del link').max(80, 'Al massimo 80 caratteri'), url: z.url('Indirizzo non valido') }))
+  .max(MAX_LINKS, `Al massimo ${MAX_LINKS} link`)
+
+// ── Photo credits ────────────────────────────────────────────────────────────
+
+/** Who took a photo and under which licence: free licences such as CC BY-SA require it to be shown. */
+export interface PhotoCredit {
+  author: string
+  /** Short name: "CC BY-SA 4.0", "Pubblico dominio". */
+  license: string
+  /** The photo's page at its source, e.g. on Wikimedia Commons. */
+  sourceUrl: string
+  licenseUrl?: string | null
+}
+
+export const photoCreditSchema = z.object({
+  author: z.string().trim().min(1, "Scrivi l'autore").max(200),
+  license: z.string().trim().min(1, 'Scrivi la licenza').max(60),
+  sourceUrl: z.url('Indirizzo non valido'),
+  licenseUrl: z.url().nullable().optional(),
+})
+
 // ── Gallery ──────────────────────────────────────────────────────────────────
 
 export interface GalleryPhoto {
   url: string
   /** Shown under the photo and read by screen readers. */
   caption: string
+  /** For photos from other authors; left out for the site's own. */
+  credit?: PhotoCredit | null
 }
 
 export const MAX_PHOTOS = 40
 
 export const gallerySchema = z
-  .array(z.object({ url: z.url('Indirizzo non valido'), caption: z.string().trim().max(200, 'Al massimo 200 caratteri') }))
+  .array(
+    z.object({
+      url: z.url('Indirizzo non valido'),
+      caption: z.string().trim().max(200, 'Al massimo 200 caratteri'),
+      credit: photoCreditSchema.nullable().optional(),
+    }),
+  )
   .max(MAX_PHOTOS, `Al massimo ${MAX_PHOTOS} foto`)

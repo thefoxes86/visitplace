@@ -3,7 +3,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { Link, useNavigate } from '@tanstack/react-router'
 
 import { LocationPicker } from '#/components/admin/LocationPicker'
-import { GalleryEditor, TrackEditor, uploadPhoto } from '#/components/admin/MediaEditors'
+import { GalleryEditor, LinksEditor, TrackEditor, uploadPhoto } from '#/components/admin/MediaEditors'
 import { Alert, Card, Field, Toggle, buttonClass, errorMessage, inputClass } from '#/components/admin/ui'
 import { categoryTree, useCategories } from '#/data/categories'
 import { poiImage } from '#/data/pois'
@@ -15,7 +15,7 @@ import { createPoi, updatePoi } from '#/server/pois'
 import type { AdminPoi } from '#/components/admin/queries'
 import type { Contact, DetailField, DetailValues } from '#/lib/category-types'
 import type { RecurrenceId } from '#/lib/event-dates'
-import type { GalleryPhoto, Track } from '#/lib/media'
+import type { GalleryPhoto, PoiLink, Track } from '#/lib/media'
 
 interface PoiFormProps {
   /** Id in the `categories` table. */
@@ -33,6 +33,9 @@ type Values = Record<
   | 'description'
   | 'area'
   | 'imageUrl'
+  | 'creditAuthor'
+  | 'creditLicense'
+  | 'creditSource'
   | 'address'
   | 'phone'
   | 'email'
@@ -42,7 +45,7 @@ type Values = Record<
   | 'recurrence'
   | 'recurrenceUntil',
   string
-> & { lat: number | null; lon: number | null; featured: boolean; published: boolean; allDay: boolean; sortOrder: number }
+> & { lat: number | null; lon: number | null; featured: boolean; showOnMap: boolean; published: boolean; allDay: boolean; sortOrder: number }
 
 /** Date ⇄ value of a datetime-local input (or a date input, with `dateOnly`), in the editor's time zone. */
 const toLocalInput = (date: Date | null, dateOnly = false) =>
@@ -50,13 +53,19 @@ const toLocalInput = (date: Date | null, dateOnly = false) =>
 /** A date alone is taken at midnight. */
 const fromLocalInput = (value: string) => (value ? new Date(value.length === 10 ? `${value}T00:00` : value) : null)
 
-const initialValues = (poi: AdminPoi | undefined): Values => ({
+/** Types whose contents stay off the tourist map unless switched on. */
+const OFF_MAP_TYPES = ['recipe', 'product', 'event']
+
+const initialValues = (poi: AdminPoi | undefined, typeId: string): Values => ({
   id: poi?.id ?? '',
   name: poi?.name ?? '',
   summary: poi?.summary ?? '',
   description: poi?.description ?? '',
   area: poi?.area ?? '',
   imageUrl: poi?.imageUrl ?? '',
+  creditAuthor: poi?.imageCredit?.author ?? '',
+  creditLicense: poi?.imageCredit?.license ?? '',
+  creditSource: poi?.imageCredit?.sourceUrl ?? '',
   address: poi?.address ?? '',
   phone: poi?.phone ?? '',
   email: poi?.email ?? '',
@@ -69,6 +78,7 @@ const initialValues = (poi: AdminPoi | undefined): Values => ({
   lat: poi?.lat ?? null,
   lon: poi?.lon ?? null,
   featured: poi?.featured ?? false,
+  showOnMap: poi?.showOnMap ?? !OFF_MAP_TYPES.includes(typeId),
   published: poi?.published ?? true,
   sortOrder: poi?.sortOrder ?? 0,
 })
@@ -119,9 +129,10 @@ export function PoiForm({ category: initialCategory, poi, areas }: PoiFormProps)
   const navigate = useNavigate()
   const queryClient = useQueryClient()
 
-  const [values, setValues] = useState(() => initialValues(poi))
+  const [values, setValues] = useState(() => initialValues(poi, category.type))
   const [details, setDetails] = useState(() => initialDetails(type.fields, poi?.details))
   const [gallery, setGallery] = useState<GalleryPhoto[]>(() => poi?.gallery ?? [])
+  const [links, setLinks] = useState<PoiLink[]>(() => poi?.links ?? [])
   const [track, setTrack] = useState<Track | null>(() => poi?.track ?? null)
   const [imageUploading, setImageUploading] = useState(false)
   /** The address follows the name until it is edited by hand (new places only). */
@@ -156,7 +167,7 @@ export function PoiForm({ category: initialCategory, poi, areas }: PoiFormProps)
     clearError('startsAt', 'endsAt')
   }
 
-  const text = (key: Exclude<keyof Values, 'lat' | 'lon' | 'featured' | 'published' | 'allDay' | 'sortOrder'>) => ({
+  const text = (key: Exclude<keyof Values, 'lat' | 'lon' | 'featured' | 'showOnMap' | 'published' | 'allDay' | 'sortOrder'>) => ({
     id: key,
     value: values[key] as string,
     onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => set(key, e.target.value),
@@ -182,6 +193,16 @@ export function PoiForm({ category: initialCategory, poi, areas }: PoiFormProps)
       lat: values.lat ?? undefined,
       lon: values.lon ?? undefined,
       imageUrl: orNull(values.imageUrl),
+      // A credit only when something is filled in; its own checks say what is missing.
+      imageCredit:
+        values.creditAuthor.trim() || values.creditLicense.trim() || values.creditSource.trim()
+          ? {
+              author: values.creditAuthor,
+              license: values.creditLicense,
+              sourceUrl: values.creditSource.trim(),
+              licenseUrl: poi?.imageCredit?.sourceUrl === values.creditSource.trim() ? (poi?.imageCredit?.licenseUrl ?? null) : null,
+            }
+          : null,
       address: orNull(values.address),
       phone: orNull(values.phone),
       email: orNull(values.email),
@@ -192,12 +213,18 @@ export function PoiForm({ category: initialCategory, poi, areas }: PoiFormProps)
       recurrenceUntil: fromLocalInput(values.recurrenceUntil),
       gallery: gallery.map((photo) => ({ ...photo, caption: photo.caption.trim() })),
       track,
+      links: links.map((link) => ({ label: link.label.trim(), url: link.url.trim() })),
       details: toDetails(type.fields, details),
     })
     if (!parsed.success) {
       const fieldErrors: typeof errors = {}
       for (const issue of parsed.error.issues) {
-        const key = issue.path[0] === 'details' ? `details.${String(issue.path[1])}` : String(issue.path[0])
+        const key =
+          issue.path[0] === 'details'
+            ? `details.${String(issue.path[1])}`
+            : issue.path[0] === 'links' && issue.path.length > 2
+              ? `links.${String(issue.path[1])}.${String(issue.path[2])}`
+              : String(issue.path[0])
         fieldErrors[key] ??= issue.message
       }
       setErrors(fieldErrors)
@@ -357,6 +384,15 @@ export function PoiForm({ category: initialCategory, poi, areas }: PoiFormProps)
 
         <GalleryEditor poiId={values.id} photos={gallery} onChange={setGallery} error={errors.gallery} />
 
+        <LinksEditor
+          links={links}
+          onChange={(next) => {
+            setLinks(next)
+            setErrors((prev) => Object.fromEntries(Object.entries(prev).filter(([key]) => !key.startsWith('links'))))
+          }}
+          errors={errors}
+        />
+
         <TrackEditor
           track={track}
           onChange={(next) => {
@@ -414,6 +450,12 @@ export function PoiForm({ category: initialCategory, poi, areas }: PoiFormProps)
               checked={values.featured}
               onChange={(v) => set('featured', v)}
             />
+            <Toggle
+              label="Sulla mappa turistica"
+              hint="Se spento, non compare né ha un numero sulla mappa. Spento di solito per ricette, prodotti ed eventi."
+              checked={values.showOnMap}
+              onChange={(v) => set('showOnMap', v)}
+            />
           </div>
           <div className="mt-6 flex flex-wrap gap-2">
             <button type="submit" disabled={saving} className={buttonClass.primary}>
@@ -456,6 +498,20 @@ export function PoiForm({ category: initialCategory, poi, areas }: PoiFormProps)
             alt=""
             className="mt-4 aspect-[4/3] w-full rounded-md object-cover"
           />
+          <p className="mt-4 text-xs font-semibold uppercase tracking-wider text-teal">Crediti della foto</p>
+          <p className="mt-1 text-xs font-light">Per le foto di altri autori, come quelle di Wikimedia Commons: compaiono sotto l'immagine.</p>
+          {errors.imageCredit && <p className="mt-1 text-xs font-semibold text-coral-dark">{errors.imageCredit}</p>}
+          <div className="mt-3 space-y-3">
+            <Field label="Autore" htmlFor="creditAuthor">
+              <input {...text('creditAuthor')} />
+            </Field>
+            <Field label="Licenza" htmlFor="creditLicense" hint="Es. CC BY-SA 4.0">
+              <input {...text('creditLicense')} />
+            </Field>
+            <Field label="Link alla fonte" htmlFor="creditSource">
+              <input {...text('creditSource')} type="url" placeholder="https://commons.wikimedia.org/…" />
+            </Field>
+          </div>
         </Card>
       </div>
     </form>

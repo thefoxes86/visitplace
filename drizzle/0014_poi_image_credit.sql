@@ -1,0 +1,1 @@
+ALTER TABLE "pois" ADD COLUMN "image_credit" jsonb;

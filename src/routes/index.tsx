@@ -4,9 +4,10 @@ import { Link, createFileRoute } from '@tanstack/react-router'
 import { CategoryCards, useSectionCategories } from '#/components/CategoryPage'
 import { Skyline } from '#/components/Skyline'
 import { Compass } from '#/components/tourist-map/TouristMap'
-import { categoryLink, useCategories } from '#/data/categories'
+import { useCategories } from '#/data/categories'
+import { useEventsLink, useUpcomingEvents } from '#/data/events'
 import { poiImage, poiNumber } from '#/data/pois'
-import { formatOccurrence, formatRecurrence, nextOccurrence } from '#/lib/event-dates'
+import { formatOccurrence, formatRecurrence } from '#/lib/event-dates'
 import { usePois } from '#/data/use-pois'
 import { sectionLink, sections } from '#/data/sections'
 import { DEFAULT_DESCRIPTION, SITE_NAME, absoluteUrl, seo } from '#/lib/seo'
@@ -52,9 +53,8 @@ function shuffle<T>(list: T[]) {
 
 function Home() {
   const pois = usePois()
-  const { categories, categoryOf, subtree, eventsCategory } = useCategories()
-  // The timeline of the events category, or the Vivi section until there is one.
-  const eventsLink = eventsCategory ? categoryLink(eventsCategory) : sectionLink('vivi')
+  const { categories, categoryOf, subtree } = useCategories()
+  const eventsLink = useEventsLink()
   const featured = pois.filter((poi) => poi.featured)
   const isEvent = (poi: Poi) => categoryOf(poi.category).type === 'event'
 
@@ -64,14 +64,7 @@ function Home() {
   const [picks, setPicks] = useState(() => firstOfEach.slice(0, PICKS_SHOWN))
   useEffect(() => setPicks(shuffle(firstOfEach).slice(0, PICKS_SHOWN)), [pois, categories])
 
-  // Repeating events count from their next time.
-  const upcoming = pois
-    .flatMap((poi) => {
-      const next = isEvent(poi) ? nextOccurrence(poi) : null
-      return next ? [{ ...poi, next }] : []
-    })
-    .sort((a, b) => a.next.start.getTime() - b.next.start.getTime())
-    .slice(0, EVENTS_SHOWN)
+  const upcoming = useUpcomingEvents(EVENTS_SHOWN)
 
   const scopriIds = new Set(useSectionCategories('scopri').flatMap((c) => [...subtree(c.id)]))
   const thingsToDo = pois.filter((poi) => scopriIds.has(poi.category) && !isEvent(poi)).slice(0, THINGS_TO_DO_SHOWN)
@@ -80,7 +73,7 @@ function Home() {
 
   return (
     <main className="min-h-dvh bg-paper font-sans text-ink">
-      <div className="mx-auto max-w-6xl px-6 pb-12 pt-24 sm:px-12">
+      <div className="mx-auto max-w-7xl px-6 pb-12 pt-24 sm:px-12">
         {/* Skyline + title, standing on one baseline */}
         <header className="flex flex-col-reverse items-start gap-4 border-b-[3px] border-teal md:flex-row md:items-end md:gap-8">
           <Skyline className="w-36 shrink-0 text-teal md:w-40 lg:w-60" />
@@ -182,7 +175,7 @@ function Home() {
                   >
                     <span className="text-right">
                       <span className="block border-b-2 border-coral font-display text-6xl font-light leading-none text-coral">
-                        {poiNumber(place)}
+                        {poiNumber(place) ?? '·'}
                       </span>
                       <span className="mt-2 block text-sm leading-snug transition-colors group-hover:text-coral">
                         {place.name}
@@ -235,7 +228,7 @@ function Home() {
       {/* Upcoming events, on a band of their own */}
       {upcoming.length > 0 && (
         <section className="bg-teal text-paper">
-          <div className="mx-auto max-w-6xl px-6 py-16 sm:px-12">
+          <div className="mx-auto max-w-7xl px-6 py-16 sm:px-12">
             <div className="flex flex-wrap items-end justify-between gap-4 border-b-2 border-mint/40 pb-4">
               <h2 className="font-display text-3xl font-semibold uppercase tracking-[0.15em] sm:text-4xl">
                 <Link {...eventsLink} className="transition-colors hover:text-mint">
@@ -272,7 +265,7 @@ function Home() {
         </section>
       )}
 
-      <div className="mx-auto max-w-6xl px-6 pb-12 sm:px-12">
+      <div className="mx-auto max-w-7xl px-6 pb-12 sm:px-12">
         {/* Things to do, from the categories of the Scopri section */}
         {thingsToDo.length > 0 && (
           <section className="pt-20">
@@ -293,9 +286,11 @@ function Home() {
                         loading="lazy"
                         className="aspect-[3/2] w-full object-cover grayscale transition duration-500 group-hover:grayscale-0"
                       />
-                      <span className="absolute -bottom-4 left-4 bg-paper px-2 font-display text-5xl font-light leading-none text-coral">
-                        {poiNumber(place)}
-                      </span>
+                      {place.number !== null && (
+                        <span className="absolute -bottom-4 left-4 bg-paper px-2 font-display text-5xl font-light leading-none text-coral">
+                          {poiNumber(place)}
+                        </span>
+                      )}
                     </span>
                     <span className="mt-6 block font-display text-xl font-semibold text-teal transition-colors group-hover:text-coral">
                       {place.name}

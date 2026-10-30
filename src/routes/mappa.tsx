@@ -26,12 +26,19 @@ export const Route = createFileRoute('/mappa')({
   component: MapPage,
 })
 
-/** Map numbers stay the same whatever the filter, like on a printed map. */
-const numberOf = (poi: Poi) => poi.number
+/** Map numbers stay the same whatever the filter, like on a printed map. Only places on the map have one. */
+const numberOf = (poi: Poi) => poi.number ?? 0
 
 function MapPage() {
-  const pois = usePois()
-  const { categories, tree, categoryOf, subtree } = useCategories()
+  // Recipes, typical products, events and anything else switched off stay out of the map.
+  const all = usePois()
+  const pois = useMemo(() => all.filter((poi) => poi.showOnMap), [all])
+  const { categories, tree: fullTree, categoryOf, subtree } = useCategories()
+  // The legend lists only categories with something on the map.
+  const tree = fullTree.filter((category) => {
+    const ids = subtree(category.id)
+    return pois.some((p) => ids.has(p.category))
+  })
   const [active, setActive] = useState<Set<string>>(() => new Set(categories.map((c) => c.id)))
   const { luogo } = Route.useSearch()
   const [selected, setSelected] = useState<Poi | null>(() => (luogo && pois.find((p) => p.id === luogo)) || null)

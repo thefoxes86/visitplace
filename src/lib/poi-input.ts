@@ -2,7 +2,7 @@ import { z } from 'zod'
 
 import { detailsSchema } from '#/lib/category-types'
 import { RECURRENCE_IDS } from '#/lib/event-dates'
-import { gallerySchema, trackSchema } from '#/lib/media'
+import { gallerySchema, linksSchema, photoCreditSchema, trackSchema } from '#/lib/media'
 
 import type { CategoryType } from '#/lib/category-types'
 
@@ -21,8 +21,10 @@ const poiFields = z.object({
   lat: z.number({ error: 'Scegli la posizione' }).min(-90).max(90),
   lon: z.number({ error: 'Scegli la posizione' }).min(-180).max(180),
   featured: z.boolean(),
+  showOnMap: z.boolean(),
   published: z.boolean(),
   imageUrl: z.url('Indirizzo non valido').nullable(),
+  imageCredit: photoCreditSchema.nullable(),
   address: z.string().trim().nullable(),
   phone: z.string().trim().nullable(),
   email: z.email('Email non valida').nullable(),
@@ -33,6 +35,7 @@ const poiFields = z.object({
   recurrence: z.enum(RECURRENCE_IDS).nullable(),
   recurrenceUntil: z.date().nullable(),
   gallery: gallerySchema,
+  links: linksSchema,
   track: trackSchema.nullable(),
   sortOrder: z.number().int(),
 })

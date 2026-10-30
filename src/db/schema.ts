@@ -3,7 +3,7 @@ import type { AnyPgColumn } from 'drizzle-orm/pg-core'
 
 import type { DetailValues } from '../lib/category-types.ts'
 import type { RecurrenceId } from '../lib/event-dates.ts'
-import type { GalleryPhoto, Track } from '../lib/media.ts'
+import type { GalleryPhoto, PhotoCredit, PoiLink, Track } from '../lib/media.ts'
 
 // ── Auth (Better Auth + its admin plugin) ────────────────────────────────────
 
@@ -129,9 +129,13 @@ export const pois = pgTable(
     lon: doublePrecision().notNull(),
     /** Shown among the main attractions on the home page. */
     featured: boolean().notNull().default(false),
+    /** Shown and numbered on the tourist map: off for recipes, typical products and events. */
+    showOnMap: boolean('show_on_map').notNull().default(true),
     /** Unpublished entries are only visible in the admin. */
     published: boolean().notNull().default(true),
     imageUrl: text('image_url'),
+    /** Author, licence and source of the main photo, when it is not the site's own. */
+    imageCredit: jsonb('image_credit').$type<PhotoCredit>(),
     address: text(),
     phone: text(),
     email: text(),
@@ -140,6 +144,8 @@ export const pois = pgTable(
     details: jsonb().$type<DetailValues>().notNull().default({}),
     /** Photos shown on the place's page, in order (src/lib/media.ts). */
     gallery: jsonb().$type<GalleryPhoto[]>().notNull().default([]),
+    /** Pages about the place elsewhere, each with its name: reports, guides, official sites. */
+    links: jsonb().$type<PoiLink[]>().notNull().default([]),
     /** GPS track from a .gpx file, drawn on the place's page; null without one. */
     track: jsonb().$type<Track>(),
     /** Events only. For repeating events, the first occurrence; for all-day events, midnight of the first and last day. */

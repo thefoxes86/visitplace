@@ -11,6 +11,8 @@ import { distanceKm, poiImage, poiNumber } from '#/data/pois'
 import { currentOccurrence, formatOccurrence, formatRecurrence } from '#/lib/event-dates'
 import { poisQuery, usePois } from '#/data/use-pois'
 import { PoiGallery } from '#/components/PoiGallery'
+import { PoiLinks } from '#/components/PoiLinks'
+import { PhotoCreditLine } from '#/components/PhotoCredit'
 import { TrackMap } from '#/components/TrackMap'
 import { getPoiTrack } from '#/server/pois'
 import { absoluteUrl, breadcrumbs, seo } from '#/lib/seo'
@@ -144,7 +146,7 @@ function infoRows(poi: Poi, category: Category) {
       </a>,
     ])
   rows.push(['Coordinate', `${poi.lat.toFixed(4)}° N · ${poi.lon.toFixed(4)}° E`])
-  rows.push(['Sulla mappa', `N. ${poiNumber(poi)}`])
+  if (poi.number !== null) rows.push(['Sulla mappa', `N. ${poiNumber(poi)}`])
   return rows
 }
 
@@ -154,8 +156,9 @@ function PoiPage() {
   const { poi, track } = Route.useLoaderData()
   const { categoryOf } = useCategories()
   const category = categoryOf(poi.category)
+  // Places on the map around it, with their map numbers.
   const nearby = usePois()
-    .filter((p) => p.id !== poi.id)
+    .filter((p) => p.id !== poi.id && p.showOnMap)
     .map((p) => ({ poi: p, d: distanceKm(poi, p) }))
     .sort((a, b) => a.d - b.d)
     .slice(0, 6)
@@ -163,14 +166,16 @@ function PoiPage() {
 
   return (
     <main className="min-h-dvh bg-paper font-sans text-ink">
-      <div className="mx-auto max-w-6xl px-6 pb-12 pt-24 sm:px-12">
-        <Link
-          to="/mappa"
-          search={{ luogo: poi.id }}
-          className="hero-fade font-serif text-sm italic text-coral hover:underline"
-        >
-          ← Mappa turistica
-        </Link>
+      <div className="mx-auto max-w-7xl px-6 pb-12 pt-24 sm:px-12">
+        {poi.showOnMap ? (
+          <Link to="/mappa" search={{ luogo: poi.id }} className="hero-fade font-serif text-sm italic text-coral hover:underline">
+            ← Mappa turistica
+          </Link>
+        ) : (
+          <Link {...categoryLink(category)} className="hero-fade font-serif text-sm italic text-coral hover:underline">
+            ← {category.label}
+          </Link>
+        )}
 
         {/* Skyline + title, standing on one baseline, as on the home page */}
         <header className="mt-4 flex flex-col-reverse items-start gap-4 border-b-[3px] border-teal md:flex-row md:items-end md:gap-8">
@@ -205,18 +210,24 @@ function PoiPage() {
 
         <div className="mt-10 grid gap-12 lg:grid-cols-[minmax(0,1fr)_17rem] lg:gap-0">
           <div className="hero-fade lg:pr-12" style={{ animationDelay: '750ms' }}>
-            {/* Demo image: replace with real photography of each place. */}
-            <img src={poiImage(poi, 1200)} alt="" className="aspect-[16/10] w-full object-cover" />
+            {/* Without a photo of its own, a demo image stands in. */}
+            <figure>
+              <img src={poiImage(poi, 1200)} alt="" className="aspect-[16/10] w-full object-cover" />
+              {poi.imageCredit && <PhotoCreditLine credit={poi.imageCredit} className="mt-2 block text-right text-xs font-light text-ink/70" />}
+            </figure>
 
-            <div className="mt-8 grid gap-8 sm:grid-cols-[7rem_minmax(0,1fr)]">
-              <span className="block self-start border-b-2 border-coral text-right font-display text-7xl font-light leading-none text-coral">
-                {poiNumber(poi)}
-              </span>
+            <div className={`mt-8 grid gap-8 ${poi.number !== null ? 'sm:grid-cols-[7rem_minmax(0,1fr)]' : ''}`}>
+              {poi.number !== null && (
+                <span className="block self-start border-b-2 border-coral text-right font-display text-7xl font-light leading-none text-coral">
+                  {poiNumber(poi)}
+                </span>
+              )}
               <p className="whitespace-pre-line text-lg font-light leading-relaxed">{poi.description}</p>
             </div>
 
             <PoiGallery photos={poi.gallery} name={poi.name} />
             {track && <TrackMap track={track} name={poi.name} />}
+            <PoiLinks links={poi.links} title={category.type === 'climbing' ? 'Relazioni' : 'Link utili'} />
 
             {/* Practical info, framed like the legend of the map */}
             <section className="relative mt-14 border-2 border-coral px-5 pb-5 pt-8">
@@ -257,13 +268,15 @@ function PoiPage() {
                   </span>
                 </span>
               </a>
-              <Link
-                to="/mappa"
-                search={{ luogo: poi.id }}
-                className="signpost-right bg-mint py-3 pl-5 pr-12 font-display font-semibold uppercase tracking-[0.12em] text-teal transition-colors hover:bg-coral hover:text-white"
-              >
-                Vedi sulla mappa
-              </Link>
+              {poi.showOnMap && (
+                <Link
+                  to="/mappa"
+                  search={{ luogo: poi.id }}
+                  className="signpost-right bg-mint py-3 pl-5 pr-12 font-display font-semibold uppercase tracking-[0.12em] text-teal transition-colors hover:bg-coral hover:text-white"
+                >
+                  Vedi sulla mappa
+                </Link>
+              )}
               <Compass className="hidden size-28 shrink-0 sm:block" />
             </div>
           </div>

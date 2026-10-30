@@ -85,6 +85,27 @@
       "when": 1793136794830,
       "tag": "0011_poi_media",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1793283147221,
+      "tag": "0012_poi_links",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1793292833798,
+      "tag": "0013_poi_show_on_map",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1793294076690,
+      "tag": "0014_poi_image_credit",
+      "breakpoints": true
     }
   ]
 }

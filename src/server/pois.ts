@@ -20,7 +20,7 @@ async function hiddenCategoryIds() {
   return hiddenIds(await db.select({ id: categories.id, parentId: categories.parentId, visible: categories.visible }).from(categories))
 }
 
-/** Published places outside hidden categories, numbered in map order. */
+/** Published places outside hidden categories, those on the map numbered in map order. */
 export const listPublicPois = createServerFn({ method: 'GET' }).handler(async (): Promise<Poi[]> => {
   const [rows, hidden] = await Promise.all([
     db
@@ -31,9 +31,15 @@ export const listPublicPois = createServerFn({ method: 'GET' }).handler(async ()
     hiddenCategoryIds(),
   ])
   // Tracks stay out: they can be large, and only the place's own page draws one.
+  // Only places on the map get a number, so the map counts 1, 2, 3… without gaps.
+  let number = 0
   return rows
     .filter((poi) => !hidden.has(poi.category))
-    .map(({ published, sortOrder, createdAt, updatedAt, track, ...poi }, i) => ({ ...poi, hasTrack: track !== null, number: i + 1 }))
+    .map(({ published, sortOrder, createdAt, updatedAt, track, ...poi }) => ({
+      ...poi,
+      hasTrack: track !== null,
+      number: poi.showOnMap ? ++number : null,
+    }))
 })
 
 /** The GPS track of a published place, for its page. */

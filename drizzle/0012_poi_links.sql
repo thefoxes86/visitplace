@@ -1,0 +1,1 @@
+ALTER TABLE "pois" ADD COLUMN "links" jsonb DEFAULT '[]'::jsonb NOT NULL;

@@ -5,6 +5,8 @@
 import type { CategorySectionId } from '../data/sections.ts'
 import type { SeedPoi } from '../data/pois.ts'
 import type { CategoryTypeId } from '../lib/category-types.ts'
+import type { PoiLink } from '../lib/media.ts'
+import { seedPhotos } from './seed-photos.ts'
 
 /** A category to create, with its subcategories. Its id and address are its name, slugified. */
 export interface SeedCategory {
@@ -30,7 +32,13 @@ export const seedCategories: Record<CategorySectionId, (string | SeedCategory)[]
     { label: 'Siti naturalistici', children: [places('Montagne, grotte e cascate'), places('Mare e parchi')] },
     { label: 'Palazzi', children: [places('Palazzi, ville e teatri')] },
     { label: 'Chiese e luoghi sacri', children: [places('Chiese del centro'), places('Pievi e abbazie')] },
-    { label: 'Outdoor', children: [{ label: 'Trekking', type: 'trekking', singular: 'percorso' }] },
+    {
+      label: 'Outdoor',
+      children: [
+        { label: 'Trekking', type: 'trekking', singular: 'percorso' },
+        { label: 'Arrampicata', type: 'climbing', singular: 'falesia' },
+      ],
+    },
   ],
   vivi: ['Esperienze', 'Itinerari culturali', 'Eventi', 'Mercati'],
   gusta: [
@@ -434,6 +442,7 @@ const gustaPois: SeedPoi[] = [
     id: 'tordelli-camaioresi',
     name: 'Tordelli camaioresi',
     category: 'piatti-della-tradizione',
+    showOnMap: false,
     summary: 'La pasta ripiena di carne simbolo di Camaiore, condita con il ragù.',
     description:
       "Il piatto di Camaiore per eccellenza: grandi ravioli ripieni di carne di manzo e di maiale, pane, formaggio ed erbe, conditi con un ricco sugo di carne. Un tempo si preparavano nelle famiglie contadine solo nei giorni di festa, e ancora oggi ogni casa ha la sua ricetta. Nel 2022 il premio Tordello d'Oro per il miglior tordello della Versilia è andato al Caffè Centrale di Camaiore.",
@@ -454,6 +463,7 @@ const gustaPois: SeedPoi[] = [
     id: 'torta-di-pepe',
     name: 'Torta di pepe',
     category: 'piatti-della-tradizione',
+    showOnMap: false,
     summary: 'Detta anche torta coi becchi o coi pizzi: torta salata di riso, bietola e pecorino.',
     description:
       "Una torta salata con un ripieno di riso, bietola, pecorino e uova, ben pepata, chiusa da un bordo di pasta che sporge dalla teglia e si ripiega in tante punte: i pizzi, o becchi, che le danno il nome. A Camaiore si prepara per Pasqua e per la festa di San Vincenzo, il 5 aprile, e si trova tutto l'anno nelle pizzerie a taglio del centro. Esiste anche una variante con la cannella.",
@@ -473,6 +483,7 @@ const gustaPois: SeedPoi[] = [
     id: 'scarpaccia-camaiorese',
     name: 'Scarpaccia camaiorese',
     category: 'piatti-della-tradizione',
+    showOnMap: false,
     summary: 'La torta salata di zucchine, bassa come una vecchia suola.',
     description:
       "Una torta bassa di zucchine e farina che, una volta cotta, ha lo spessore di una vecchia suola di scarpa: da qui il nome. A Camaiore è salata, mentre a Viareggio se ne fa una versione dolce. Si mangia come antipasto o merenda ed è buona anche fredda, perfetta per un picnic. Un tempo si cuoceva nel forno a legna comune; a Capezzano Pianore nella pastella si aggiungono anche parmigiano, olio e uova.",
@@ -488,11 +499,33 @@ const gustaPois: SeedPoi[] = [
     },
   },
 
+  {
+    id: 'biroldo',
+    name: 'Biroldo',
+    category: 'piatti-della-tradizione',
+    showOnMap: false,
+    summary: 'Il salume cotto della tradizione contadina, fatto con le parti povere del maiale e il suo sangue.',
+    description:
+      "Il biroldo nasce dall'abitudine contadina di non buttare via nulla del maiale: testa, lingua, cotenna e a volte il polmone vengono lessati, tritati e insaporiti con il sangue e le spezie, poi insaccati e cotti di nuovo. Si mangia freddo, a fette. A Camaiore lo si prepara come in Garfagnana, da dove viene il più noto biroldo, presidio Slow Food, tanto che a volte è chiamato biroldo della Versilia; dalla versione di Lucca si distingue per l'assenza di pinoli.\n\nÈ un piatto della stagione fredda, quando si macellava il maiale: si fa da ottobre ad aprile e va consumato entro una quindicina di giorni.",
+    area: 'Camaiore',
+    lat: 43.93333,
+    lon: 10.3,
+    details: {
+      ingredients:
+        'testa di maiale disossata\nlingua\ncotenna\npolmone, a piacere\nsangue di maiale\nsale e pepe\nfinocchio selvatico\nnoce moscata, chiodi di garofano, cannella e anice stellato\naglio\nbudello naturale, vescica o stomaco di maiale',
+      preparation:
+        "Lessare a lungo la testa, la lingua e la cotenna, circa tre ore, poi disossare e tagliare la carne a pezzetti.\n\nMescolarla con un po' di sangue di maiale, sale, pepe e le spezie, aggiungendole poco alla volta e assaggiando: il finocchio selvatico deve prevalere.\n\nInsaccare il composto nel budello, nella vescica o nello stomaco, legarlo e lessarlo di nuovo. Lasciarlo raffreddare e servirlo freddo, tagliato a fette.",
+      difficulty: 'hard',
+      occasion: 'Da ottobre ad aprile, quando si macella il maiale',
+    },
+  },
+
   // ── Prodotti tipici ──
   {
     id: 'mortadella-di-camaiore',
     name: 'Mortadella di Camaiore',
     category: 'salumi',
+    showOnMap: false,
     summary: 'La sbriciolona, il salume di maiale dolce e profumato della Versilia.',
     description:
       "Chiamata anche sbriciolona per la sua consistenza morbida, ha la forma di un salame, un colore scuro e un sapore dolce e delicato, profumato di finocchio e spezie. Si produce in pochi salumifici di Camaiore e Massarosa, quasi solo per il consumo locale e regionale.",
@@ -729,9 +762,341 @@ const trekkingPois: SeedPoi[] = [
   },
 ]
 
+/** Parking places, for crags with no position of their own in the sources: to refine in the admin. */
+const PARKING = {
+  candalla: { lat: 43.95739, lon: 10.32394 },
+  casoli: { lat: 43.96354, lon: 10.33032 },
+  trescolli: { lat: 43.96428, lon: 10.32424 },
+  greppolungo: { lat: 43.95356, lon: 10.30115 },
+}
+
+const VA = 'http://www.versanteapuano.it'
+const versanteApuano = (path: string): PoiLink => ({ label: 'Relazione Versante Apuano', url: `${VA}/${path}.html` })
+const climbook = (path: string): PoiLink => ({ label: 'Scheda Climbook', url: `https://climbook.com/falesie/${path}` })
+
+/** Reports and pages on each crag, from the research behind these entries. */
+const CRAG_LINKS: Record<string, PoiLink[]> = {
+  'candalla-bassa': [versanteApuano('valle-del-lombricese/117-candalla-bassa'), climbook('213/candalla-bassa')],
+  'candalla-alta': [
+    versanteApuano('arrampicata-sportiva/151-candalla-alta'),
+    climbook('16691/candalla-alta-penitenziario-le-villette-pancione-bianco-bao'),
+  ],
+  'placche-a-mare': [
+    versanteApuano('valle-del-lombricese/111-placche-a-mare'),
+    climbook('212/candalla-alta-placche-a-mare'),
+    { label: 'Scheda TheTopo', url: 'https://thetopo.com/crags/camaiore/cragmap/placche-a-mare' },
+  ],
+  castagni: [climbook('28212/i-castagni-sinistro-destro')],
+  'parco-pagazzo': [climbook('25794/il-parco')],
+  'muro-del-cimitero': [versanteApuano('casoli-basso/130-muro-del-cimitero'), climbook('216/cimitero')],
+  mongololificio: [versanteApuano('casoli-basso/128-mongololificio'), climbook('21111/mongololificio')],
+  'giardino-degli-elfi': [
+    versanteApuano('casoli-basso/53-giardino-degli-elfi'),
+    climbook('223/giardino-degli-elfi'),
+    { label: 'Scheda theCrag', url: 'https://www.thecrag.com/it/arrampicata/italy/central-and-southern-italy/lucca-area/area/2223140946' },
+  ],
+  'primo-pilastro-di-setriana': [
+    versanteApuano('casoli-alto/150-i-pilastro-di-setriana'),
+    climbook('15651/1-pilastro-di-setriana'),
+    { label: 'Scheda Gulliver', url: 'https://www.gulliver.it/itinerari/primo-pilastro-di-setriana-falesia/' },
+  ],
+  'secondo-pilastro-di-setriana': [versanteApuano('arrampicata-sportiva/167-ii-pilastro-di-setriana'), climbook('21121/2-pilastro-di-setriana')],
+  caianificio: [
+    climbook('17071/caianificio'),
+    { label: 'Scheda theCrag', url: 'https://www.thecrag.com/it/arrampicar/italy/central-and-southern-italy/lucca-area/area/2061126891' },
+  ],
+  'san-rocchino': [
+    versanteApuano('casoli-alto/159-san-rocchino'),
+    climbook('239/san-rocchino'),
+    { label: 'Scheda theCrag', url: 'https://www.thecrag.com/en/climbing/italy/s-rocchino' },
+  ],
+  'muro-dei-ganzi': [versanteApuano('greppolungo/83-muro-dei-ganzi'), climbook('21101/muro-dei-ganzi')],
+  'muro-del-tossico': [versanteApuano('greppolungo/79-muro-del-tossico'), climbook('26552/muro-del-tossico')],
+  isola: [versanteApuano('greppolungo/80-isola-e-pilastro-dei-bimbi'), climbook('224/isola-di-greppolungo-pilastro-dei-bimbi')],
+  'pilastro-di-greppolungo': [versanteApuano('greppolungo/80-isola-e-pilastro-dei-bimbi'), climbook('224/isola-di-greppolungo-pilastro-dei-bimbi')],
+  tomeoni: [{ label: 'Scheda PeakVisor', url: 'https://peakvisor.com/poi/falesia-di-tomeoni.html' }],
+  'ciarro-torre': [
+    versanteApuano('arrampicata-sportiva/135-ciarro-torre'),
+    { label: 'CAI Viareggio · la nuova via del 2026', url: 'https://www.caiviareggio.it/notizie-12-03-2026/nuova-via-di-arrampicata-a-greppolungo' },
+  ],
+  saratoga: [climbook('220/saratoga')],
+  trittico: [versanteApuano('home/163-trittico'), climbook('221/trittico')],
+  conchetta: [versanteApuano('valle-del-conchiusori/110-conchetta'), climbook('217/conchetta')],
+  grottino: [versanteApuano('valle-del-conchiusori/127-grottino'), climbook('14921/grottino')],
+  'muro-di-swann': [versanteApuano('arrampicata-sportiva/134-muro-si-swann'), climbook('219/muro-di-swann')],
+}
+
+const crag = (
+  id: string,
+  name: string,
+  area: string,
+  position: { lat: number; lon: number },
+  summary: string,
+  description: string,
+  details: SeedPoi['details'] = {},
+  published = true,
+): SeedPoi => ({
+  id: `falesia-${id}`,
+  name,
+  category: 'arrampicata',
+  area,
+  ...position,
+  summary,
+  description,
+  details,
+  links: CRAG_LINKS[id] ?? [],
+  published,
+})
+
+/** Not yet described by any source: a draft to complete, unpublished. */
+const draftCrag = (id: string, name: string, area: string, position: { lat: number; lon: number }, known = '') =>
+  crag(
+    id,
+    name,
+    area,
+    position,
+    `Settore di arrampicata della zona di ${area}.`,
+    `Settore della zona di ${area}.${known ? ` ${known}` : ''} Scheda da completare con vie, gradi, esposizione e avvicinamento.`,
+    {},
+    false,
+  )
+
+/**
+ * Crags of the Camaiorese: from the reports of Versante Apuano (where most were re-bolted by the
+ * Magicandalla association), Climbook, TheTopo and Gulliver; positions from OpenStreetMap and PeakVisor,
+ * or the parking place where none is known.
+ */
+const climbingPois: SeedPoi[] = [
+  // ── Candalla, valle del Lombricese ──
+  crag(
+    'candalla-bassa',
+    'Candalla Bassa',
+    'Candalla',
+    { lat: 43.95802, lon: 10.32691 },
+    'Uno dei settori più imponenti di Camaiore: quasi cento vie lunghe di resistenza, a dieci minuti dal mulino.',
+    "Il grande settore della valle del Lombricese, tra i più conosciuti dagli arrampicatori toscani. Quasi cento vie divise nei settori Sinistro, Cengia, Centrale, Destro e Pennino, con tiri lunghi e di resistenza che d'estate restano all'ombra. La falesia è stata interamente richiodata e pulita dall'associazione Magicandalla.\n\nSi parcheggia sulla strada per il mulino di Candalla, oltre il ristorante Emilio e Bona, rispettando i divieti per lasciar girare l'autobus. Si attraversa il ponticello del mulino, dove c'è acqua potabile, si segue il sentiero della valle, si scende al torrente e lo si attraversa: la parete è visibile dopo una decina di minuti. Si arrampica anche con la pioggia.",
+    { gradeMin: '5b', gradeMax: '8c', routes: 97, rock: 'Calcare', approach: 10, season: 'Tutto l’anno; d’estate all’ombra' },
+  ),
+  crag(
+    'candalla-alta',
+    'Candalla Alta',
+    'Candalla',
+    { lat: 43.95773, lon: 10.32792 },
+    'Strapiombi di calcare a canne e un grande panorama: una delle falesie più belle della Toscana.',
+    "Uno dei settori più spettacolari della valle, con strapiombi di calcare a canne e tiri lunghi e di resistenza fino a 40 metri. Quasi cento vie nei settori Bao, Pancione Bianco, Le Villette e Penitenziario.\n\nDal parcheggio sulla strada per il mulino si prende lo sterrato a destra prima del mulino, si passa sotto le casette e si sale nel bosco: dopo 30-35 minuti, a destra, si stacca il sentiero per le Placche a Mare; proseguendo si arriva ai settori. Si arrampica anche con la pioggia.",
+    { gradeMin: '5c', gradeMax: '8c', routes: 99, height: 40, rock: 'Calcare a canne', approach: 35 },
+  ),
+  crag(
+    'placche-a-mare',
+    'Placche a Mare',
+    'Candalla',
+    { lat: 43.9567, lon: 10.32661 },
+    'Placche a gocce e lame al sole del pomeriggio: il settore più abbordabile per cominciare.',
+    "Il settore più adatto a chi arriva per la prima volta: placche di calcare grigio lavorate a gocce e lame, con qualche strapiombo, su tiri di 22-25 metri. È al sole dalla tarda mattina al tramonto, perfetto d'inverno e nelle mezze stagioni. Richiodato e pulito dall'associazione Magicandalla.\n\nSi raggiunge con lo stesso sentiero di Candalla Alta: dopo 30-35 minuti di salita nel bosco si prende la deviazione a destra.",
+    { gradeMin: '5+', gradeMax: '7a', routes: 16, height: 25, rock: 'Calcare grigio', approach: 30, season: 'Inverno e mezze stagioni' },
+  ),
+  crag(
+    'castagni',
+    'I Castagni',
+    'Candalla',
+    PARKING.candalla,
+    'Due piccoli settori esposti a ovest, con vie dal 6b all’8a.',
+    'Falesia divisa in due settori, Sinistro e Destro, con una quindicina di vie dal 6b all’8a, esposte a ovest. Circa 20 minuti di avvicinamento.',
+    { gradeMin: '6b', gradeMax: '8a', routes: 14, exposure: 'O', approach: 20 },
+  ),
+  draftCrag('mulini', 'Mulini', 'Candalla', PARKING.candalla),
+  crag(
+    'parco-pagazzo',
+    'Il Parco',
+    'Candalla',
+    PARKING.candalla,
+    'Una ventina di vie, soprattutto dal 5b al 7b, con qualche tiro più duro.',
+    'Settore con una ventina di vie, in gran parte tra il 5b e il 7b, con qualche linea più dura e alcune vie a due tiri.',
+    { gradeMin: '5b', gradeMax: '7b', routes: 24 },
+  ),
+  draftCrag('penna-pirsing', 'Penna Pirsing', 'Candalla', PARKING.candalla, 'Conta una tredicina di vie sulle pareti del Monte Penna, sopra il Rio Lombricese.'),
+
+  // ── Casoli bassa ──
+  crag(
+    'muro-del-cimitero',
+    'Muro del Cimitero',
+    'Casoli bassa',
+    { lat: 43.9621, lon: 10.33407 },
+    'La parete storica di Casoli, visibile dal paese: tiri non banali su placca strapiombante.',
+    "La parete più imponente di Casoli, ben visibile dal paese: il settore storico della valle, con tiri lunghi fino a 40 metri su placca strapiombante, quasi tutti dal 7a in su e poco frequentati. Richiodato dall'associazione Magicandalla.\n\nSi parcheggia nella piazzetta della Garbatella, vicino al bar La Frana; si attraversa il paese oltre il cimitero fino a un ponte, si gira a sinistra e dopo pochi minuti si sale per il sentiero a destra.",
+    { gradeMin: '6c', gradeMax: '8c', routes: 27, height: 40, exposure: 'O', season: 'Inverno e mezze stagioni' },
+  ),
+  crag(
+    'mongololificio',
+    'Mongololificio',
+    'Casoli bassa',
+    PARKING.casoli,
+    'Un muro verticale su tacche, esposto a nord-est: la falesia estiva di Casoli.',
+    "Parete verticale e difficile, su tacche, esposta a nord-est e all'ombra dalle 11: una falesia da estate. Scoperta e chiodata dall'associazione Magicandalla.\n\nDalla piazzetta della Garbatella si attraversa il paese oltre il cimitero e un ponte, poi si gira a sinistra seguendo il sentiero sotto il muro del cimitero: circa 25 minuti.",
+    { gradeMin: '6b', gradeMax: '7c+', routes: 13, height: 30, exposure: 'NE', approach: 25, season: 'Estate e mezze stagioni' },
+  ),
+  crag(
+    'giardino-degli-elfi',
+    'Giardino degli Elfi',
+    'Casoli bassa',
+    { lat: 43.96733, lon: 10.34049 },
+    'Un bosco nascosto con strapiombi atletici: fresco anche nelle giornate più afose.',
+    "Sul versante opposto della valle, nascosto in un bosco, è il posto giusto per le giornate afose: arrampicata atletica su strapiombi, con le vie più facili dentro il canyon.\n\nOltre Casoli si parcheggia nello slargo sul rettilineo vicino al cimitero; si scende per la strada cementata sotto il cimitero e le case fino a una cappella e al ponte, e poco prima del ponte si prende il sentiero in salita a sinistra: circa 20 minuti.",
+    { gradeMin: '5b', gradeMax: '8c', routes: 23, height: 30, exposure: 'N', approach: 20, season: 'Estate' },
+  ),
+
+  // ── Casoli alta, verso Trescolli ──
+  crag(
+    'primo-pilastro-di-setriana',
+    'Primo pilastro di Setriana',
+    'Casoli alta',
+    { lat: 43.96173, lon: 10.31593 },
+    'Una bellissima placca verticale fino a 40 metri, al sole fino al primo pomeriggio.',
+    "Una bellissima placca verticale, con tiri fino a 40 metri: per alcune vie una corda da 80 metri non basta senza che chi assicura salga qualche metro. Il sole resta sulla parete fino al primo pomeriggio.\n\nDal centro di Camaiore si seguono le indicazioni per Vado e Casoli, si supera Casoli e si prosegue verso Trescolli, parcheggiando al bivio per la località Luciana, dove inizia la strada privata: circa 15 minuti a piedi.",
+    { gradeMin: '4+', gradeMax: '8a+', routes: 16, height: 40, approach: 15, season: 'Inverno e mezze stagioni' },
+  ),
+  crag(
+    'secondo-pilastro-di-setriana',
+    'Secondo pilastro di Setriana',
+    'Casoli alta',
+    PARKING.trescolli,
+    'Partenze boulderose e muri verticali, al sole la mattina.',
+    "Partenze boulderose e muri verticali, con alcune vie a due tiri. La parete va all'ombra nel primo pomeriggio. Interamente richiodata e pulita dall'associazione Magicandalla.\n\nSi parcheggia prima della sbarra della strada privata verso Trescolli e si sale per il sentiero seguendo l'acquedotto fino a un ometto sulla destra, poi per una traccia fino alla base: circa 20 minuti.",
+    { gradeMin: '5+', gradeMax: '8b+', routes: 18, height: 35, approach: 20, season: 'Estate e mezze stagioni' },
+  ),
+  crag(
+    'caianificio',
+    'Caianificio',
+    'Casoli alta',
+    PARKING.trescolli,
+    'Vie a più tiri con secondi tiri bellissimi: serve una corda da 80 metri.',
+    "Un settore di vie a più tiri, dove i secondi e terzi tiri sono considerati i più belli. Serve una corda da almeno 80 metri, che a volte non basta. Va all'ombra verso mezzogiorno; il periodo migliore è da maggio a ottobre.",
+    { gradeMin: '5c', gradeMax: '8a', routes: 22, season: 'Da maggio a ottobre' },
+  ),
+  draftCrag('pensatoio', 'Pensatoio', 'Casoli alta', PARKING.trescolli, 'Conta una decina di vie.'),
+  draftCrag('grotta-allombra', "Grotta all'ombra", 'Casoli alta', PARKING.trescolli),
+  crag(
+    'san-rocchino',
+    'San Rocchino',
+    'Casoli alta',
+    PARKING.trescolli,
+    'Arrampicata atletica su strapiombi, con quello che è probabilmente il primo 9a della Toscana.',
+    "Trenta vie su due settori, basso e alto, di arrampicata atletica su strapiombi, con tiri fino a 35 metri. Qui si trova quello che è probabilmente il primo 9a della Toscana.\n\nDal centro di Camaiore si seguono le indicazioni per Vado e Casoli, si prosegue verso Trescolli e si parcheggia prima della sbarra della strada privata; si sale per il sentiero oltre un gruppo di case, con la falesia ben visibile sopra.",
+    { gradeMin: '6b', gradeMax: '9a', routes: 30, height: 35, season: 'Estate e mezze stagioni' },
+  ),
+
+  // ── Greppolungo ──
+  draftCrag('il-nido', 'Il Nido', 'Greppolungo', PARKING.greppolungo),
+  crag(
+    'muro-dei-ganzi',
+    'Muro dei Ganzi',
+    'Greppolungo',
+    PARKING.greppolungo,
+    'Muri verticali e leggermente strapiombanti nel bosco sopra Greppolungo.',
+    "Una ventina di vie su muri verticali e leggermente strapiombanti, lunghe 15-25 metri. Interamente richiodato e pulito dall'associazione Magicandalla.\n\nSi parcheggia sotto il paese di Greppolungo e si sale per la strada e poi il sentiero: 25-30 minuti.",
+    { gradeMin: '5+', gradeMax: '8a', routes: 23, height: 25, approach: 30, season: 'Estate e mezze stagioni' },
+  ),
+  crag(
+    'muro-del-tossico',
+    'Muro del Tossico',
+    'Greppolungo',
+    { lat: 43.95693, lon: 10.30368 },
+    'Vie corte e boulderose esposte a sud, a dieci minuti dal paese: la falesia d’inverno.',
+    "Vie corte, 15-25 metri, con movimenti boulder, esposte a sud: una falesia da inverno. Interamente richiodata e pulita dall'associazione Magicandalla.\n\nSi parcheggia sotto Greppolungo, si sale per la strada lastricata tenendo la destra al bivio della Madonnina fino alla fontana con i pesci rossi, poi per il sentiero accanto al cancello di una casa, oltre i ruderi: circa 10 minuti.",
+    { gradeMin: '6a', gradeMax: '8a+', routes: 12, height: 25, exposure: 'S', approach: 10, season: 'Inverno' },
+  ),
+  crag(
+    'isola',
+    'Isola',
+    'Greppolungo',
+    { lat: 43.9603, lon: 10.3032 },
+    'Strapiombi a buchi all’ombra del bosco, buoni anche con la pioggia.',
+    "Pareti strapiombanti lavorate a buchi, all'ombra della vegetazione: l'Isola è una delle poche falesie dove si arrampica anche con la pioggia. Insieme al vicino Pilastro dei Bimbi conta 35 vie, lunghe fino a 33 metri. Richiodata e pulita dall'associazione Magicandalla.\n\nSi parcheggia sotto Greppolungo e si segue la strada lastricata e poi il sentiero: 30-35 minuti.",
+    { gradeMin: '5+', gradeMax: '8a', height: 33, approach: 35, season: 'Inverno e mezze stagioni' },
+  ),
+  crag(
+    'pilastro-di-greppolungo',
+    'Pilastro dei Bimbi',
+    'Greppolungo',
+    { lat: 43.9603, lon: 10.3032 },
+    'Il pilastro di Greppolungo: calcare lavorato al sole d’inverno, asciuga in fretta.',
+    "Calcare lavorato e appoggiato sul pilastro accanto all'Isola: d'inverno prende il sole dalla mattina al tardo pomeriggio e asciuga molto in fretta. Con l'Isola conta 35 vie.\n\nStesso avvicinamento dell'Isola: 30-35 minuti dal parcheggio sotto Greppolungo.",
+    { gradeMin: '5+', gradeMax: '8a', approach: 35, season: 'Inverno e mezze stagioni' },
+  ),
+  crag(
+    'tomeoni',
+    'Tomeoni',
+    'Greppolungo',
+    { lat: 43.95787, lon: 10.28965 },
+    'Uno sperone nel bosco esposto a sud-est, tra Greppolungo e La Culla.',
+    "Uno sperone esposto a sud-est, con tiri fino a 30 metri tra il 5c e l'8a, come Retone del 2000 (6a) e Musica ribelle (6c+).\n\nSi parcheggia a Greppolungo, si segue la scalinata con le traversine dei binari in direzione La Culla e poi il sentiero nel bosco che scende allo sperone.",
+    { gradeMin: '5c', gradeMax: '8a', height: 30, exposure: 'SE' },
+  ),
+  draftCrag('al-castellaccio', 'Al Castellaccio', 'Greppolungo', PARKING.greppolungo),
+  draftCrag('la-selva', 'La Selva', 'Greppolungo', PARKING.greppolungo),
+
+  // ── Valle del Conchiusori, sotto Greppolungo ──
+  crag(
+    'ciarro-torre',
+    'Ciarro Torre',
+    'Valle del Conchiusori',
+    { lat: 43.95703, lon: 10.30541 },
+    'Un pilastro a dieci minuti dalla strada, con vie facili sempre all’ombra.',
+    "Una dozzina di vie corte, 10-20 metri: le più facili, su una parete sempre all'ombra, sono adatte a chi comincia, mentre le più dure sono molto impegnative. Nel 2026 il CAI di Viareggio ha aperto qui accanto una nuova via di quattro tiri, fino al 5c.\n\nDa Camaiore si seguono le indicazioni per Vado, Lombrici e Greppolungo, si tira dritto al bivio per Greppolungo e si parcheggia nello slargo al primo tornante a sinistra. Si prende il sentiero prima del ponte, attraverso l'oliveto, e al bivio nel bosco si va a sinistra fino alla base del pilastro: circa 10 minuti.",
+    { gradeMin: '5c', gradeMax: '7c', routes: 12, height: 20, exposure: 'S', approach: 10, season: 'Mezze stagioni' },
+  ),
+  crag(
+    'saratoga',
+    'Saratoga',
+    'Valle del Conchiusori',
+    { lat: 43.95841, lon: 10.30531 },
+    'Una ventina di vie, soprattutto tra il 6a e il 7b+, nella valle del Conchiusori.',
+    'Settore della valle del Conchiusori, accanto al Trittico, con una ventina di vie, le più ripetute tra il 6a e il 7b+.',
+    { gradeMin: '6a', gradeMax: '7b+', routes: 19 },
+  ),
+  crag(
+    'trittico',
+    'Trittico',
+    'Valle del Conchiusori',
+    { lat: 43.95859, lon: 10.30581 },
+    'Calcare appoggiato con strapiombi e diedri, al sole la mattina.',
+    "Una falesia molto frequentata: calcare in gran parte appoggiato, con qualche strapiombo e qualche diedro, su tiri di 15-35 metri. Al sole la mattina. Richiodata dall'associazione Magicandalla.\n\nDal parcheggio al primo tornante a sinistra dopo il bivio per Greppolungo si prende il sentiero prima del ponte, attraverso l'oliveto, e al bivio nel bosco si va a destra: la falesia è sulla sinistra del greto, a 15-20 minuti.",
+    { gradeMin: '5c', gradeMax: '7b+', routes: 26, height: 35, exposure: 'E', approach: 20, season: 'Estate e mezze stagioni' },
+  ),
+  crag(
+    'conchetta',
+    'Conchetta',
+    'Valle del Conchiusori',
+    { lat: 43.95836, lon: 10.30659 },
+    'Calcare lavorato e leggermente strapiombante, riparato dal vento e buono con la pioggia.',
+    "Calcare lavorato, leggermente strapiombante, con frequenti movimenti boulder su tiri di circa 15 metri. Riparata dal vento, prende il sole dal primo pomeriggio per qualche ora e si arrampica anche con la pioggia. Interamente richiodata e pulita dall'associazione Magicandalla.\n\nDal parcheggio al primo tornante dopo il bivio per Greppolungo si segue il sentiero nell'oliveto e nella gola; al bivio si va a destra, si attraversa il greto e si sale sul lato destro della valle: 15-20 minuti.",
+    { gradeMin: '5+', gradeMax: '8a+', routes: 19, height: 18, approach: 20, season: 'Inverno e mezze stagioni' },
+  ),
+  crag(
+    'grottino',
+    'Grottino',
+    'Valle del Conchiusori',
+    { lat: 43.95888, lon: 10.30692 },
+    'Una grotta con strapiombi e tiri fino a 40 metri, all’ombra d’estate fino alle 14.',
+    "Il secondo settore sulla destra della valle, con 27 vie da 10 a 40 metri, alcune a due tiri. Il sole arriva nel primo pomeriggio per un paio d'ore; d'estate è all'ombra fino alle 14. Il lato sinistro e gli strapiombi restano riparati con la pioggia, mentre le uscite e il pilastro centrale si bagnano.\n\nDal parcheggio al primo tornante dopo il bivio per Greppolungo (pochi posti: se è pieno, si lascia l'auto al bivio precedente) si segue il sentiero nell'oliveto e nella gola, si va a destra al bivio, si attraversa il greto e si sale sul lato destro con l'aiuto delle corde fisse: 20-25 minuti.",
+    { gradeMin: '5+', gradeMax: '8a+', routes: 27, height: 40, approach: 25, season: 'Inverno e mezze stagioni' },
+  ),
+  crag(
+    'muro-di-swann',
+    'Muro di Swann',
+    'Valle del Conchiusori',
+    { lat: 43.95965, lon: 10.30739 },
+    'In fondo alla valle del Conchiusori: vie dure al sole la mattina, buone anche con la pioggia.',
+    "Il settore più in fondo alla valle, con una ventina di vie dal 6c all'8b+, lunghe 15-20 metri, alcune a due tiri. Al sole la mattina, si arrampica anche con la pioggia.\n\nSi segue il sentiero della valle del Conchiusori oltre la Conchetta, il Grottino e la Maruccio Area, e al bivio si va a destra: 30-35 minuti dal parcheggio al primo tornante dopo il bivio per Greppolungo.",
+    { gradeMin: '6c', gradeMax: '8b+', routes: 17, height: 20, approach: 35, season: 'Mezze stagioni' },
+  ),
+]
+
+/** Every seeded place, with its Wikimedia Commons photos where there are some (seed-photos.ts). */
 export const seedPois: SeedPoi[] = [
   ...scopriPois,
   ...trekkingPois,
+  ...climbingPois,
   ...gustaPois,
   // Demo listings: replace with real restaurants, B&Bs and events.
   {
@@ -815,6 +1180,7 @@ export const seedPois: SeedPoi[] = [
     id: 'tappeti-segatura',
     name: 'Tappeti di segatura',
     category: 'events',
+    showOnMap: false,
     summary: 'Per il Corpus Domini le vie del centro si coprono di tappeti di segatura colorata.',
     description:
       'Ogni anno, per la festa del Corpus Domini, gli abitanti di Camaiore lavorano tutta la notte per coprire le vie del centro storico con tappeti di segatura colorata: disegni sacri e geometrici che al mattino accompagnano la processione. Una tradizione secolare che richiama visitatori da tutta la Toscana.',
@@ -827,6 +1193,7 @@ export const seedPois: SeedPoi[] = [
     id: 'mercato-centro',
     name: 'Mercato settimanale',
     category: 'events',
+    showOnMap: false,
     summary: 'Bancarelle di prodotti locali e artigianato in centro.',
     description:
       "Il mercato settimanale anima le piazze e le vie del centro con bancarelle di frutta e verdura delle aziende locali, formaggi, salumi, piante e artigianato. Un'occasione per vivere Camaiore come i suoi abitanti.",
@@ -838,6 +1205,7 @@ export const seedPois: SeedPoi[] = [
     id: 'cinema-sotto-le-stelle',
     name: 'Cinema sotto le stelle',
     category: 'events',
+    showOnMap: false,
     summary: "Proiezioni all'aperto sul lungomare nelle sere d'estate.",
     description:
       "Nelle sere d'estate, sul lungomare del Lido, uno schermo all'aperto propone film per tutte le età: classici, novità della stagione e serate dedicate ai più piccoli. Si porta un telo e si guarda il film con la brezza del mare.",
@@ -845,4 +1213,4 @@ export const seedPois: SeedPoi[] = [
     lat: 43.8975,
     lon: 10.2232,
   },
-]
+].map((poi) => ({ ...poi, ...seedPhotos[poi.id] }))

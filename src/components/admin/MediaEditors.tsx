@@ -3,10 +3,10 @@ import type { Dispatch, SetStateAction } from 'react'
 import { upload } from '@vercel/blob/client'
 
 import { Card, buttonClass, errorMessage, inputClass } from '#/components/admin/ui'
-import { MAX_PHOTOS, parseGpx } from '#/lib/media'
+import { MAX_LINKS, MAX_PHOTOS, parseGpx } from '#/lib/media'
 import { slugify } from '#/lib/poi-input'
 
-import type { GalleryPhoto, Track } from '#/lib/media'
+import type { GalleryPhoto, PoiLink, Track } from '#/lib/media'
 
 const IMAGE_ACCEPT = 'image/jpeg,image/png,image/webp,image/avif'
 
@@ -182,6 +182,92 @@ export function TrackEditor({ track, onChange, onUseStart, error }: TrackEditorP
         </label>
       </div>
       {(readError || error) && <p className="mt-2 text-xs font-semibold text-coral-dark">{readError ?? error}</p>}
+    </Card>
+  )
+}
+
+interface LinksEditorProps {
+  links: PoiLink[]
+  onChange: (links: PoiLink[]) => void
+  /** By row: `links.0.url`, `links.2.label`… */
+  errors: Record<string, string>
+}
+
+/** Pages about the place elsewhere, each with its own name, in order. */
+export function LinksEditor({ links, onChange, errors }: LinksEditorProps) {
+  const update = (i: number, link: Partial<PoiLink>) => onChange(links.map((l, j) => (j === i ? { ...l, ...link } : l)))
+  const move = (i: number, by: number) => {
+    const next = [...links]
+    ;[next[i], next[i + by]] = [next[i + by], next[i]]
+    onChange(next)
+  }
+
+  return (
+    <Card title="Link">
+      <p className="text-sm font-light">
+        Pagine utili su altri siti, ciascuna con il suo nome: relazioni di arrampicata, guide, siti ufficiali. Compaiono nella pagina, in
+        quest'ordine.
+      </p>
+      {links.length > 0 && (
+        <ul className="mt-4 space-y-3">
+          {links.map((link, i) => (
+            <li key={i} className="rounded-md border border-ink/10 p-3">
+              <div className="grid gap-3 sm:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
+                <div>
+                  <label htmlFor={`link-label-${i}`} className="mb-1 block text-xs font-semibold uppercase tracking-wider text-teal">
+                    Nome
+                  </label>
+                  <input
+                    id={`link-label-${i}`}
+                    value={link.label}
+                    maxLength={80}
+                    placeholder="Es. Relazione Versante Apuano"
+                    onChange={(e) => update(i, { label: e.target.value })}
+                    className={inputClass}
+                    aria-invalid={Boolean(errors[`links.${i}.label`])}
+                  />
+                  {errors[`links.${i}.label`] && <p className="mt-1 text-xs font-semibold text-coral-dark">{errors[`links.${i}.label`]}</p>}
+                </div>
+                <div>
+                  <label htmlFor={`link-url-${i}`} className="mb-1 block text-xs font-semibold uppercase tracking-wider text-teal">
+                    Indirizzo
+                  </label>
+                  <input
+                    id={`link-url-${i}`}
+                    type="url"
+                    value={link.url}
+                    placeholder="https://"
+                    onChange={(e) => update(i, { url: e.target.value })}
+                    className={inputClass}
+                    aria-invalid={Boolean(errors[`links.${i}.url`])}
+                  />
+                  {errors[`links.${i}.url`] && <p className="mt-1 text-xs font-semibold text-coral-dark">{errors[`links.${i}.url`]}</p>}
+                </div>
+              </div>
+              <div className="mt-2 flex flex-wrap gap-1">
+                <button type="button" disabled={i === 0} onClick={() => move(i, -1)} className={buttonClass.secondary} aria-label="Sposta prima">
+                  ↑
+                </button>
+                <button type="button" disabled={i === links.length - 1} onClick={() => move(i, 1)} className={buttonClass.secondary} aria-label="Sposta dopo">
+                  ↓
+                </button>
+                <button type="button" onClick={() => onChange(links.filter((_, j) => j !== i))} className={buttonClass.danger}>
+                  Rimuovi
+                </button>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+      <button
+        type="button"
+        disabled={links.length >= MAX_LINKS}
+        onClick={() => onChange([...links, { label: '', url: '' }])}
+        className={`${buttonClass.secondary} mt-4`}
+      >
+        Aggiungi un link
+      </button>
+      {errors.links && <p className="mt-2 text-xs font-semibold text-coral-dark">{errors.links}</p>}
     </Card>
   )
 }

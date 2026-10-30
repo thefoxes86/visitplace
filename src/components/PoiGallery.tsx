@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 
+import { PhotoCreditLine } from '#/components/PhotoCredit'
+
 import type { GalleryPhoto } from '#/lib/media'
 
 /** The photos of a place: a grid of thumbnails, each opening a full-screen viewer. */
@@ -60,6 +62,7 @@ export function PoiGallery({ photos, name }: { photos: GalleryPhoto[]; name: str
               <span className="ml-2 text-sm not-italic text-paper/70">
                 {open! + 1} / {photos.length}
               </span>
+              {current.credit && <PhotoCreditLine credit={current.credit} className="mt-1 block text-xs not-italic text-paper/70" />}
             </figcaption>
           </figure>
         )}

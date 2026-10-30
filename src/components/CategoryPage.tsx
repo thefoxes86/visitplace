@@ -160,7 +160,7 @@ interface PageShellProps {
 export function PageShell({ back: { label, ...back }, eyebrow, title, tagline, aside, wide = false, children }: PageShellProps) {
   return (
     <main className="min-h-dvh bg-paper font-sans text-ink">
-      <div className="mx-auto max-w-6xl px-6 pb-12 pt-24 sm:px-12">
+      <div className="mx-auto max-w-7xl px-6 pb-12 pt-24 sm:px-12">
         <Link {...back} className="hero-fade font-serif text-sm italic text-coral hover:underline">
           ← {label}
         </Link>
@@ -233,7 +233,7 @@ export function PoiList({ items }: { items: Poi[] }) {
               className="group grid items-start gap-5 sm:grid-cols-[5rem_12rem_minmax(0,1fr)]"
             >
               <span className="hidden border-b-2 border-coral text-right font-display text-6xl font-light leading-none text-coral sm:block">
-                {poiNumber(poi)}
+                {poiNumber(poi) ?? '·'}
               </span>
               <img
                 src={poiImage(poi, 480)}
@@ -243,7 +243,7 @@ export function PoiList({ items }: { items: Poi[] }) {
               />
               <span className="min-w-0">
                 <span className="block font-display text-xl font-semibold text-teal transition-colors group-hover:text-coral">
-                  <span className="text-coral sm:hidden">{poiNumber(poi)} · </span>
+                  {poi.number !== null && <span className="text-coral sm:hidden">{poiNumber(poi)} · </span>}
                   {poi.name}
                 </span>
                 <span className="mt-1 block font-serif italic text-coral">{poi.summary}</span>

@@ -1,13 +1,13 @@
 import type { DetailValues } from '#/lib/category-types'
 import type { RecurrenceId } from '#/lib/event-dates'
-import type { GalleryPhoto } from '#/lib/media'
+import type { GalleryPhoto, PhotoCredit, PoiLink } from '#/lib/media'
 
 /** A point of the tourist map, as stored in the `pois` table. */
 export interface Poi {
   /** Also the URL: /luoghi/<id>. */
   id: string
-  /** Map number, the same everywhere on the site. */
-  number: number
+  /** Map number, the same everywhere on the site; null for places not on the map. */
+  number: number | null
   name: string
   /** Id in the `categories` table, see useCategories(). */
   category: string
@@ -19,7 +19,11 @@ export interface Poi {
   lon: number
   /** Shown among the main attractions on the home page. */
   featured: boolean
+  /** Shown and numbered on the tourist map. */
+  showOnMap: boolean
   imageUrl: string | null
+  /** Author, licence and source of the main photo. */
+  imageCredit: PhotoCredit | null
   address: string | null
   phone: string | null
   email: string | null
@@ -34,16 +38,21 @@ export interface Poi {
   recurrenceUntil: Date | null
   /** Photos of the place's page, in order. */
   gallery: GalleryPhoto[]
+  /** Pages about the place elsewhere, each with its name. */
+  links: PoiLink[]
   /** Whether it has a GPS track: the points load with its page only (getPoiTrack). */
   hasTrack: boolean
 }
 
 /** A place in src/db/seed-data.ts: everything optional is left out. */
 export type SeedPoi = Pick<Poi, 'id' | 'name' | 'category' | 'summary' | 'description' | 'area' | 'lat' | 'lon'> &
-  Partial<Pick<Poi, 'featured' | 'address' | 'phone' | 'email' | 'website' | 'details'>>
+  Partial<Pick<Poi, 'featured' | 'showOnMap' | 'imageUrl' | 'imageCredit' | 'gallery' | 'address' | 'phone' | 'email' | 'website' | 'details' | 'links'>> & {
+    /** Left out, a seeded place is published; false keeps a draft to complete in the admin. */
+    published?: boolean
+  }
 
 /** Map number of a point, the same everywhere on the site. */
-export const poiNumber = (poi: Poi) => String(poi.number).padStart(2, '0')
+export const poiNumber = (poi: Pick<Poi, 'number'>) => (poi.number === null ? null : String(poi.number).padStart(2, '0'))
 
 /** The place's photo, or a demo image until one is set in the admin. */
 export const poiImage = (poi: Pick<Poi, 'id' | 'imageUrl'>, size = 800) =>

@@ -2,20 +2,27 @@ import { useEffect, useRef, useState } from 'react'
 import { Link } from '@tanstack/react-router'
 
 import { Skyline } from '#/components/Skyline'
-import { useCategories } from '#/data/categories'
-import { poiNumber } from '#/data/pois'
-import { usePois } from '#/data/use-pois'
+import { categoryLink, useCategories } from '#/data/categories'
+import { useEventsLink, useUpcomingEvents } from '#/data/events'
 import { sectionLink, sections } from '#/data/sections'
+import { formatOccurrence } from '#/lib/event-dates'
 
 // The overlay grows as a circle from the centre of the toggle button
 // (top-4 right-4, size-14 → 2.75rem from the corner).
 const ORIGIN = 'at calc(100% - 2.75rem) 2.75rem'
 const EASE_OUT = 'ease-[cubic-bezier(0.22,1,0.36,1)]'
 
+/** Upcoming events listed under the map link. */
+const EVENTS_SHOWN = 5
+
 export function SiteMenu() {
-  const pois = usePois()
-  const { categoryOf } = useCategories()
+  const events = useUpcomingEvents(EVENTS_SHOWN)
+  const eventsLink = useEventsLink()
+  const { roots, categories } = useCategories()
+  const childrenOf = (id: string) => categories.filter((c) => c.parentId === id)
   const [open, setOpen] = useState(false)
+  /** The section whose categories are showing, one at a time. */
+  const [openSection, setOpenSection] = useState<string | null>(null)
   const toggle = useRef<HTMLButtonElement>(null)
   const firstLink = useRef<HTMLAnchorElement>(null)
 
@@ -86,7 +93,7 @@ export function SiteMenu() {
           open ? '' : 'pointer-events-none'
         }`}
       >
-        <nav className="relative mx-auto flex min-h-full max-w-6xl flex-col px-6 pb-10 pt-24 sm:px-12">
+        <nav className="relative mx-auto flex min-h-full max-w-7xl flex-col px-6 pb-10 pt-24 sm:px-12">
           <Link
             to="/"
             onClick={close}
@@ -108,30 +115,93 @@ export function SiteMenu() {
             <ul>
               {sections.map((section, i) => {
                 const { style, className } = rise(i)
+                const categories = roots.filter((c) => c.section === section.id)
+                const expanded = openSection === section.id
+                const panel = `site-menu-${section.id}`
                 return (
                   <li key={section.id} style={style} className={className}>
-                    <Link
-                      ref={i === 0 ? firstLink : undefined}
-                      {...sectionLink(section.id)}
-                      onClick={close}
-                      className="group flex items-end gap-4 border-b-2 border-coral/30 py-3 outline-none transition-colors hover:border-coral focus-visible:border-coral sm:gap-6"
-                    >
-                      <span className="w-14 shrink-0 font-display text-4xl font-light leading-none text-coral sm:w-20 sm:text-5xl">
-                        {String(i + 1).padStart(2, '0')}
-                      </span>
-                      <span className="flex-1 font-display text-3xl font-extrabold uppercase tracking-wide text-teal transition duration-300 group-hover:translate-x-2 group-hover:text-coral group-focus-visible:translate-x-2 group-focus-visible:text-coral sm:text-5xl">
-                        {section.title}
-                      </span>
-                      <span className="hidden pb-1 font-serif text-sm italic text-ink/70 md:block">
-                        {section.tagline}
-                      </span>
-                    </Link>
+                    <div className="flex items-end border-b-2 border-coral/30 transition-colors focus-within:border-coral hover:border-coral">
+                      <Link
+                        ref={i === 0 ? firstLink : undefined}
+                        {...sectionLink(section.id)}
+                        onClick={close}
+                        className="group flex min-w-0 flex-1 items-end gap-4 py-3 outline-none sm:gap-6"
+                      >
+                        <span className="w-14 shrink-0 font-display text-4xl font-light leading-none text-coral sm:w-20 sm:text-5xl">
+                          {String(i + 1).padStart(2, '0')}
+                        </span>
+                        <span className="flex-1 font-display text-3xl font-extrabold uppercase tracking-wide text-teal transition duration-300 group-hover:translate-x-2 group-hover:text-coral group-focus-visible:translate-x-2 group-focus-visible:text-coral sm:text-5xl">
+                          {section.title}
+                        </span>
+                        <span className="hidden pb-1 font-serif text-sm italic text-ink/70 md:block">{section.tagline}</span>
+                      </Link>
+                      {categories.length > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => setOpenSection(expanded ? null : section.id)}
+                          aria-expanded={expanded}
+                          aria-controls={panel}
+                          aria-label={`${expanded ? 'Chiudi' : 'Apri'} le categorie di ${section.title}`}
+                          className="mb-2 ml-3 grid size-10 shrink-0 place-items-center rounded-full text-teal outline-none ring-1 ring-mint transition hover:bg-mint focus-visible:ring-2 focus-visible:ring-coral sm:mb-3 sm:ml-6"
+                        >
+                          <span aria-hidden className={`text-2xl leading-none transition-transform duration-300 ${expanded ? 'rotate-45' : ''}`}>
+                            +
+                          </span>
+                        </button>
+                      )}
+                    </div>
+
+                    {/* The section's categories, opening under it */}
+                    {categories.length > 0 && (
+                      <div
+                        id={panel}
+                        inert={!expanded}
+                        className={`grid transition-[grid-template-rows] duration-500 motion-reduce:transition-none ${EASE_OUT} ${
+                          expanded ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
+                        }`}
+                      >
+                        <div className="overflow-hidden">
+                          <ul className="grid gap-x-8 gap-y-4 py-5 pl-[4.5rem] sm:grid-cols-2 sm:pl-[6.5rem] lg:grid-cols-3">
+                            {categories.map((category) => {
+                              const children = childrenOf(category.id)
+                              return (
+                                <li key={category.id}>
+                                  <Link
+                                    {...categoryLink(category)}
+                                    onClick={close}
+                                    className="group inline-flex items-center gap-2 font-display text-lg font-semibold uppercase tracking-[0.08em] text-teal outline-none transition-colors hover:text-coral focus-visible:text-coral focus-visible:underline"
+                                  >
+                                    <span aria-hidden className="size-2.5 shrink-0 rounded-full" style={{ backgroundColor: category.color }} />
+                                    {category.label}
+                                  </Link>
+                                  {children.length > 0 && (
+                                    <ul className="mt-1 space-y-0.5 border-l-2 border-mint pl-4">
+                                      {children.map((child) => (
+                                        <li key={child.id}>
+                                          <Link
+                                            {...categoryLink(child)}
+                                            onClick={close}
+                                            className="text-sm font-light outline-none transition-colors hover:text-coral focus-visible:text-coral focus-visible:underline"
+                                          >
+                                            {child.label}
+                                          </Link>
+                                        </li>
+                                      ))}
+                                    </ul>
+                                  )}
+                                </li>
+                              )
+                            })}
+                          </ul>
+                        </div>
+                      </div>
+                    )}
                   </li>
                 )
               })}
             </ul>
 
-            {/* The map and its places */}
+            {/* The map and the next events */}
             <div {...rise(sections.length)}>
               <Link
                 to="/mappa"
@@ -142,31 +212,39 @@ export function SiteMenu() {
                 Mappa turistica
                 <span className="transition-transform duration-300 group-hover:translate-x-1">→</span>
               </Link>
-              <div className="mt-6 border-l-[6px] border-mint">
-                <p className="signpost-right -ml-1.5 bg-mint py-2 pl-5 pr-10 font-display font-semibold uppercase tracking-[0.15em] text-teal">
-                  Luoghi
-                </p>
-                <ul className="space-y-2 py-4 pl-5">
-                  {pois.map((place) => (
-                    <li key={place.id}>
-                      <Link
-                        to="/luoghi/$poiId"
-                        params={{ poiId: place.id }}
-                        onClick={close}
-                        className="group flex items-center gap-2 text-sm font-light outline-none transition-colors hover:text-coral focus-visible:text-coral focus-visible:underline"
-                      >
-                        <span
-                          className="grid size-6 shrink-0 place-items-center rounded-full text-[10px] font-semibold text-white"
-                          style={{ backgroundColor: categoryOf(place.category).color }}
+              {/* The next events, soonest first */}
+              {events.length > 0 && (
+                <div className="mt-6 border-l-[6px] border-mint">
+                  <p className="signpost-right -ml-1.5 bg-mint py-2 pl-5 pr-10 font-display font-semibold uppercase tracking-[0.15em] text-teal">
+                    Prossimi eventi
+                  </p>
+                  <ul className="space-y-4 py-4 pl-5">
+                    {events.map((event) => (
+                      <li key={event.id}>
+                        <Link
+                          to="/luoghi/$poiId"
+                          params={{ poiId: event.id }}
+                          onClick={close}
+                          className="group block outline-none focus-visible:underline"
                         >
-                          {poiNumber(place)}
-                        </span>
-                        {place.name}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+                          <span className="block font-serif text-xs italic text-coral">{formatOccurrence(event.next, event.allDay)}</span>
+                          <span className="block text-sm font-semibold leading-snug text-teal transition-colors group-hover:text-coral group-focus-visible:text-coral">
+                            {event.name}
+                          </span>
+                          <span className="block text-xs font-light">{event.area}</span>
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                  <Link
+                    {...eventsLink}
+                    onClick={close}
+                    className="group mb-2 ml-5 inline-flex items-center gap-1 font-serif text-sm italic text-coral outline-none hover:underline focus-visible:underline"
+                  >
+                    Tutti gli eventi <span className="transition-transform group-hover:translate-x-1">→</span>
+                  </Link>
+                </div>
+              )}
             </div>
           </div>
 
