@@ -40,6 +40,7 @@ function MapPage() {
     return pois.some((p) => ids.has(p.category))
   })
   const [active, setActive] = useState<Set<string>>(() => new Set(categories.map((c) => c.id)))
+  const allOn = tree.every((c) => active.has(c.id))
   const { luogo } = Route.useSearch()
   const [selected, setSelected] = useState<Poi | null>(() => (luogo && pois.find((p) => p.id === luogo)) || null)
   const [target, setTarget] = useState<MapTarget | null>(() => (selected ? { poi: selected } : null))
@@ -69,6 +70,12 @@ function MapPage() {
     if (!on && selected && ids.has(selected.category)) setSelected(null)
   }
 
+  /** Every category on, or every one off. */
+  const toggleAll = () => {
+    setActive(allOn ? new Set() : new Set(categories.map((c) => c.id)))
+    if (allOn) setSelected(null)
+  }
+
   const select = (poi: Poi) => {
     setSelected(poi)
     setTarget({ poi })
@@ -85,17 +92,36 @@ function MapPage() {
             Mappa
             <br className="hidden lg:block" /> turistica
           </h1>
-          <p className="mt-3 hidden text-sm font-light leading-relaxed text-ink/80 lg:block">
+          <p className="mt-3 hidden text-sm font-normal leading-relaxed text-ink/80 lg:block">
             Dal centro storico al Lido: scegli cosa vuoi vedere sulla mappa.
           </p>
+          <Link to="/outdoor" className="group mt-2 hidden font-serif text-sm italic text-coral hover:underline lg:inline-block">
+            Trekking e falesie con i filtri: la mappa outdoor <span className="inline-block transition-transform group-hover:translate-x-1">→</span>
+          </Link>
         </div>
 
         <h2 className="signpost-right mr-10 hidden bg-mint py-2 pl-6 pr-10 font-display font-semibold uppercase tracking-[0.15em] text-teal lg:block">
           Categorie
         </h2>
+        <button
+          type="button"
+          onClick={toggleAll}
+          className="mx-6 mt-3 hidden self-start font-serif text-sm italic text-coral hover:underline lg:block"
+        >
+          {allOn ? 'Deseleziona tutto' : 'Seleziona tutto'}
+        </button>
 
         {/* Category filter: chips on phones, a legend on wide screens */}
         <ul className="flex gap-2 overflow-x-auto px-5 pb-3 lg:flex-col lg:gap-1 lg:px-6 lg:py-4">
+          <li className="shrink-0 lg:hidden">
+            <button
+              type="button"
+              onClick={toggleAll}
+              className="flex h-10 items-center rounded-full px-4 text-sm font-semibold text-coral ring-1 ring-coral/40"
+            >
+              {allOn ? 'Deseleziona tutto' : 'Seleziona tutto'}
+            </button>
+          </li>
           {tree.map((category) => {
             const on = active.has(category.id)
             const ids = subtree(category.id)
@@ -149,7 +175,7 @@ function MapPage() {
                   type="button"
                   onClick={() => select(poi)}
                   className={`flex w-full items-center gap-2 rounded-sm px-2 py-1 text-left text-sm transition-colors hover:bg-mint-light ${
-                    selected?.id === poi.id ? 'bg-mint-light font-semibold text-teal' : 'font-light'
+                    selected?.id === poi.id ? 'bg-mint-light font-semibold text-teal' : 'font-normal'
                   }`}
                 >
                   <span
@@ -162,7 +188,7 @@ function MapPage() {
                 </button>
               </li>
             ))}
-            {!visible.length && <li className="px-2 text-sm font-light italic">Nessuna categoria selezionata.</li>}
+            {!visible.length && <li className="px-2 text-sm font-normal italic">Nessuna categoria selezionata.</li>}
           </ol>
         </div>
       </aside>
@@ -196,7 +222,7 @@ function MapPage() {
                 <span className="mt-1 block font-display text-lg font-extrabold leading-tight text-teal transition-colors group-hover:text-coral">
                   {selected.name}
                 </span>
-                <span className="mt-1 line-clamp-2 block text-sm font-light leading-snug">{selected.summary}</span>
+                <span className="mt-1 line-clamp-2 block text-sm font-normal leading-snug">{selected.summary}</span>
                 <span className="mt-2 inline-flex items-center gap-1 text-sm font-semibold text-coral">
                   Scopri di più
                   <span className="transition-transform group-hover:translate-x-1">→</span>

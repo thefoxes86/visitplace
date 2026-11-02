@@ -6,8 +6,8 @@
 import { max } from 'drizzle-orm'
 import { drizzle } from 'drizzle-orm/node-postgres'
 
-import { categories, pois } from '../src/db/schema.ts'
-import { seedCategories, seedPois } from '../src/db/seed-data.ts'
+import { categories, itineraries, pois } from '../src/db/schema.ts'
+import { seedCategories, seedItineraries, seedPois } from '../src/db/seed-data.ts'
 
 import type { SeedCategory } from '../src/db/seed-data.ts'
 
@@ -87,4 +87,10 @@ const moved = seedPois.flatMap((poi) => {
   return found && found.category !== poi.category ? [`${poi.id} (${found.category} → ${poi.category})`] : []
 })
 if (moved.length) console.log(`Already there in another category, left as they are: ${moved.join(', ')}.`)
+// Itineraries: those whose address is free.
+const currentItineraries = await db.select({ id: itineraries.id }).from(itineraries)
+const newItineraries = seedItineraries.filter((it) => !currentItineraries.some((c) => c.id === it.id))
+if (newItineraries.length) await db.insert(itineraries).values(newItineraries)
+console.log(newItineraries.length ? `Added ${newItineraries.length} itineraries: ${newItineraries.map((it) => it.id).join(', ')}.` : 'Itineraries: nothing to add.')
+
 await db.$client.end()

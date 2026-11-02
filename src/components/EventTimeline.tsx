@@ -133,7 +133,7 @@ export function EventTimeline({ category }: { category: Category }) {
             />
           </label>
           <label className="text-xs font-semibold uppercase tracking-wider text-teal">
-            Al <span className="font-light normal-case tracking-normal">(facoltativo)</span>
+            Al <span className="font-normal normal-case tracking-normal">(facoltativo)</span>
             <input
               type="date"
               value={custom.to}
@@ -211,13 +211,13 @@ function EventCard({ entry: { event, occurrence }, now, category }: { entry: Ent
         <span className="min-w-0">
           <span className="block text-sm font-semibold text-teal">
             {formatOccurrenceTime(occurrence, event.allDay)}
-            {over && <span className="ml-2 font-light italic text-ink/70">concluso</span>}
+            {over && <span className="ml-2 font-normal italic text-ink/70">concluso</span>}
           </span>
           <span className="mt-1 block font-display text-xl font-semibold leading-tight text-teal transition-colors group-hover:text-coral">
             {event.name}
           </span>
           <span className="mt-1 block font-serif text-sm italic text-coral">{event.summary}</span>
-          <span className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs font-light">
+          <span className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs font-normal">
             <span className="font-semibold uppercase tracking-wider" style={{ color: category.color }}>
               {category.label}
             </span>

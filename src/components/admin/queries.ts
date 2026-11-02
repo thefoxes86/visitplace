@@ -1,6 +1,7 @@
 import { queryOptions } from '@tanstack/react-query'
 
 import { adminListCategories } from '#/server/categories'
+import { adminListItineraries } from '#/server/itineraries'
 import { adminListPois } from '#/server/pois'
 import { listUsers } from '#/server/users'
 
@@ -24,3 +25,9 @@ export const adminCategoriesQuery = queryOptions({
 })
 
 export type AdminCategory = Awaited<ReturnType<typeof adminListCategories>>[number]
+
+/** Every itinerary, published or not. */
+export const adminItinerariesQuery = queryOptions({
+  queryKey: ['admin', 'itineraries'],
+  queryFn: () => adminListItineraries(),
+})

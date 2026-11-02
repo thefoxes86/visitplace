@@ -1,5 +1,5 @@
 import { createServerFn } from '@tanstack/react-start'
-import { and, asc, eq, max } from 'drizzle-orm'
+import { and, asc, eq, isNotNull, max } from 'drizzle-orm'
 import { z } from 'zod'
 
 import { db } from '#/db'
@@ -40,6 +40,29 @@ export const listPublicPois = createServerFn({ method: 'GET' }).handler(async ()
       hasTrack: track !== null,
       number: poi.showOnMap ? ++number : null,
     }))
+})
+
+/** Points kept per track on the outdoor map: enough for the line, light for the page. */
+const OVERVIEW_POINTS = 300
+
+/** The GPS tracks of published hikes, thinned out, to draw them all on the outdoor map. */
+export const listOutdoorTracks = createServerFn({ method: 'GET' }).handler(async (): Promise<{ id: string; points: [number, number][] }[]> => {
+  const [rows, hidden] = await Promise.all([
+    db
+      .select({ id: pois.id, category: pois.category, track: pois.track })
+      .from(pois)
+      .innerJoin(categories, eq(categories.id, pois.category))
+      .where(and(eq(pois.published, true), eq(categories.type, 'trekking'), isNotNull(pois.track))),
+    hiddenCategoryIds(),
+  ])
+  return rows
+    .filter((row) => row.track && !hidden.has(row.category))
+    .map(({ id, track }) => {
+      const points = track!.points
+      const step = Math.max(1, Math.ceil(points.length / OVERVIEW_POINTS))
+      const thin = points.filter((_, i) => i % step === 0 || i === points.length - 1)
+      return { id, points: thin.map(([lat, lon]): [number, number] => [lat, lon]) }
+    })
 })
 
 /** The GPS track of a published place, for its page. */

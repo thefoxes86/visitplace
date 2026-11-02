@@ -3,7 +3,7 @@ import { desc, eq } from 'drizzle-orm'
 
 import { sections } from '#/data/sections'
 import { db } from '#/db'
-import { categories, pois } from '#/db/schema'
+import { categories, itineraries, pois } from '#/db/schema'
 import { hiddenIds } from '#/lib/category-tree'
 import { absoluteUrl } from '#/lib/seo'
 
@@ -50,12 +50,19 @@ export const Route = createFileRoute('/sitemap.xml')({
         const categoryPages = (
           await db.select({ id: categories.id, slug: categories.slug, updatedAt: categories.updatedAt }).from(categories)
         ).filter((category) => !hidden.has(category.id))
+        const itineraryPages = await db
+          .select({ id: itineraries.id, updatedAt: itineraries.updatedAt })
+          .from(itineraries)
+          .where(eq(itineraries.published, true))
+          .orderBy(desc(itineraries.updatedAt))
+        const lastItinerary = itineraryPages[0]?.updatedAt
         // Pages listing places change whenever one of them does.
         const lastChange = places[0]?.updatedAt
 
         const entries: SitemapEntry[] = [
           { path: '/', lastmod: lastChange, changefreq: 'weekly', priority: 1 },
           { path: '/mappa', lastmod: lastChange, changefreq: 'weekly', priority: 0.9 },
+          { path: '/outdoor', lastmod: lastChange, changefreq: 'weekly', priority: 0.8 },
           ...sections.map((section) => ({
             path: `/${section.id}`,
             lastmod: section.id === 'info' ? undefined : lastChange,
@@ -66,6 +73,13 @@ export const Route = createFileRoute('/sitemap.xml')({
             path: `/categorie/${category.slug}`,
             lastmod: lastChange && lastChange > category.updatedAt ? lastChange : category.updatedAt,
             changefreq: 'weekly' as const,
+            priority: 0.7,
+          })),
+          { path: '/itinerari', lastmod: lastItinerary, changefreq: 'weekly' as const, priority: 0.8 },
+          ...itineraryPages.map((itinerary) => ({
+            path: `/itinerari/${itinerary.id}`,
+            lastmod: itinerary.updatedAt,
+            changefreq: 'monthly' as const,
             priority: 0.7,
           })),
           ...places.map((place) => ({

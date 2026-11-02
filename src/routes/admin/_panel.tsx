@@ -91,6 +91,11 @@ function AdminLayout() {
               {section.title}
             </Link>
           ))}
+          <p className="mt-5 px-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-mint">Contenuti</p>
+          <Link to="/admin/itinerari" activeProps={activeNavLink} onClick={close} className={navLink}>
+            <span aria-hidden className="grid size-5 place-items-center">⤳</span>
+            Itinerari
+          </Link>
           {user.role === 'admin' && (
             <>
               <p className="mt-5 px-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-mint">Amministrazione</p>

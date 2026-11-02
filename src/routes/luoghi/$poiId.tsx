@@ -213,7 +213,7 @@ function PoiPage() {
             {/* Without a photo of its own, a demo image stands in. */}
             <figure>
               <img src={poiImage(poi, 1200)} alt="" className="aspect-[16/10] w-full object-cover" />
-              {poi.imageCredit && <PhotoCreditLine credit={poi.imageCredit} className="mt-2 block text-right text-xs font-light text-ink/70" />}
+              {poi.imageCredit && <PhotoCreditLine credit={poi.imageCredit} className="mt-2 block text-right text-xs font-normal text-ink/70" />}
             </figure>
 
             <div className={`mt-8 grid gap-8 ${poi.number !== null ? 'sm:grid-cols-[7rem_minmax(0,1fr)]' : ''}`}>
@@ -222,7 +222,7 @@ function PoiPage() {
                   {poiNumber(poi)}
                 </span>
               )}
-              <p className="whitespace-pre-line text-lg font-light leading-relaxed">{poi.description}</p>
+              <p className="whitespace-pre-line text-lg font-normal leading-relaxed">{poi.description}</p>
             </div>
 
             <PoiGallery photos={poi.gallery} name={poi.name} />
@@ -245,7 +245,7 @@ function PoiPage() {
                       {String(i + 1).padStart(2, '0')}
                     </span>
                     <span>
-                      <dt className="text-xs font-light">{label}</dt>
+                      <dt className="text-xs font-normal">{label}</dt>
                       <dd className="font-semibold text-teal">{value}</dd>
                     </span>
                   </div>
@@ -261,7 +261,7 @@ function PoiPage() {
                 className="group grid size-48 shrink-0 place-items-center rounded-full bg-mint-light p-8 text-center ring-1 ring-mint ring-offset-8 ring-offset-paper transition hover:bg-mint"
               >
                 <span>
-                  <span className="block text-sm font-light leading-snug">Come arrivare con Google Maps</span>
+                  <span className="block text-sm font-normal leading-snug">Come arrivare con Google Maps</span>
                   <span className="mt-2 inline-flex items-center gap-1 font-semibold text-teal">
                     Indicazioni
                     <span className="transition-transform group-hover:translate-x-1">→</span>

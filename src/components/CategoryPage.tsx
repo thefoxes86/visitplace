@@ -33,7 +33,7 @@ export function CategoryPage({ sectionId, intro }: CategoryPageProps) {
       tagline={section.tagline}
       aside={<OtherSections current={section.id} />}
     >
-      <p className="max-w-2xl text-lg font-light leading-relaxed">{intro}</p>
+      <p className="max-w-2xl text-lg font-normal leading-relaxed">{intro}</p>
       {list.length > 0 ? (
         <CategoryCards list={list} />
       ) : (
@@ -126,7 +126,7 @@ export function CategoryCards({ list, className = 'mt-12 sm:grid-cols-2' }: { li
                   </span>
                   {child.label}
                 </span>
-                <span className="mt-2 flex items-center justify-between text-xs font-light">
+                <span className="mt-2 flex items-center justify-between text-xs font-normal">
                   {isListType(child.type)
                     ? `${nested} ${nested === 1 ? 'categoria' : 'categorie'}`
                     : inside.length > 0
@@ -247,7 +247,7 @@ export function PoiList({ items }: { items: Poi[] }) {
                   {poi.name}
                 </span>
                 <span className="mt-1 block font-serif italic text-coral">{poi.summary}</span>
-                <span className="mt-2 block text-sm font-light leading-relaxed">{poi.description}</span>
+                <span className="mt-2 block text-sm font-normal leading-relaxed">{poi.description}</span>
                 <span className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-teal">
                   Scopri di più
                   <span className="transition-transform group-hover:translate-x-1">→</span>
@@ -297,7 +297,7 @@ export function SignpostNav({ title, items }: SignpostNavProps) {
               </span>
               <span>
                 <span className="block font-semibold text-teal transition-colors group-hover:text-coral">{item.title}</span>
-                <span className="block text-xs font-light">{item.tagline}</span>
+                <span className="block text-xs font-normal">{item.tagline}</span>
               </span>
             </Link>
           </li>

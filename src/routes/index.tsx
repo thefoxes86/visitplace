@@ -6,6 +6,8 @@ import { Skyline } from '#/components/Skyline'
 import { Compass } from '#/components/tourist-map/TouristMap'
 import { useCategories } from '#/data/categories'
 import { useEventsLink, useUpcomingEvents } from '#/data/events'
+import { itinerariesQuery, useItineraries } from '#/data/itineraries'
+import { ItineraryCard } from '#/components/ItineraryCard'
 import { poiImage, poiNumber } from '#/data/pois'
 import { formatOccurrence, formatRecurrence } from '#/lib/event-dates'
 import { usePois } from '#/data/use-pois'
@@ -15,6 +17,7 @@ import { DEFAULT_DESCRIPTION, SITE_NAME, absoluteUrl, seo } from '#/lib/seo'
 import type { Poi } from '#/data/pois'
 
 export const Route = createFileRoute('/')({
+  loader: ({ context }) => context.queryClient.ensureQueryData(itinerariesQuery),
   head: () =>
     seo({
       path: '/',
@@ -39,6 +42,7 @@ const TITLE = 'Camaiore'
 
 /** Upcoming events and things to do shown on the home page. */
 const EVENTS_SHOWN = 4
+const ITINERARIES_SHOWN = 3
 const THINGS_TO_DO_SHOWN = 6
 const PICKS_SHOWN = 4
 
@@ -55,6 +59,7 @@ function Home() {
   const pois = usePois()
   const { categories, categoryOf, subtree } = useCategories()
   const eventsLink = useEventsLink()
+  const itineraries = useItineraries()
   const featured = pois.filter((poi) => poi.featured)
   const isEvent = (poi: Poi) => categoryOf(poi.category).type === 'event'
 
@@ -105,7 +110,7 @@ function Home() {
         <div className="mt-10 grid gap-12 lg:grid-cols-[minmax(0,1fr)_15rem_16rem] lg:gap-0">
           {/* Intro, sections and the map */}
           <div className="hero-fade lg:pr-10" style={{ animationDelay: '1300ms' }}>
-            <p className="max-w-xl font-light leading-relaxed">
+            <p className="max-w-xl font-normal leading-relaxed">
               Camaiore è una delle perle della Versilia. Il centro storico medievale, raccolto attorno alla
               Collegiata e a Piazza San Bernardino, si apre su colline di ulivi e borghi di pietra che salgono
               verso le Alpi Apuane. A pochi chilometri, il Lido di Camaiore offre spiagge di sabbia fine, il
@@ -118,7 +123,7 @@ function Home() {
                 className="group grid size-52 shrink-0 place-items-center rounded-full bg-mint-light p-8 text-center ring-1 ring-mint ring-offset-8 ring-offset-paper transition hover:bg-mint"
               >
                 <span>
-                  <span className="block text-sm font-light leading-snug">Ristoranti, B&B, cultura ed eventi, dal centro al Lido</span>
+                  <span className="block text-sm font-normal leading-snug">Ristoranti, B&B, cultura ed eventi, dal centro al Lido</span>
                   <span className="mt-2 inline-flex items-center gap-1 font-semibold text-teal">
                     La mappa turistica
                     <span className="transition-transform group-hover:translate-x-1">→</span>
@@ -151,7 +156,7 @@ function Home() {
                         <span className="block font-semibold text-teal transition-colors group-hover:text-coral">
                           {section.title}
                         </span>
-                        <span className="block text-xs font-light">{section.tagline}</span>
+                        <span className="block text-xs font-normal">{section.tagline}</span>
                       </span>
                     </Link>
                   </li>
@@ -256,7 +261,7 @@ function Home() {
                     <span className="mt-1 block font-display text-xl font-semibold leading-tight transition-colors group-hover:text-coral">
                       {event.name}
                     </span>
-                    <span className="mt-1 block text-sm font-light text-paper/80">{event.area}</span>
+                    <span className="mt-1 block text-sm font-normal text-paper/80">{event.area}</span>
                   </Link>
                 </li>
               ))}
@@ -298,6 +303,27 @@ function Home() {
                     <span className="mt-1 block font-serif italic text-coral">{place.summary}</span>
                   </Link>
                 </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
+        {/* Themed itineraries, the first ones */}
+        {itineraries.length > 0 && (
+          <section className="pt-20">
+            <div className="flex flex-wrap items-end justify-between gap-4 border-b-[3px] border-teal pb-4">
+              <h2 className="font-display text-3xl font-semibold uppercase tracking-[0.15em] text-coral sm:text-4xl">
+                <Link to="/itinerari" className="transition-colors hover:text-teal">
+                  Itinerari
+                </Link>
+              </h2>
+              <Link to="/itinerari" className="group font-serif italic text-coral hover:underline">
+                Tutti gli itinerari <span className="inline-block transition-transform group-hover:translate-x-1">→</span>
+              </Link>
+            </div>
+            <ul className="mt-10 grid gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
+              {itineraries.slice(0, ITINERARIES_SHOWN).map((itinerary, i) => (
+                <ItineraryCard key={itinerary.id} itinerary={itinerary} index={i} />
               ))}
             </ul>
           </section>

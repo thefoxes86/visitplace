@@ -34,7 +34,7 @@ function MaintenancePage() {
             </h1>
           </div>
         </header>
-        <p className="mt-8 text-lg font-light leading-relaxed">{message}</p>
+        <p className="mt-8 text-lg font-normal leading-relaxed">{message}</p>
         <p className="mt-10 flex flex-wrap justify-between gap-2 text-xs italic text-ink/70">
           <span>Camaiore · Versilia, Toscana</span>
           <Link to="/admin/login" className="hover:text-coral hover:underline">

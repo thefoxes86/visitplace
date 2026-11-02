@@ -44,7 +44,7 @@ function InfoPage() {
           <li key={office.name}>
             <p className="font-display text-lg font-semibold text-teal">{office.name}</p>
             <p className="font-serif italic text-coral">{office.area}</p>
-            <dl className="mt-3 space-y-1 text-sm font-light">
+            <dl className="mt-3 space-y-1 text-sm font-normal">
               {(
                 [
                   ['Indirizzo', office.address],
@@ -106,7 +106,7 @@ function InfoPage() {
               )}
             </div>
             <p className="mt-2 font-semibold text-teal">{cam.name}</p>
-            <p className="text-xs font-light">{cam.area}</p>
+            <p className="text-xs font-normal">{cam.area}</p>
           </li>
         ))}
       </ul>
@@ -129,7 +129,7 @@ function InfoPage() {
         </div>
       }
     >
-      <p className="max-w-2xl text-lg font-light leading-relaxed">
+      <p className="max-w-2xl text-lg font-normal leading-relaxed">
         Tutto quello che serve per organizzare la visita: dove chiedere informazioni, come raggiungere Camaiore e
         spostarsi tra il centro, i borghi e il Lido.
       </p>
@@ -168,7 +168,7 @@ function ItemList({ items }: { items: InfoItem[] }) {
           </span>
           <div>
             <dt className="font-semibold text-teal">{item.title}</dt>
-            <dd className="mt-1 text-sm font-light leading-relaxed">{item.text}</dd>
+            <dd className="mt-1 text-sm font-normal leading-relaxed">{item.text}</dd>
           </div>
         </div>
       ))}

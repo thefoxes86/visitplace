@@ -56,7 +56,7 @@ export function TrackMap({ track, name }: { track: Track; name: string }) {
       <dl className="mt-6 flex flex-wrap gap-x-8 gap-y-3">
         {figures.map(([label, value]) => (
           <div key={label}>
-            <dt className="text-xs font-light">{label}</dt>
+            <dt className="text-xs font-normal">{label}</dt>
             <dd className="font-display text-2xl font-semibold text-teal">{value}</dd>
           </div>
         ))}
@@ -125,7 +125,7 @@ function Profile({ track }: { track: Track }) {
         <path d={`${d}L${lastX.toFixed(1)},${H}L${firstX.toFixed(1)},${H}Z`} fill="#d5ebe3" />
         <path d={d} fill="none" stroke={TEAL} strokeWidth={2} vectorEffect="non-scaling-stroke" />
       </svg>
-      <figcaption className="mt-1 flex justify-between text-xs font-light">
+      <figcaption className="mt-1 flex justify-between text-xs font-normal">
         <span>0 km · {track.minEle}–{track.maxEle} m</span>
         <span>{track.length.toLocaleString('it-IT')} km</span>
       </figcaption>

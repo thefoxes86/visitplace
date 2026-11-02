@@ -106,6 +106,27 @@
       "when": 1793294076690,
       "tag": "0014_poi_image_credit",
       "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "7",
+      "when": 1793625560747,
+      "tag": "0015_itineraries",
+      "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1793626317800,
+      "tag": "0016_itinerary_info",
+      "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1793626329166,
+      "tag": "0017_itinerary_drop_mode",
+      "breakpoints": true
     }
   ]
 }

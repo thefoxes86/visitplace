@@ -4,6 +4,7 @@ import type { AnyPgColumn } from 'drizzle-orm/pg-core'
 import type { DetailValues } from '../lib/category-types.ts'
 import type { RecurrenceId } from '../lib/event-dates.ts'
 import type { GalleryPhoto, PhotoCredit, PoiLink, Track } from '../lib/media.ts'
+import type { ItineraryModeId, ItineraryStop } from '../lib/itineraries.ts'
 
 // ── Auth (Better Auth + its admin plugin) ────────────────────────────────────
 
@@ -167,6 +168,33 @@ export const pois = pgTable(
   },
   (t) => [index('pois_category_idx').on(t.category)],
 )
+
+/** Themed routes through the places: their stops point to `pois` (src/lib/itineraries.ts). */
+export const itineraries = pgTable('itineraries', {
+  /** Also the URL: /itinerari/<id>. */
+  id: text().primaryKey(),
+  title: text().notNull(),
+  summary: text().notNull(),
+  description: text().notNull(),
+  /** Free text: "Mezza giornata". */
+  duration: text().notNull().default(''),
+  /** Every way to travel it: walk, car, bike, transit. */
+  modes: jsonb().$type<ItineraryModeId[]>().notNull().default([]),
+  /** Free text: "Da maggio a ottobre". */
+  season: text().notNull().default(''),
+  kidFriendly: boolean('kid_friendly').notNull().default(false),
+  petFriendly: boolean('pet_friendly').notNull().default(false),
+  /** Places in order, each with a note; a stop whose place is gone or hidden is skipped on the site. */
+  stops: jsonb().$type<ItineraryStop[]>().notNull().default([]),
+  published: boolean().notNull().default(true),
+  /** Order of the list of itineraries. */
+  sortOrder: integer('sort_order').notNull().default(0),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at')
+    .notNull()
+    .defaultNow()
+    .$onUpdate(() => new Date()),
+})
 
 // ── Settings ─────────────────────────────────────────────────────────────────
 

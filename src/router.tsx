@@ -49,7 +49,7 @@ function ErrorPage({ error, reset }: ErrorComponentProps) {
     <main className="grid min-h-dvh place-items-center bg-paper p-8 text-center font-sans text-ink">
       <div>
         <h1 className="font-display text-3xl font-extrabold uppercase text-coral">Qualcosa è andato storto</h1>
-        <p className="mt-2 text-sm font-light">{error instanceof Error ? error.message : String(error)}</p>
+        <p className="mt-2 text-sm font-normal">{error instanceof Error ? error.message : String(error)}</p>
         <button type="button" onClick={reset} className="mt-4 font-serif italic text-teal underline">
           Riprova
         </button>

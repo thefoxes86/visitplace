@@ -82,6 +82,22 @@ export function TouristMap(props: TouristMapProps) {
   )
 }
 
+/** A dashed line through the points, in order. */
+export function RouteLine({ path }: { path: { lat: number; lng: number }[] }) {
+  const map = useMap()
+  useEffect(() => {
+    if (!map) return
+    const line = new google.maps.Polyline({
+      path,
+      map,
+      strokeOpacity: 0,
+      icons: [{ icon: { path: 'M 0,-1 0,1', strokeOpacity: 1, strokeColor: TEAL, strokeWeight: 3, scale: 3 }, offset: '0', repeat: '14px' }],
+    })
+    return () => line.setMap(null)
+  }, [map, path])
+  return null
+}
+
 function Camera({ target }: { target: MapTarget | null }) {
   const map = useMap()
   useEffect(() => {
@@ -139,7 +155,7 @@ function Markers({ pois, selected, onSelect, numberOf }: Omit<TouristMapProps, '
  * React content pinned to a map position. A plain OverlayView, so it works with
  * a styled map (AdvancedMarker needs a Map ID, which ignores `styles`).
  */
-function HtmlMarker({ lat, lng, zIndex, children }: { lat: number; lng: number; zIndex: number; children: React.ReactNode }) {
+export function HtmlMarker({ lat, lng, zIndex, children }: { lat: number; lng: number; zIndex: number; children: React.ReactNode }) {
   const map = useMap()
   const [el, setEl] = useState<HTMLDivElement | null>(null)
 
@@ -169,7 +185,7 @@ function HtmlMarker({ lat, lng, zIndex, children }: { lat: number; lng: number; 
   return el ? createPortal(children, el) : null
 }
 
-function ZoomControls() {
+export function ZoomControls() {
   const map = useMap()
   return (
     <div className="absolute right-4 top-4 flex flex-col overflow-hidden rounded-sm bg-paper shadow ring-1 ring-mint lg:top-24">

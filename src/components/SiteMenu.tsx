@@ -181,7 +181,7 @@ export function SiteMenu() {
                                           <Link
                                             {...categoryLink(child)}
                                             onClick={close}
-                                            className="text-sm font-light outline-none transition-colors hover:text-coral focus-visible:text-coral focus-visible:underline"
+                                            className="text-sm font-normal outline-none transition-colors hover:text-coral focus-visible:text-coral focus-visible:underline"
                                           >
                                             {child.label}
                                           </Link>
@@ -212,6 +212,22 @@ export function SiteMenu() {
                 Mappa turistica
                 <span className="transition-transform duration-300 group-hover:translate-x-1">→</span>
               </Link>
+              <Link
+                to="/itinerari"
+                onClick={close}
+                className="group signpost-left mt-3 flex items-center justify-center gap-2 bg-mint-light py-3 pl-10 pr-4 font-display text-lg font-semibold uppercase tracking-[0.12em] text-teal outline-none transition-colors hover:bg-coral hover:text-white focus-visible:bg-coral focus-visible:text-white"
+              >
+                Itinerari
+                <span className="transition-transform duration-300 group-hover:translate-x-1">→</span>
+              </Link>
+              <Link
+                to="/outdoor"
+                onClick={close}
+                className="group signpost-left mt-3 flex items-center justify-center gap-2 bg-mint-light py-3 pl-10 pr-4 font-display text-lg font-semibold uppercase tracking-[0.12em] text-teal outline-none transition-colors hover:bg-coral hover:text-white focus-visible:bg-coral focus-visible:text-white"
+              >
+                Mappa outdoor
+                <span className="transition-transform duration-300 group-hover:translate-x-1">→</span>
+              </Link>
               {/* The next events, soonest first */}
               {events.length > 0 && (
                 <div className="mt-6 border-l-[6px] border-mint">
@@ -231,7 +247,7 @@ export function SiteMenu() {
                           <span className="block text-sm font-semibold leading-snug text-teal transition-colors group-hover:text-coral group-focus-visible:text-coral">
                             {event.name}
                           </span>
-                          <span className="block text-xs font-light">{event.area}</span>
+                          <span className="block text-xs font-normal">{event.area}</span>
                         </Link>
                       </li>
                     ))}

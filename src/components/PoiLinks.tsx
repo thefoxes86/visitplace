@@ -21,7 +21,7 @@ export function PoiLinks({ links, title = 'Link utili' }: { links: PoiLink[]; ti
             <a href={link.url} target="_blank" rel="noreferrer" className="group flex items-center justify-between gap-4 py-3">
               <span className="min-w-0">
                 <span className="block font-semibold text-teal transition-colors group-hover:text-coral">{link.label}</span>
-                <span className="block truncate text-xs font-light">{host(link.url)}</span>
+                <span className="block truncate text-xs font-normal">{host(link.url)}</span>
               </span>
               <span aria-hidden className="shrink-0 text-coral transition-transform group-hover:translate-x-1">
                 ↗

@@ -6,6 +6,7 @@ import type { CategorySectionId } from '../data/sections.ts'
 import type { SeedPoi } from '../data/pois.ts'
 import type { CategoryTypeId } from '../lib/category-types.ts'
 import type { PoiLink } from '../lib/media.ts'
+import type { ItineraryInput } from '../lib/itineraries.ts'
 import { seedPhotos } from './seed-photos.ts'
 
 /** A category to create, with its subcategories. Its id and address are its name, slugified. */
@@ -754,6 +755,7 @@ const trekkingPois: SeedPoi[] = [
     lat: 43.94118,
     lon: 10.27158,
     details: {
+      family: true,
       difficulty: 'E',
       length: 30,
       duration: 'Più giorni, a tappe',
@@ -875,7 +877,7 @@ const climbingPois: SeedPoi[] = [
     { lat: 43.95802, lon: 10.32691 },
     'Uno dei settori più imponenti di Camaiore: quasi cento vie lunghe di resistenza, a dieci minuti dal mulino.',
     "Il grande settore della valle del Lombricese, tra i più conosciuti dagli arrampicatori toscani. Quasi cento vie divise nei settori Sinistro, Cengia, Centrale, Destro e Pennino, con tiri lunghi e di resistenza che d'estate restano all'ombra. La falesia è stata interamente richiodata e pulita dall'associazione Magicandalla.\n\nSi parcheggia sulla strada per il mulino di Candalla, oltre il ristorante Emilio e Bona, rispettando i divieti per lasciar girare l'autobus. Si attraversa il ponticello del mulino, dove c'è acqua potabile, si segue il sentiero della valle, si scende al torrente e lo si attraversa: la parete è visibile dopo una decina di minuti. Si arrampica anche con la pioggia.",
-    { gradeMin: '5b', gradeMax: '8c', routes: 97, rock: 'Calcare', approach: 10, season: 'Tutto l’anno; d’estate all’ombra' },
+    { rain: true, gradeMin: '5b', gradeMax: '8c', routes: 97, rock: 'Calcare', approach: 10, season: 'Tutto l’anno; d’estate all’ombra' },
   ),
   crag(
     'candalla-alta',
@@ -884,7 +886,7 @@ const climbingPois: SeedPoi[] = [
     { lat: 43.95773, lon: 10.32792 },
     'Strapiombi di calcare a canne e un grande panorama: una delle falesie più belle della Toscana.',
     "Uno dei settori più spettacolari della valle, con strapiombi di calcare a canne e tiri lunghi e di resistenza fino a 40 metri. Quasi cento vie nei settori Bao, Pancione Bianco, Le Villette e Penitenziario.\n\nDal parcheggio sulla strada per il mulino si prende lo sterrato a destra prima del mulino, si passa sotto le casette e si sale nel bosco: dopo 30-35 minuti, a destra, si stacca il sentiero per le Placche a Mare; proseguendo si arriva ai settori. Si arrampica anche con la pioggia.",
-    { gradeMin: '5c', gradeMax: '8c', routes: 99, height: 40, rock: 'Calcare a canne', approach: 35 },
+    { rain: true, gradeMin: '5c', gradeMax: '8c', routes: 99, height: 40, rock: 'Calcare a canne', approach: 35 },
   ),
   crag(
     'placche-a-mare',
@@ -982,7 +984,7 @@ const climbingPois: SeedPoi[] = [
     PARKING.trescolli,
     'Arrampicata atletica su strapiombi, con quello che è probabilmente il primo 9a della Toscana.',
     "Trenta vie su due settori, basso e alto, di arrampicata atletica su strapiombi, con tiri fino a 35 metri. Qui si trova quello che è probabilmente il primo 9a della Toscana.\n\nDal centro di Camaiore si seguono le indicazioni per Vado e Casoli, si prosegue verso Trescolli e si parcheggia prima della sbarra della strada privata; si sale per il sentiero oltre un gruppo di case, con la falesia ben visibile sopra.",
-    { gradeMin: '6b', gradeMax: '9a', routes: 30, height: 35, season: 'Estate e mezze stagioni' },
+    { rain: true, gradeMin: '6b', gradeMax: '9a', routes: 30, height: 35, season: 'Estate e mezze stagioni' },
   ),
 
   // ── Greppolungo ──
@@ -1012,7 +1014,7 @@ const climbingPois: SeedPoi[] = [
     { lat: 43.9603, lon: 10.3032 },
     'Strapiombi a buchi all’ombra del bosco, buoni anche con la pioggia.',
     "Pareti strapiombanti lavorate a buchi, all'ombra della vegetazione: l'Isola è una delle poche falesie dove si arrampica anche con la pioggia. Insieme al vicino Pilastro dei Bimbi conta 35 vie, lunghe fino a 33 metri. Richiodata e pulita dall'associazione Magicandalla.\n\nSi parcheggia sotto Greppolungo e si segue la strada lastricata e poi il sentiero: 30-35 minuti.",
-    { gradeMin: '5+', gradeMax: '8a', height: 33, approach: 35, season: 'Inverno e mezze stagioni' },
+    { rain: true, gradeMin: '5+', gradeMax: '8a', height: 33, approach: 35, season: 'Inverno e mezze stagioni' },
   ),
   crag(
     'pilastro-di-greppolungo',
@@ -1043,7 +1045,7 @@ const climbingPois: SeedPoi[] = [
     { lat: 43.95703, lon: 10.30541 },
     'Un pilastro a dieci minuti dalla strada, con vie facili sempre all’ombra.',
     "Una dozzina di vie corte, 10-20 metri: le più facili, su una parete sempre all'ombra, sono adatte a chi comincia, mentre le più dure sono molto impegnative. Nel 2026 il CAI di Viareggio ha aperto qui accanto una nuova via di quattro tiri, fino al 5c.\n\nDa Camaiore si seguono le indicazioni per Vado, Lombrici e Greppolungo, si tira dritto al bivio per Greppolungo e si parcheggia nello slargo al primo tornante a sinistra. Si prende il sentiero prima del ponte, attraverso l'oliveto, e al bivio nel bosco si va a sinistra fino alla base del pilastro: circa 10 minuti.",
-    { gradeMin: '5c', gradeMax: '7c', routes: 12, height: 20, exposure: 'S', approach: 10, season: 'Mezze stagioni' },
+    { family: true, gradeMin: '5c', gradeMax: '7c', routes: 12, height: 20, exposure: 'S', approach: 10, season: 'Mezze stagioni' },
   ),
   crag(
     'saratoga',
@@ -1061,7 +1063,7 @@ const climbingPois: SeedPoi[] = [
     { lat: 43.95859, lon: 10.30581 },
     'Calcare appoggiato con strapiombi e diedri, al sole la mattina.',
     "Una falesia molto frequentata: calcare in gran parte appoggiato, con qualche strapiombo e qualche diedro, su tiri di 15-35 metri. Al sole la mattina. Richiodata dall'associazione Magicandalla.\n\nDal parcheggio al primo tornante a sinistra dopo il bivio per Greppolungo si prende il sentiero prima del ponte, attraverso l'oliveto, e al bivio nel bosco si va a destra: la falesia è sulla sinistra del greto, a 15-20 minuti.",
-    { gradeMin: '5c', gradeMax: '7b+', routes: 26, height: 35, exposure: 'E', approach: 20, season: 'Estate e mezze stagioni' },
+    { family: true, gradeMin: '5c', gradeMax: '7b+', routes: 26, height: 35, exposure: 'E', approach: 20, season: 'Estate e mezze stagioni' },
   ),
   crag(
     'conchetta',
@@ -1070,7 +1072,7 @@ const climbingPois: SeedPoi[] = [
     { lat: 43.95836, lon: 10.30659 },
     'Calcare lavorato e leggermente strapiombante, riparato dal vento e buono con la pioggia.',
     "Calcare lavorato, leggermente strapiombante, con frequenti movimenti boulder su tiri di circa 15 metri. Riparata dal vento, prende il sole dal primo pomeriggio per qualche ora e si arrampica anche con la pioggia. Interamente richiodata e pulita dall'associazione Magicandalla.\n\nDal parcheggio al primo tornante dopo il bivio per Greppolungo si segue il sentiero nell'oliveto e nella gola; al bivio si va a destra, si attraversa il greto e si sale sul lato destro della valle: 15-20 minuti.",
-    { gradeMin: '5+', gradeMax: '8a+', routes: 19, height: 18, approach: 20, season: 'Inverno e mezze stagioni' },
+    { rain: true, gradeMin: '5+', gradeMax: '8a+', routes: 19, height: 18, approach: 20, season: 'Inverno e mezze stagioni' },
   ),
   crag(
     'grottino',
@@ -1079,7 +1081,7 @@ const climbingPois: SeedPoi[] = [
     { lat: 43.95888, lon: 10.30692 },
     'Una grotta con strapiombi e tiri fino a 40 metri, all’ombra d’estate fino alle 14.',
     "Il secondo settore sulla destra della valle, con 27 vie da 10 a 40 metri, alcune a due tiri. Il sole arriva nel primo pomeriggio per un paio d'ore; d'estate è all'ombra fino alle 14. Il lato sinistro e gli strapiombi restano riparati con la pioggia, mentre le uscite e il pilastro centrale si bagnano.\n\nDal parcheggio al primo tornante dopo il bivio per Greppolungo (pochi posti: se è pieno, si lascia l'auto al bivio precedente) si segue il sentiero nell'oliveto e nella gola, si va a destra al bivio, si attraversa il greto e si sale sul lato destro con l'aiuto delle corde fisse: 20-25 minuti.",
-    { gradeMin: '5+', gradeMax: '8a+', routes: 27, height: 40, approach: 25, season: 'Inverno e mezze stagioni' },
+    { rain: true, gradeMin: '5+', gradeMax: '8a+', routes: 27, height: 40, approach: 25, season: 'Inverno e mezze stagioni' },
   ),
   crag(
     'muro-di-swann',
@@ -1088,7 +1090,7 @@ const climbingPois: SeedPoi[] = [
     { lat: 43.95965, lon: 10.30739 },
     'In fondo alla valle del Conchiusori: vie dure al sole la mattina, buone anche con la pioggia.',
     "Il settore più in fondo alla valle, con una ventina di vie dal 6c all'8b+, lunghe 15-20 metri, alcune a due tiri. Al sole la mattina, si arrampica anche con la pioggia.\n\nSi segue il sentiero della valle del Conchiusori oltre la Conchetta, il Grottino e la Maruccio Area, e al bivio si va a destra: 30-35 minuti dal parcheggio al primo tornante dopo il bivio per Greppolungo.",
-    { gradeMin: '6c', gradeMax: '8b+', routes: 17, height: 20, approach: 35, season: 'Mezze stagioni' },
+    { rain: true, gradeMin: '6c', gradeMax: '8b+', routes: 17, height: 20, approach: 35, season: 'Mezze stagioni' },
   ),
 ]
 
@@ -1214,3 +1216,141 @@ export const seedPois: SeedPoi[] = [
     lon: 10.2232,
   },
 ].map((poi) => ({ ...poi, ...seedPhotos[poi.id] }))
+
+/** Themed itineraries through the seeded places, stops in route order. */
+export const seedItineraries: ItineraryInput[] = [
+  {
+    id: 'centro-storico-a-piedi',
+    title: 'Il centro storico a piedi',
+    summary: 'Da San Lazzaro alla Badia: chiese, musei e piazze dell’antico Campus Maior.',
+    description:
+      "Una passeggiata da ovest a est attraverso il centro fondato da Lucca nel 1255, con le sue strade parallele. Si parte dal convento di San Lazzaro, si arriva in Piazza San Bernardino tra la Collegiata e il Municipio, si passa sotto l'unica porta rimasta delle mura e si scende tra i due musei e il teatro, fino alla Badia di San Pietro, appena fuori dal centro, la più antica di tutte, citata già nel 761.\n\nTutto in piano, tra le vie del centro: si può fare in un paio d'ore, o in mezza giornata visitando i musei.",
+    modes: ['walk'],
+    season: "Tutto l'anno",
+    kidFriendly: true,
+    petFriendly: true,
+    duration: '2–3 ore',
+    published: true,
+    sortOrder: 1,
+    stops: [
+      { poiId: 'chiesa-di-san-lazzaro', note: 'Il portico a due ordini del 1610, che apre sulla chiesa e sul chiostro.' },
+      { poiId: 'piazza-san-bernardino', note: 'Il cuore del paese, con la fontana, la Collegiata e il palazzo comunale.' },
+      { poiId: 'collegiata', note: "Il campanile del Trecento, il fonte battesimale del 1387 e l'organo di Paolino Bertolucci." },
+      { poiId: 'porta-lombricese', note: "L'ultima porta delle mura del 1374, con l'affresco della Vergine tra i santi Benedetto e Rocco." },
+      { poiId: 'museo-arte-sacra', note: 'Dipinti, sculture e arredi sacri delle chiese del territorio, dal Quattrocento.' },
+      { poiId: 'chiesa-di-san-michele', note: "La chiesa romanica in pietra a vista, ricostruita com'era dopo la guerra." },
+      { poiId: 'museo-archeologico', note: 'Tredici sale nel Palazzo Tori Massoni, dai Neanderthal della Grotta all’Onda al Medioevo.' },
+      { poiId: 'teatro-dell-olivo', note: 'Uno dei teatri più antichi della lucchesia, nato da una filanda di lana.' },
+      { poiId: 'badia-san-pietro', note: "L'abbazia citata nel 761: si entra dall'arco in pietra, attraverso il prato dell'antico cimitero." },
+    ],
+  },
+  {
+    id: 'pievi-e-via-francigena',
+    title: 'Le pievi della Via Francigena',
+    summary: 'Sulla strada dei pellegrini, dalla Badia alla pieve dell’817 e al castello di Montemagno.',
+    description:
+      "Per secoli i pellegrini diretti a Roma attraversavano Camaiore lungo la Via Francigena: si fermavano alla Badia di San Pietro, passavano per la pieve sulle colline sotto il Prana e salivano verso Lucca per la valle della Freddana, sorvegliata dal castello di Montemagno.\n\nL'itinerario segue lo stesso percorso in auto. Chi cammina può percorrere il tratto Camaiore–Lucca della Francigena, la tappa 27.",
+    modes: ['car', 'walk'],
+    season: "Tutto l'anno",
+    kidFriendly: true,
+    petFriendly: true,
+    duration: 'Mezza giornata',
+    published: true,
+    sortOrder: 2,
+    stops: [
+      { poiId: 'badia-san-pietro', note: 'Per secoli punto di riferimento dei pellegrini, sulla strada tra Lucca e Luni.' },
+      { poiId: 'collegiata', note: 'La chiesa del borgo nato attorno alla Badia, collegiata dal 1515.' },
+      { poiId: 'pieve-di-santo-stefano', note: "La chiesa madre del territorio, citata nell'817: il sarcofago romano e il trittico di Battista da Pisa." },
+      { poiId: 'castello-di-montemagno', note: 'Le rovine del castello che dal 1099 sorvegliava la Francigena verso Lucca.' },
+      { poiId: 'montemagno', note: 'Il borgo raccolto attorno alla sua chiesa, sulla strada panoramica della Freddana.' },
+    ],
+  },
+  {
+    id: 'valle-dei-mulini',
+    title: 'La valle dei mulini',
+    summary: 'Lungo il Lombricese tra mulini, una ferriera ancora attiva, cascate, grotte e un castello medievale.',
+    description:
+      "Per secoli l'acqua del Lombricese ha mosso mulini, frantoi, una polveriera e una ferriera. Questo itinerario a piedi risale la valle dal paese di Lombrici alle pozze di Candalla, poi sale per la mulattiera verso Metato, con una deviazione alla Grotta del Tambugione, e torna per le rovine del castello di Montecastrese.\n\nSi segue in parte l'anello Candalla–Casoli–Metato di Camaiore Antiqua. D'estate si porta il costume per le pozze; i parcheggi a Candalla sono pochi e conviene la navetta del Comune.",
+    modes: ['walk'],
+    season: 'Da maggio a ottobre; d’estate per il bagno nelle pozze',
+    kidFriendly: false,
+    petFriendly: true,
+    duration: 'Mezza giornata',
+    published: true,
+    sortOrder: 3,
+    stops: [
+      { poiId: 'lombrici', note: "Il paese all'imbocco della valle." },
+      { poiId: 'ferriera-dei-barsi', note: 'Il maglio idraulico ancora funzionante e le forge della famiglia Barsi.' },
+      { poiId: 'candalla', note: 'I resti dei mulini del Cinquecento e dell’Ottocento lungo il torrente.' },
+      { poiId: 'cascate-di-candalla', note: "Le pozze d'acqua fredda e la cascata con la piscina naturale." },
+      { poiId: 'grotta-del-tambugione', note: "Una breve deviazione dalla mulattiera: la caverna usata come sepolcro nell'età del Rame." },
+      { poiId: 'metato', note: 'Il borgo dei seccatoi di castagne, con la vista fino al mare.' },
+      { poiId: 'montecastrese', note: 'Le rovine del villaggio fortificato distrutto da Lucca nel Duecento.' },
+    ],
+  },
+  {
+    id: 'borghi-delle-colline',
+    title: 'I borghi delle colline e delle Apuane',
+    summary: 'Una giornata in auto tra i borghi sopra Camaiore, dai colli sul mare alla valle della Freddana.',
+    description:
+      "Le frazioni di Camaiore sono un mondo a parte: castelli sui colli, borghi dove fino a pochi decenni fa si arrivava solo a piedi, paesi di fabbri con un dialetto tutto loro. L'itinerario parte dai colli affacciati sul mare, sale verso le Apuane fino al borgo dei graffiti e scende poi verso la valle della Freddana.\n\nLe strade sono strette e con molti tornanti: meglio un'auto piccola e tutta la giornata.",
+    modes: ['car'],
+    season: 'Primavera e autunno',
+    kidFriendly: true,
+    petFriendly: true,
+    duration: 'Una giornata',
+    published: true,
+    sortOrder: 4,
+    stops: [
+      { poiId: 'monteggiori', note: 'Vicoli lastricati e la rocca, con lo sguardo sulla costa della Versilia.' },
+      { poiId: 'pedona', note: 'Le case strette dentro le mura del castello, attorno al campanile.' },
+      { poiId: 'metato', note: 'Fino agli anni Settanta senza luce né strada: oggi si arriva con 3 km di tornanti da Lombrici.' },
+      { poiId: 'casoli', note: 'Il borgo dei graffiti: una passeggiata tra gli sgraffiti di Murabito e degli artisti venuti dopo di lui.' },
+      { poiId: 'gombitelli', note: 'Il borgo dei fabbri, isola linguistica sul crinale.' },
+      { poiId: 'orbicciano', note: 'Le due chiese romaniche di San Lorenzo e San Giorgio, tra case sparse nella Freddana.' },
+    ],
+  },
+  {
+    id: 'camaiore-con-i-bambini',
+    title: 'Camaiore con i bambini',
+    summary: 'Neanderthal, un maglio ad acqua, le pozze per il bagno e il tramonto sul pontile.',
+    description:
+      "Una giornata pensata per i più piccoli: la mattina al museo archeologico, dove si toccano le riproduzioni dei reperti e si scopre chi abitava le grotte delle Apuane, poi alla ferriera di Candalla a vedere il fabbro al lavoro e alle pozze del Lombricese per un bagno. Il pomeriggio si scende al mare, tra il parco della Bussoladomani e il pontile al tramonto.",
+    modes: ['car'],
+    season: 'Da giugno a settembre',
+    kidFriendly: true,
+    petFriendly: false,
+    duration: 'Una giornata',
+    published: true,
+    sortOrder: 5,
+    stops: [
+      { poiId: 'museo-archeologico', note: 'Le postazioni tattili e il calco del femore di un Neanderthal.' },
+      { poiId: 'ferriera-dei-barsi', note: 'Il maglio mosso dall’acqua e il fabbro al lavoro.' },
+      { poiId: 'cascate-di-candalla', note: "Le pozze d'acqua limpida, per un bagno d'estate. Attenzione alle pietre scivolose." },
+      { poiId: 'parco-bussoladomani', note: 'Un grande parco verde vicino al mare, dove d’estate c’è anche il cinema all’aperto.' },
+      { poiId: 'pontile-lido-di-camaiore', note: 'Una passeggiata sul pontile fino alla rotonda sul mare, al tramonto.' },
+    ],
+  },
+  {
+    id: 'dal-mare-ai-monti',
+    title: 'Dal mare ai monti',
+    summary: 'In un solo comune, dalla sabbia del Lido alla vetta più alta delle Apuane meridionali.',
+    description:
+      "Camaiore va dal mare alle montagne: questo itinerario lo attraversa tutto. Si parte dal pontile del Lido, si passa per la villa dei Borbone nella piana di Capezzano e per il centro storico, si sale a Casoli e, per chi se la sente, si arriva a piedi in vetta al Matanna, da cui si vede tutta la costa appena lasciata.\n\nL'ultima tappa è un'escursione impegnativa: in alternativa ci si può fermare a Casoli e salire alla Grotta all'Onda.",
+    modes: ['car', 'walk'],
+    season: 'Da maggio a ottobre',
+    kidFriendly: false,
+    petFriendly: true,
+    duration: 'Una giornata',
+    published: true,
+    sortOrder: 6,
+    stops: [
+      { poiId: 'pontile-lido-di-camaiore', note: 'Il mare, la spiaggia Bandiera Blu e le Apuane alle spalle.' },
+      { poiId: 'villa-borbone-delle-pianore', note: "La villa dei duchi di Borbone, dove nacque l'ultima imperatrice d'Austria." },
+      { poiId: 'piazza-san-bernardino', note: 'Il centro storico, con la Collegiata.' },
+      { poiId: 'badia-san-pietro', note: "L'abbazia benedettina citata già nel 761." },
+      { poiId: 'casoli', note: 'Il borgo dei graffiti, a 400 metri, ai piedi del Matanna.' },
+      { poiId: 'monte-matanna', note: 'La vetta, 1.317 metri, per escursionisti allenati: 6–7 ore ad anello da Trescolli.' },
+    ],
+  },
+]

@@ -14,6 +14,7 @@ import { Route as GustaRouteImport } from './routes/gusta'
 import { Route as InfoRouteImport } from './routes/info'
 import { Route as ManutenzioneRouteImport } from './routes/manutenzione'
 import { Route as MappaRouteImport } from './routes/mappa'
+import { Route as OutdoorRouteImport } from './routes/outdoor'
 import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as ViviRouteImport } from './routes/vivi'
@@ -21,6 +22,8 @@ import { Route as AdminPanelRouteImport } from './routes/admin/_panel'
 import { Route as AdminLoginRouteImport } from './routes/admin/login'
 import { Route as ApiUploadRouteImport } from './routes/api/upload'
 import { Route as CategorieSlugRouteImport } from './routes/categorie/$slug'
+import { Route as ItinerariIndexRouteImport } from './routes/itinerari/index'
+import { Route as ItinerariIdRouteImport } from './routes/itinerari/$id'
 import { Route as LuoghiPoiIdRouteImport } from './routes/luoghi/$poiId'
 import { Route as ScopriIndexRouteImport } from './routes/scopri/index'
 import { Route as AdminPanelIndexRouteImport } from './routes/admin/_panel/index'
@@ -35,6 +38,9 @@ import { Route as AdminPanelCategoryNuovoRouteImport } from './routes/admin/_pan
 import { Route as AdminPanelCategorieIndexRouteImport } from './routes/admin/_panel/categorie/index'
 import { Route as AdminPanelCategorieIdRouteImport } from './routes/admin/_panel/categorie/$id'
 import { Route as AdminPanelCategorieNuovaRouteImport } from './routes/admin/_panel/categorie/nuova'
+import { Route as AdminPanelItinerariIndexRouteImport } from './routes/admin/_panel/itinerari/index'
+import { Route as AdminPanelItinerariIdRouteImport } from './routes/admin/_panel/itinerari/$id'
+import { Route as AdminPanelItinerariNuovoRouteImport } from './routes/admin/_panel/itinerari/nuovo'
 import { Route as AdminPanelSezioneSectionRouteImport } from './routes/admin/_panel/sezione/$section'
 
 const IndexRoute = IndexRouteImport.update({
@@ -60,6 +66,11 @@ const ManutenzioneRoute = ManutenzioneRouteImport.update({
 const MappaRoute = MappaRouteImport.update({
   id: '/mappa',
   path: '/mappa',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OutdoorRoute = OutdoorRouteImport.update({
+  id: '/outdoor',
+  path: '/outdoor',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
@@ -95,6 +106,16 @@ const ApiUploadRoute = ApiUploadRouteImport.update({
 const CategorieSlugRoute = CategorieSlugRouteImport.update({
   id: '/categorie/$slug',
   path: '/categorie/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ItinerariIndexRoute = ItinerariIndexRouteImport.update({
+  id: '/itinerari/',
+  path: '/itinerari/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ItinerariIdRoute = ItinerariIdRouteImport.update({
+  id: '/itinerari/$id',
+  path: '/itinerari/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LuoghiPoiIdRoute = LuoghiPoiIdRouteImport.update({
@@ -170,6 +191,23 @@ const AdminPanelCategorieNuovaRoute =
     path: '/nuova',
     getParentRoute: () => AdminPanelCategorieRouteRoute,
   } as any)
+const AdminPanelItinerariIndexRoute =
+  AdminPanelItinerariIndexRouteImport.update({
+    id: '/itinerari/',
+    path: '/itinerari/',
+    getParentRoute: () => AdminPanelRoute,
+  } as any)
+const AdminPanelItinerariIdRoute = AdminPanelItinerariIdRouteImport.update({
+  id: '/itinerari/$id',
+  path: '/itinerari/$id',
+  getParentRoute: () => AdminPanelRoute,
+} as any)
+const AdminPanelItinerariNuovoRoute =
+  AdminPanelItinerariNuovoRouteImport.update({
+    id: '/itinerari/nuovo',
+    path: '/itinerari/nuovo',
+    getParentRoute: () => AdminPanelRoute,
+  } as any)
 const AdminPanelSezioneSectionRoute =
   AdminPanelSezioneSectionRouteImport.update({
     id: '/sezione/$section',
@@ -183,6 +221,7 @@ export interface FileRoutesByFullPath {
   '/info': typeof InfoRoute
   '/manutenzione': typeof ManutenzioneRoute
   '/mappa': typeof MappaRoute
+  '/outdoor': typeof OutdoorRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/vivi': typeof ViviRoute
@@ -190,7 +229,9 @@ export interface FileRoutesByFullPath {
   '/admin/login': typeof AdminLoginRoute
   '/api/upload': typeof ApiUploadRoute
   '/categorie/$slug': typeof CategorieSlugRoute
+  '/itinerari/$id': typeof ItinerariIdRoute
   '/luoghi/$poiId': typeof LuoghiPoiIdRoute
+  '/itinerari/': typeof ItinerariIndexRoute
   '/scopri/': typeof ScopriIndexRoute
   '/admin/$category': typeof AdminPanelCategoryRouteRouteWithChildren
   '/admin/categorie': typeof AdminPanelCategorieRouteRouteWithChildren
@@ -202,9 +243,12 @@ export interface FileRoutesByFullPath {
   '/admin/$category/nuovo': typeof AdminPanelCategoryNuovoRoute
   '/admin/categorie/$id': typeof AdminPanelCategorieIdRoute
   '/admin/categorie/nuova': typeof AdminPanelCategorieNuovaRoute
+  '/admin/itinerari/$id': typeof AdminPanelItinerariIdRoute
+  '/admin/itinerari/nuovo': typeof AdminPanelItinerariNuovoRoute
   '/admin/sezione/$section': typeof AdminPanelSezioneSectionRoute
   '/admin/$category/': typeof AdminPanelCategoryIndexRoute
   '/admin/categorie/': typeof AdminPanelCategorieIndexRoute
+  '/admin/itinerari/': typeof AdminPanelItinerariIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -212,13 +256,16 @@ export interface FileRoutesByTo {
   '/info': typeof InfoRoute
   '/manutenzione': typeof ManutenzioneRoute
   '/mappa': typeof MappaRoute
+  '/outdoor': typeof OutdoorRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/vivi': typeof ViviRoute
   '/admin/login': typeof AdminLoginRoute
   '/api/upload': typeof ApiUploadRoute
   '/categorie/$slug': typeof CategorieSlugRoute
+  '/itinerari/$id': typeof ItinerariIdRoute
   '/luoghi/$poiId': typeof LuoghiPoiIdRoute
+  '/itinerari': typeof ItinerariIndexRoute
   '/scopri': typeof ScopriIndexRoute
   '/admin/impostazioni': typeof AdminPanelImpostazioniRoute
   '/admin/utenti': typeof AdminPanelUtentiRoute
@@ -228,9 +275,12 @@ export interface FileRoutesByTo {
   '/admin/$category/nuovo': typeof AdminPanelCategoryNuovoRoute
   '/admin/categorie/$id': typeof AdminPanelCategorieIdRoute
   '/admin/categorie/nuova': typeof AdminPanelCategorieNuovaRoute
+  '/admin/itinerari/$id': typeof AdminPanelItinerariIdRoute
+  '/admin/itinerari/nuovo': typeof AdminPanelItinerariNuovoRoute
   '/admin/sezione/$section': typeof AdminPanelSezioneSectionRoute
   '/admin/$category': typeof AdminPanelCategoryIndexRoute
   '/admin/categorie': typeof AdminPanelCategorieIndexRoute
+  '/admin/itinerari': typeof AdminPanelItinerariIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -239,6 +289,7 @@ export interface FileRoutesById {
   '/info': typeof InfoRoute
   '/manutenzione': typeof ManutenzioneRoute
   '/mappa': typeof MappaRoute
+  '/outdoor': typeof OutdoorRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/vivi': typeof ViviRoute
@@ -246,7 +297,9 @@ export interface FileRoutesById {
   '/admin/login': typeof AdminLoginRoute
   '/api/upload': typeof ApiUploadRoute
   '/categorie/$slug': typeof CategorieSlugRoute
+  '/itinerari/$id': typeof ItinerariIdRoute
   '/luoghi/$poiId': typeof LuoghiPoiIdRoute
+  '/itinerari/': typeof ItinerariIndexRoute
   '/scopri/': typeof ScopriIndexRoute
   '/admin/_panel/$category': typeof AdminPanelCategoryRouteRouteWithChildren
   '/admin/_panel/categorie': typeof AdminPanelCategorieRouteRouteWithChildren
@@ -258,9 +311,12 @@ export interface FileRoutesById {
   '/admin/_panel/$category/nuovo': typeof AdminPanelCategoryNuovoRoute
   '/admin/_panel/categorie/$id': typeof AdminPanelCategorieIdRoute
   '/admin/_panel/categorie/nuova': typeof AdminPanelCategorieNuovaRoute
+  '/admin/_panel/itinerari/$id': typeof AdminPanelItinerariIdRoute
+  '/admin/_panel/itinerari/nuovo': typeof AdminPanelItinerariNuovoRoute
   '/admin/_panel/sezione/$section': typeof AdminPanelSezioneSectionRoute
   '/admin/_panel/$category/': typeof AdminPanelCategoryIndexRoute
   '/admin/_panel/categorie/': typeof AdminPanelCategorieIndexRoute
+  '/admin/_panel/itinerari/': typeof AdminPanelItinerariIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -270,6 +326,7 @@ export interface FileRouteTypes {
     | '/info'
     | '/manutenzione'
     | '/mappa'
+    | '/outdoor'
     | '/robots.txt'
     | '/sitemap.xml'
     | '/vivi'
@@ -277,7 +334,9 @@ export interface FileRouteTypes {
     | '/admin/login'
     | '/api/upload'
     | '/categorie/$slug'
+    | '/itinerari/$id'
     | '/luoghi/$poiId'
+    | '/itinerari/'
     | '/scopri/'
     | '/admin/$category'
     | '/admin/categorie'
@@ -289,9 +348,12 @@ export interface FileRouteTypes {
     | '/admin/$category/nuovo'
     | '/admin/categorie/$id'
     | '/admin/categorie/nuova'
+    | '/admin/itinerari/$id'
+    | '/admin/itinerari/nuovo'
     | '/admin/sezione/$section'
     | '/admin/$category/'
     | '/admin/categorie/'
+    | '/admin/itinerari/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -299,13 +361,16 @@ export interface FileRouteTypes {
     | '/info'
     | '/manutenzione'
     | '/mappa'
+    | '/outdoor'
     | '/robots.txt'
     | '/sitemap.xml'
     | '/vivi'
     | '/admin/login'
     | '/api/upload'
     | '/categorie/$slug'
+    | '/itinerari/$id'
     | '/luoghi/$poiId'
+    | '/itinerari'
     | '/scopri'
     | '/admin/impostazioni'
     | '/admin/utenti'
@@ -315,9 +380,12 @@ export interface FileRouteTypes {
     | '/admin/$category/nuovo'
     | '/admin/categorie/$id'
     | '/admin/categorie/nuova'
+    | '/admin/itinerari/$id'
+    | '/admin/itinerari/nuovo'
     | '/admin/sezione/$section'
     | '/admin/$category'
     | '/admin/categorie'
+    | '/admin/itinerari'
   id:
     | '__root__'
     | '/'
@@ -325,6 +393,7 @@ export interface FileRouteTypes {
     | '/info'
     | '/manutenzione'
     | '/mappa'
+    | '/outdoor'
     | '/robots.txt'
     | '/sitemap.xml'
     | '/vivi'
@@ -332,7 +401,9 @@ export interface FileRouteTypes {
     | '/admin/login'
     | '/api/upload'
     | '/categorie/$slug'
+    | '/itinerari/$id'
     | '/luoghi/$poiId'
+    | '/itinerari/'
     | '/scopri/'
     | '/admin/_panel/$category'
     | '/admin/_panel/categorie'
@@ -344,9 +415,12 @@ export interface FileRouteTypes {
     | '/admin/_panel/$category/nuovo'
     | '/admin/_panel/categorie/$id'
     | '/admin/_panel/categorie/nuova'
+    | '/admin/_panel/itinerari/$id'
+    | '/admin/_panel/itinerari/nuovo'
     | '/admin/_panel/sezione/$section'
     | '/admin/_panel/$category/'
     | '/admin/_panel/categorie/'
+    | '/admin/_panel/itinerari/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -355,6 +429,7 @@ export interface RootRouteChildren {
   InfoRoute: typeof InfoRoute
   ManutenzioneRoute: typeof ManutenzioneRoute
   MappaRoute: typeof MappaRoute
+  OutdoorRoute: typeof OutdoorRoute
   RobotsDottxtRoute: typeof RobotsDottxtRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   ViviRoute: typeof ViviRoute
@@ -362,7 +437,9 @@ export interface RootRouteChildren {
   AdminLoginRoute: typeof AdminLoginRoute
   ApiUploadRoute: typeof ApiUploadRoute
   CategorieSlugRoute: typeof CategorieSlugRoute
+  ItinerariIdRoute: typeof ItinerariIdRoute
   LuoghiPoiIdRoute: typeof LuoghiPoiIdRoute
+  ItinerariIndexRoute: typeof ItinerariIndexRoute
   ScopriIndexRoute: typeof ScopriIndexRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
@@ -402,6 +479,13 @@ declare module '@tanstack/react-router' {
       path: '/mappa'
       fullPath: '/mappa'
       preLoaderRoute: typeof MappaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/outdoor': {
+      id: '/outdoor'
+      path: '/outdoor'
+      fullPath: '/outdoor'
+      preLoaderRoute: typeof OutdoorRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/robots.txt': {
@@ -451,6 +535,20 @@ declare module '@tanstack/react-router' {
       path: '/categorie/$slug'
       fullPath: '/categorie/$slug'
       preLoaderRoute: typeof CategorieSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/itinerari/': {
+      id: '/itinerari/'
+      path: '/itinerari'
+      fullPath: '/itinerari/'
+      preLoaderRoute: typeof ItinerariIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/itinerari/$id': {
+      id: '/itinerari/$id'
+      path: '/itinerari/$id'
+      fullPath: '/itinerari/$id'
+      preLoaderRoute: typeof ItinerariIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/luoghi/$poiId': {
@@ -551,6 +649,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminPanelCategorieNuovaRouteImport
       parentRoute: typeof AdminPanelCategorieRouteRoute
     }
+    '/admin/_panel/itinerari/': {
+      id: '/admin/_panel/itinerari/'
+      path: '/itinerari'
+      fullPath: '/admin/itinerari/'
+      preLoaderRoute: typeof AdminPanelItinerariIndexRouteImport
+      parentRoute: typeof AdminPanelRoute
+    }
+    '/admin/_panel/itinerari/$id': {
+      id: '/admin/_panel/itinerari/$id'
+      path: '/itinerari/$id'
+      fullPath: '/admin/itinerari/$id'
+      preLoaderRoute: typeof AdminPanelItinerariIdRouteImport
+      parentRoute: typeof AdminPanelRoute
+    }
+    '/admin/_panel/itinerari/nuovo': {
+      id: '/admin/_panel/itinerari/nuovo'
+      path: '/itinerari/nuovo'
+      fullPath: '/admin/itinerari/nuovo'
+      preLoaderRoute: typeof AdminPanelItinerariNuovoRouteImport
+      parentRoute: typeof AdminPanelRoute
+    }
     '/admin/_panel/sezione/$section': {
       id: '/admin/_panel/sezione/$section'
       path: '/sezione/$section'
@@ -603,7 +722,10 @@ interface AdminPanelRouteChildren {
   AdminPanelImpostazioniRoute: typeof AdminPanelImpostazioniRoute
   AdminPanelUtentiRoute: typeof AdminPanelUtentiRoute
   AdminPanelIndexRoute: typeof AdminPanelIndexRoute
+  AdminPanelItinerariIdRoute: typeof AdminPanelItinerariIdRoute
+  AdminPanelItinerariNuovoRoute: typeof AdminPanelItinerariNuovoRoute
   AdminPanelSezioneSectionRoute: typeof AdminPanelSezioneSectionRoute
+  AdminPanelItinerariIndexRoute: typeof AdminPanelItinerariIndexRoute
 }
 
 const AdminPanelRouteChildren: AdminPanelRouteChildren = {
@@ -612,7 +734,10 @@ const AdminPanelRouteChildren: AdminPanelRouteChildren = {
   AdminPanelImpostazioniRoute: AdminPanelImpostazioniRoute,
   AdminPanelUtentiRoute: AdminPanelUtentiRoute,
   AdminPanelIndexRoute: AdminPanelIndexRoute,
+  AdminPanelItinerariIdRoute: AdminPanelItinerariIdRoute,
+  AdminPanelItinerariNuovoRoute: AdminPanelItinerariNuovoRoute,
   AdminPanelSezioneSectionRoute: AdminPanelSezioneSectionRoute,
+  AdminPanelItinerariIndexRoute: AdminPanelItinerariIndexRoute,
 }
 
 const AdminPanelRouteWithChildren = AdminPanelRoute._addFileChildren(
@@ -625,6 +750,7 @@ const rootRouteChildren: RootRouteChildren = {
   InfoRoute: InfoRoute,
   ManutenzioneRoute: ManutenzioneRoute,
   MappaRoute: MappaRoute,
+  OutdoorRoute: OutdoorRoute,
   RobotsDottxtRoute: RobotsDottxtRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   ViviRoute: ViviRoute,
@@ -632,7 +758,9 @@ const rootRouteChildren: RootRouteChildren = {
   AdminLoginRoute: AdminLoginRoute,
   ApiUploadRoute: ApiUploadRoute,
   CategorieSlugRoute: CategorieSlugRoute,
+  ItinerariIdRoute: ItinerariIdRoute,
   LuoghiPoiIdRoute: LuoghiPoiIdRoute,
+  ItinerariIndexRoute: ItinerariIndexRoute,
   ScopriIndexRoute: ScopriIndexRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
 }
