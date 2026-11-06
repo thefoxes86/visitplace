@@ -30,6 +30,7 @@ import { Route as AdminPanelIndexRouteImport } from './routes/admin/_panel/index
 import { Route as AdminPanelCategoryRouteRouteImport } from './routes/admin/_panel/$category/route'
 import { Route as AdminPanelCategorieRouteRouteImport } from './routes/admin/_panel/categorie/route'
 import { Route as AdminPanelImpostazioniRouteImport } from './routes/admin/_panel/impostazioni'
+import { Route as AdminPanelMediaRouteImport } from './routes/admin/_panel/media'
 import { Route as AdminPanelUtentiRouteImport } from './routes/admin/_panel/utenti'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as AdminPanelCategoryIndexRouteImport } from './routes/admin/_panel/$category/index'
@@ -149,6 +150,11 @@ const AdminPanelImpostazioniRoute = AdminPanelImpostazioniRouteImport.update({
   path: '/impostazioni',
   getParentRoute: () => AdminPanelRoute,
 } as any)
+const AdminPanelMediaRoute = AdminPanelMediaRouteImport.update({
+  id: '/media',
+  path: '/media',
+  getParentRoute: () => AdminPanelRoute,
+} as any)
 const AdminPanelUtentiRoute = AdminPanelUtentiRouteImport.update({
   id: '/utenti',
   path: '/utenti',
@@ -236,6 +242,7 @@ export interface FileRoutesByFullPath {
   '/admin/$category': typeof AdminPanelCategoryRouteRouteWithChildren
   '/admin/categorie': typeof AdminPanelCategorieRouteRouteWithChildren
   '/admin/impostazioni': typeof AdminPanelImpostazioniRoute
+  '/admin/media': typeof AdminPanelMediaRoute
   '/admin/utenti': typeof AdminPanelUtentiRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/admin/': typeof AdminPanelIndexRoute
@@ -268,6 +275,7 @@ export interface FileRoutesByTo {
   '/itinerari': typeof ItinerariIndexRoute
   '/scopri': typeof ScopriIndexRoute
   '/admin/impostazioni': typeof AdminPanelImpostazioniRoute
+  '/admin/media': typeof AdminPanelMediaRoute
   '/admin/utenti': typeof AdminPanelUtentiRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/admin': typeof AdminPanelIndexRoute
@@ -304,6 +312,7 @@ export interface FileRoutesById {
   '/admin/_panel/$category': typeof AdminPanelCategoryRouteRouteWithChildren
   '/admin/_panel/categorie': typeof AdminPanelCategorieRouteRouteWithChildren
   '/admin/_panel/impostazioni': typeof AdminPanelImpostazioniRoute
+  '/admin/_panel/media': typeof AdminPanelMediaRoute
   '/admin/_panel/utenti': typeof AdminPanelUtentiRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/admin/_panel/': typeof AdminPanelIndexRoute
@@ -341,6 +350,7 @@ export interface FileRouteTypes {
     | '/admin/$category'
     | '/admin/categorie'
     | '/admin/impostazioni'
+    | '/admin/media'
     | '/admin/utenti'
     | '/api/auth/$'
     | '/admin/'
@@ -373,6 +383,7 @@ export interface FileRouteTypes {
     | '/itinerari'
     | '/scopri'
     | '/admin/impostazioni'
+    | '/admin/media'
     | '/admin/utenti'
     | '/api/auth/$'
     | '/admin'
@@ -408,6 +419,7 @@ export interface FileRouteTypes {
     | '/admin/_panel/$category'
     | '/admin/_panel/categorie'
     | '/admin/_panel/impostazioni'
+    | '/admin/_panel/media'
     | '/admin/_panel/utenti'
     | '/api/auth/$'
     | '/admin/_panel/'
@@ -593,6 +605,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminPanelImpostazioniRouteImport
       parentRoute: typeof AdminPanelRoute
     }
+    '/admin/_panel/media': {
+      id: '/admin/_panel/media'
+      path: '/media'
+      fullPath: '/admin/media'
+      preLoaderRoute: typeof AdminPanelMediaRouteImport
+      parentRoute: typeof AdminPanelRoute
+    }
     '/admin/_panel/utenti': {
       id: '/admin/_panel/utenti'
       path: '/utenti'
@@ -720,6 +739,7 @@ interface AdminPanelRouteChildren {
   AdminPanelCategoryRouteRoute: typeof AdminPanelCategoryRouteRouteWithChildren
   AdminPanelCategorieRouteRoute: typeof AdminPanelCategorieRouteRouteWithChildren
   AdminPanelImpostazioniRoute: typeof AdminPanelImpostazioniRoute
+  AdminPanelMediaRoute: typeof AdminPanelMediaRoute
   AdminPanelUtentiRoute: typeof AdminPanelUtentiRoute
   AdminPanelIndexRoute: typeof AdminPanelIndexRoute
   AdminPanelItinerariIdRoute: typeof AdminPanelItinerariIdRoute
@@ -732,6 +752,7 @@ const AdminPanelRouteChildren: AdminPanelRouteChildren = {
   AdminPanelCategoryRouteRoute: AdminPanelCategoryRouteRouteWithChildren,
   AdminPanelCategorieRouteRoute: AdminPanelCategorieRouteRouteWithChildren,
   AdminPanelImpostazioniRoute: AdminPanelImpostazioniRoute,
+  AdminPanelMediaRoute: AdminPanelMediaRoute,
   AdminPanelUtentiRoute: AdminPanelUtentiRoute,
   AdminPanelIndexRoute: AdminPanelIndexRoute,
   AdminPanelItinerariIdRoute: AdminPanelItinerariIdRoute,

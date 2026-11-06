@@ -2,6 +2,7 @@ import { queryOptions } from '@tanstack/react-query'
 
 import { adminListCategories } from '#/server/categories'
 import { adminListItineraries } from '#/server/itineraries'
+import { listMedia } from '#/server/media'
 import { adminListPois } from '#/server/pois'
 import { listUsers } from '#/server/users'
 
@@ -30,4 +31,10 @@ export type AdminCategory = Awaited<ReturnType<typeof adminListCategories>>[numb
 export const adminItinerariesQuery = queryOptions({
   queryKey: ['admin', 'itineraries'],
   queryFn: () => adminListItineraries(),
+})
+
+/** Photos in the Blob store, with the places using them. */
+export const mediaQuery = queryOptions({
+  queryKey: ['admin', 'media'],
+  queryFn: () => listMedia(),
 })

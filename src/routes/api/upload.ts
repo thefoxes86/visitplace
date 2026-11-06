@@ -40,7 +40,7 @@ export const Route = createFileRoute('/api/upload')({
             body,
             request,
             onBeforeGenerateToken: async (pathname) => {
-              if (!pathname.startsWith('luoghi/')) throw new Error('Percorso non consentito')
+              if (!/^(luoghi|media)\//.test(pathname)) throw new Error('Percorso non consentito')
               return { allowedContentTypes: IMAGE_TYPES, maximumSizeInBytes: MAX_BYTES, addRandomSuffix: true }
             },
           })

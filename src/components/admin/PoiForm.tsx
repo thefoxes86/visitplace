@@ -4,6 +4,7 @@ import { Link, useNavigate } from '@tanstack/react-router'
 
 import { LocationPicker } from '#/components/admin/LocationPicker'
 import { GalleryEditor, LinksEditor, TrackEditor, uploadPhoto } from '#/components/admin/MediaEditors'
+import { MediaPicker } from '#/components/admin/MediaLibrary'
 import { Alert, Card, Field, Toggle, buttonClass, errorMessage, inputClass } from '#/components/admin/ui'
 import { categoryTree, useCategories } from '#/data/categories'
 import { poiImage } from '#/data/pois'
@@ -135,6 +136,7 @@ export function PoiForm({ category: initialCategory, poi, areas }: PoiFormProps)
   const [links, setLinks] = useState<PoiLink[]>(() => poi?.links ?? [])
   const [track, setTrack] = useState<Track | null>(() => poi?.track ?? null)
   const [imageUploading, setImageUploading] = useState(false)
+  const [pickingImage, setPickingImage] = useState(false)
   /** The address follows the name until it is edited by hand (new places only). */
   const [idTouched, setIdTouched] = useState(Boolean(poi))
   /** By field: `name`, `startsAt`, `details.difficulty`… */
@@ -468,7 +470,7 @@ export function PoiForm({ category: initialCategory, poi, areas }: PoiFormProps)
         </Card>
 
         <Card title="Immagine">
-          <Field label="Indirizzo dell'immagine" htmlFor="imageUrl" error={errors.imageUrl} hint="Incolla un indirizzo o carica una foto. Senza immagine si usa una foto di prova.">
+          <Field label="Indirizzo dell'immagine" htmlFor="imageUrl" error={errors.imageUrl} hint="Incolla un indirizzo, carica una foto o sceglila dalla libreria. Senza immagine si usa una foto di prova.">
             <input {...text('imageUrl')} type="url" placeholder="https://" />
           </Field>
           <input
@@ -493,6 +495,19 @@ export function PoiForm({ category: initialCategory, poi, areas }: PoiFormProps)
           <label htmlFor="image-file" className={`${buttonClass.secondary} mt-3 cursor-pointer ${imageUploading ? 'pointer-events-none opacity-50' : ''}`}>
             {imageUploading ? 'Caricamento…' : 'Carica una foto'}
           </label>
+          <button type="button" onClick={() => setPickingImage(true)} className={`${buttonClass.secondary} ml-2 mt-3`}>
+            Scegli dalla libreria
+          </button>
+          {pickingImage && (
+            <MediaPicker
+              title="Immagine principale"
+              onPick={([url]) => {
+                set('imageUrl', url)
+                setPickingImage(false)
+              }}
+              onClose={() => setPickingImage(false)}
+            />
+          )}
           <img
             src={poiImage({ id: values.id || 'nuovo', imageUrl: orNull(values.imageUrl) }, 600)}
             alt=""

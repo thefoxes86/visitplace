@@ -2,6 +2,7 @@ import { useRef, useState } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import { upload } from '@vercel/blob/client'
 
+import { MediaPicker } from '#/components/admin/MediaLibrary'
 import { Card, buttonClass, errorMessage, inputClass } from '#/components/admin/ui'
 import { MAX_LINKS, MAX_PHOTOS, parseGpx } from '#/lib/media'
 import { slugify } from '#/lib/poi-input'
@@ -10,13 +11,19 @@ import type { GalleryPhoto, PoiLink, Track } from '#/lib/media'
 
 const IMAGE_ACCEPT = 'image/jpeg,image/png,image/webp,image/avif'
 
-/** Sends a photo to Vercel Blob (through /api/upload, which checks the user) and returns its address. */
-export async function uploadPhoto(file: File, poiId: string) {
+/** Sends a photo of a place to Vercel Blob and returns its address. */
+export const uploadPhoto = (file: File, poiId: string) => uploadImage(file, `luoghi/${poiId || 'nuovo'}`)
+
+/** Sends a photo to the media library, outside any place. */
+export const uploadToLibrary = (file: File) => uploadImage(file, 'media')
+
+/** Sends a photo to Vercel Blob under `folder` (through /api/upload, which checks the user) and returns its address. */
+async function uploadImage(file: File, folder: string) {
   const dot = file.name.lastIndexOf('.')
   const base = slugify(dot > 0 ? file.name.slice(0, dot) : file.name) || 'foto'
   const ext = dot > 0 ? file.name.slice(dot).toLowerCase() : ''
   try {
-    const blob = await upload(`luoghi/${poiId || 'nuovo'}/${base}${ext}`, file, {
+    const blob = await upload(`${folder}/${base}${ext}`, file, {
       access: 'public',
       handleUploadUrl: '/api/upload',
       contentType: file.type,
@@ -45,6 +52,7 @@ export function GalleryEditor({ poiId, photos, onChange, error }: GalleryEditorP
   const input = useRef<HTMLInputElement>(null)
   const [uploading, setUploading] = useState(0)
   const [uploadError, setUploadError] = useState<string | null>(null)
+  const [picking, setPicking] = useState(false)
   async function add(files: FileList | null) {
     if (!files?.length) return
     setUploadError(null)
@@ -123,6 +131,9 @@ export function GalleryEditor({ poiId, photos, onChange, error }: GalleryEditorP
         <label htmlFor="gallery-files" className={`${buttonClass.secondary} cursor-pointer ${photos.length >= MAX_PHOTOS ? 'pointer-events-none opacity-50' : ''}`}>
           Aggiungi foto
         </label>
+        <button type="button" disabled={photos.length >= MAX_PHOTOS} onClick={() => setPicking(true)} className={buttonClass.secondary}>
+          Scegli dalla libreria
+        </button>
         {uploading > 0 && (
           <span className="text-sm font-light" aria-live="polite">
             Caricamento di {uploading} foto…
@@ -131,6 +142,19 @@ export function GalleryEditor({ poiId, photos, onChange, error }: GalleryEditorP
       </div>
       {(uploadError || error) && <p className="mt-2 text-xs font-semibold text-coral-dark">{uploadError ?? error}</p>}
       <p className="mt-3 text-xs font-light text-ink/70">Le foto rimosse spariscono dalla pagina al salvataggio.</p>
+      {picking && (
+        <MediaPicker
+          title="Foto per la galleria"
+          multiple
+          max={MAX_PHOTOS - photos.length}
+          taken={photos.map((p) => p.url)}
+          onPick={(urls) => {
+            onChange((prev) => [...prev, ...urls.filter((url) => !prev.some((p) => p.url === url)).map((url) => ({ url, caption: '' }))])
+            setPicking(false)
+          }}
+          onClose={() => setPicking(false)}
+        />
+      )}
     </Card>
   )
 }
