@@ -7,7 +7,6 @@ import { GalleryEditor, LinksEditor, TrackEditor, uploadPhoto } from '#/componen
 import { MediaPicker } from '#/components/admin/MediaLibrary'
 import { Alert, Card, Field, Toggle, buttonClass, errorMessage, inputClass } from '#/components/admin/ui'
 import { categoryTree, useCategories } from '#/data/categories'
-import { poiImage } from '#/data/pois'
 import { categoryType } from '#/lib/category-types'
 import { RECURRENCES, RECURRENCE_IDS, formatRecurrence } from '#/lib/event-dates'
 import { poiInputFor, slugify } from '#/lib/poi-input'
@@ -470,7 +469,7 @@ export function PoiForm({ category: initialCategory, poi, areas }: PoiFormProps)
         </Card>
 
         <Card title="Immagine">
-          <Field label="Indirizzo dell'immagine" htmlFor="imageUrl" error={errors.imageUrl} hint="Incolla un indirizzo, carica una foto o sceglila dalla libreria. Senza immagine si usa una foto di prova.">
+          <Field label="Indirizzo dell'immagine" htmlFor="imageUrl" error={errors.imageUrl} hint="Incolla un indirizzo, carica una foto o sceglila dalla libreria. Senza immagine, sul sito la scheda non mostra nessuna foto.">
             <input {...text('imageUrl')} type="url" placeholder="https://" />
           </Field>
           <input
@@ -508,11 +507,26 @@ export function PoiForm({ category: initialCategory, poi, areas }: PoiFormProps)
               onClose={() => setPickingImage(false)}
             />
           )}
-          <img
-            src={poiImage({ id: values.id || 'nuovo', imageUrl: orNull(values.imageUrl) }, 600)}
-            alt=""
-            className="mt-4 aspect-[4/3] w-full rounded-md object-cover"
-          />
+          {values.imageUrl.trim() ? (
+            <>
+              <img src={values.imageUrl.trim()} alt="" className="mt-4 aspect-[4/3] w-full rounded-md object-cover" />
+              <button
+                type="button"
+                onClick={() => {
+                  // The credits belong to the photo: they go with it.
+                  set('imageUrl', '')
+                  set('creditAuthor', '')
+                  set('creditLicense', '')
+                  set('creditSource', '')
+                }}
+                className={`${buttonClass.danger} mt-2`}
+              >
+                Rimuovi l'immagine
+              </button>
+            </>
+          ) : (
+            <p className="mt-4 rounded-md border border-dashed border-ink/20 p-6 text-center text-sm font-light italic">Nessuna immagine</p>
+          )}
           <p className="mt-4 text-xs font-semibold uppercase tracking-wider text-teal">Crediti della foto</p>
           <p className="mt-1 text-xs font-light">Per le foto di altri autori, come quelle di Wikimedia Commons: compaiono sotto l'immagine.</p>
           {errors.imageCredit && <p className="mt-1 text-xs font-semibold text-coral-dark">{errors.imageCredit}</p>}

@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { Link } from '@tanstack/react-router'
 
 import { useCategories } from '#/data/categories'
-import { poiImage } from '#/data/pois'
 import { usePois } from '#/data/use-pois'
 import {
   TIME_ZONE,
@@ -201,13 +200,16 @@ function EventCard({ entry: { event, occurrence }, now, category }: { entry: Ent
   const over = occurrence.end < now
   return (
     <li className={over ? 'opacity-60' : ''}>
-      <Link to="/luoghi/$poiId" params={{ poiId: event.id }} className="group grid grid-cols-[7rem_minmax(0,1fr)] gap-4 sm:grid-cols-[10rem_minmax(0,1fr)]">
-        <img
-          src={poiImage(event, 400)}
-          alt=""
-          loading="lazy"
-          className="aspect-square w-full object-cover grayscale transition duration-500 group-hover:grayscale-0"
-        />
+      <Link to="/luoghi/$poiId" params={{ poiId: event.id }} className={`group grid gap-4 ${event.imageUrl ? 'grid-cols-[7rem_minmax(0,1fr)] sm:grid-cols-[10rem_minmax(0,1fr)]' : ''}`}
+      >
+        {event.imageUrl && (
+          <img
+            src={event.imageUrl}
+            alt=""
+            loading="lazy"
+            className="aspect-square w-full object-cover grayscale transition duration-500 group-hover:grayscale-0"
+          />
+        )}
         <span className="min-w-0">
           <span className="block text-sm font-semibold text-teal">
             {formatOccurrenceTime(occurrence, event.allDay)}

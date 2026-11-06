@@ -1,6 +1,6 @@
 import { createServerFn } from '@tanstack/react-start'
 import { del, list } from '@vercel/blob'
-import { asc } from 'drizzle-orm'
+import { asc, eq, inArray } from 'drizzle-orm'
 import { z } from 'zod'
 
 import { db } from '#/db'
@@ -74,15 +74,37 @@ export const listMedia = createServerFn({ method: 'GET' })
       .sort((a, b) => b.uploadedAt.localeCompare(a.uploadedAt))
   })
 
-/** Deletes a photo from the store, unless a place still shows it. */
+/**
+ * Deletes a photo from the store. A photo some places still show is refused, unless `detach`:
+ * then it first comes off them (main image with its credits, gallery), so no page shows a broken image.
+ */
 export const deleteMedia = createServerFn({ method: 'POST' })
   .middleware([requireEditor])
-  .validator(z.object({ url: z.url() }))
+  .validator(z.object({ url: z.url(), detach: z.boolean().default(false) }))
   .handler(async ({ data }) => {
     requireStore()
     const usedBy = (await uses()).get(data.url) ?? []
+    if (usedBy.length && !data.detach) {
+      throw new Error(`La foto è ancora usata da: ${[...new Set(usedBy.map((u) => u.name))].join(', ')}.`)
+    }
     if (usedBy.length) {
-      throw new Error(`La foto è ancora usata da: ${[...new Set(usedBy.map((u) => u.name))].join(', ')}. Toglila prima da lì.`)
+      const ids = [...new Set(usedBy.map((u) => u.poiId))]
+      await db.transaction(async (tx) => {
+        const rows = await tx
+          .select({ id: pois.id, imageUrl: pois.imageUrl, gallery: pois.gallery })
+          .from(pois)
+          .where(inArray(pois.id, ids))
+        for (const row of rows) {
+          await tx
+            .update(pois)
+            .set({
+              ...(row.imageUrl === data.url ? { imageUrl: null, imageCredit: null } : {}),
+              gallery: row.gallery.filter((photo) => photo.url !== data.url),
+              updatedAt: new Date(),
+            })
+            .where(eq(pois.id, row.id))
+        }
+      })
     }
     await del(data.url)
   })

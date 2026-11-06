@@ -138,8 +138,11 @@ function MediaCard({ item }: { item: MediaItem }) {
     setDeleting(true)
     setError(null)
     try {
-      await deleteMedia({ data: { url: item.url } })
-      await queryClient.invalidateQueries({ queryKey: mediaQuery.queryKey })
+      await deleteMedia({ data: { url: item.url, detach: true } })
+      // The places that showed it changed too.
+      await Promise.all(
+        [mediaQuery.queryKey, ['admin', 'pois'], ['pois']].map((queryKey) => queryClient.invalidateQueries({ queryKey })),
+      )
     } catch (e) {
       setError(errorMessage(e))
       setDeleting(false)
@@ -186,6 +189,12 @@ function MediaCard({ item }: { item: MediaItem }) {
             <span className="font-light italic text-ink/60">Non usata</span>
           )}
         </div>
+        {confirming && places.length > 0 && (
+          <p className="mt-2 rounded-md bg-coral/10 p-2 text-xs font-semibold text-coral-dark">
+            Verrà tolta anche da {places.length === 1 ? '1 luogo' : `${places.length} luoghi`} (immagine principale e galleria). Clicca
+            “Conferma” per eliminarla.
+          </p>
+        )}
         {error && <p className="mt-2 text-xs font-semibold text-coral-dark">{error}</p>}
         <div className="mt-3 flex flex-wrap gap-1">
           <button type="button" onClick={copy} className={`${buttonClass.secondary} px-3 py-1.5 text-xs`}>
@@ -195,8 +204,7 @@ function MediaCard({ item }: { item: MediaItem }) {
             type="button"
             onClick={remove}
             onBlur={() => setConfirming(false)}
-            disabled={deleting || places.length > 0}
-            title={places.length ? 'Toglila prima dai luoghi che la usano' : undefined}
+            disabled={deleting}
             className={`${buttonClass.danger} px-3 py-1.5 text-xs`}
           >
             {deleting ? 'Elimino…' : confirming ? 'Conferma' : 'Elimina'}

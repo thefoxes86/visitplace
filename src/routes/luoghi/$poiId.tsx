@@ -7,7 +7,7 @@ import { CategoryIcon } from '#/components/tourist-map/CategoryIcon'
 import { Compass } from '#/components/tourist-map/TouristMap'
 import { categoriesQuery, categoryLink, useCategories } from '#/data/categories'
 import { categoryType, formatDetail } from '#/lib/category-types'
-import { distanceKm, poiImage, poiNumber } from '#/data/pois'
+import { distanceKm, poiNumber } from '#/data/pois'
 import { currentOccurrence, formatOccurrence, formatRecurrence } from '#/lib/event-dates'
 import { poisQuery, usePois } from '#/data/use-pois'
 import { PoiGallery } from '#/components/PoiGallery'
@@ -38,7 +38,7 @@ export const Route = createFileRoute('/luoghi/$poiId')({
           title: loaderData.poi.name,
           description: `${loaderData.poi.summary.replace(/\.?$/, '.')} ${loaderData.poi.description}`,
           path: `/luoghi/${loaderData.poi.id}`,
-          image: poiImage(loaderData.poi, 1200),
+          image: loaderData.poi.imageUrl ?? undefined,
           type: 'article',
           jsonLd: {
             '@graph': [
@@ -87,7 +87,7 @@ function poiJsonLd(poi: Poi, type = 'place') {
     '@type': schemaType,
     name: poi.name,
     description: poi.description || poi.summary,
-    image: poiImage(poi, 1200),
+    ...(poi.imageUrl ? { image: poi.imageUrl } : {}),
     url: absoluteUrl(`/luoghi/${poi.id}`),
   }
   if (schemaType === 'Event') {
@@ -210,13 +210,15 @@ function PoiPage() {
 
         <div className="mt-10 grid gap-12 lg:grid-cols-[minmax(0,1fr)_17rem] lg:gap-0">
           <div className="hero-fade lg:pr-12" style={{ animationDelay: '750ms' }}>
-            {/* Without a photo of its own, a demo image stands in. */}
-            <figure>
-              <img src={poiImage(poi, 1200)} alt="" className="aspect-[16/10] w-full object-cover" />
-              {poi.imageCredit && <PhotoCreditLine credit={poi.imageCredit} className="mt-2 block text-right text-xs font-normal text-ink/70" />}
-            </figure>
+            {/* Without a photo of its own, the page starts with the text. */}
+            {poi.imageUrl && (
+              <figure className="mb-8">
+                <img src={poi.imageUrl} alt="" className="aspect-[16/10] w-full object-cover" />
+                {poi.imageCredit && <PhotoCreditLine credit={poi.imageCredit} className="mt-2 block text-right text-xs font-normal text-ink/70" />}
+              </figure>
+            )}
 
-            <div className={`mt-8 grid gap-8 ${poi.number !== null ? 'sm:grid-cols-[7rem_minmax(0,1fr)]' : ''}`}>
+            <div className={`grid gap-8 ${poi.number !== null ? 'sm:grid-cols-[7rem_minmax(0,1fr)]' : ''}`}>
               {poi.number !== null && (
                 <span className="block self-start border-b-2 border-coral text-right font-display text-7xl font-light leading-none text-coral">
                   {poiNumber(poi)}
@@ -290,12 +292,14 @@ function PoiPage() {
               {nearby.map(({ poi: p, d }) => (
                 <li key={p.id}>
                   <Link to="/luoghi/$poiId" params={{ poiId: p.id }} className="group flex items-center gap-3">
-                    <img
-                      src={poiImage(p, 160)}
-                      alt=""
-                      loading="lazy"
-                      className="size-14 shrink-0 object-cover grayscale transition duration-500 group-hover:grayscale-0"
-                    />
+                    {p.imageUrl && (
+                      <img
+                        src={p.imageUrl}
+                        alt=""
+                        loading="lazy"
+                        className="size-14 shrink-0 object-cover grayscale transition duration-500 group-hover:grayscale-0"
+                      />
+                    )}
                     <span className="min-w-0">
                       <span className="flex items-center gap-2 text-xs font-semibold" style={{ color: categoryOf(p.category).color }}>
                         <span

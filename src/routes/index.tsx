@@ -8,7 +8,7 @@ import { useCategories } from '#/data/categories'
 import { useEventsLink, useUpcomingEvents } from '#/data/events'
 import { itinerariesQuery, useItineraries } from '#/data/itineraries'
 import { ItineraryCard } from '#/components/ItineraryCard'
-import { poiImage, poiNumber } from '#/data/pois'
+import { poiNumber } from '#/data/pois'
 import { formatOccurrence, formatRecurrence } from '#/lib/event-dates'
 import { usePois } from '#/data/use-pois'
 import { sectionLink, sections } from '#/data/sections'
@@ -176,7 +176,7 @@ function Home() {
                   <Link
                     to="/luoghi/$poiId"
                     params={{ poiId: place.id }}
-                    className="group grid grid-cols-[1fr_7rem] items-center gap-4"
+                    className={`group grid items-center gap-4 ${place.imageUrl ? 'grid-cols-[1fr_7rem]' : ''}`}
                   >
                     <span className="text-right">
                       <span className="block border-b-2 border-coral font-display text-6xl font-light leading-none text-coral">
@@ -186,12 +186,14 @@ function Home() {
                         {place.name}
                       </span>
                     </span>
-                    <img
-                      src={poiImage(place, 300)}
-                      alt=""
-                      loading="lazy"
-                      className="aspect-square w-full object-cover grayscale transition duration-500 group-hover:grayscale-0"
-                    />
+                    {place.imageUrl && (
+                      <img
+                        src={place.imageUrl}
+                        alt=""
+                        loading="lazy"
+                        className="aspect-square w-full object-cover grayscale transition duration-500 group-hover:grayscale-0"
+                      />
+                    )}
                   </Link>
                 </li>
               ))}
@@ -209,13 +211,15 @@ function Home() {
                 return (
                   <li key={place.id}>
                     <Link to="/luoghi/$poiId" params={{ poiId: place.id }} className="group block">
-                      <img
-                        src={poiImage(place, 400)}
-                        alt=""
-                        loading="lazy"
-                        className="aspect-[3/2] w-full object-cover grayscale transition duration-500 group-hover:grayscale-0"
-                      />
-                      <span className="mt-2 block text-xs font-semibold uppercase tracking-wider" style={{ color: category.color }}>
+                      {place.imageUrl && (
+                        <img
+                          src={place.imageUrl}
+                          alt=""
+                          loading="lazy"
+                          className="mb-2 aspect-[3/2] w-full object-cover grayscale transition duration-500 group-hover:grayscale-0"
+                        />
+                      )}
+                      <span className="block text-xs font-semibold uppercase tracking-wider" style={{ color: category.color }}>
                         {category.label}
                       </span>
                       <span className="block font-display text-lg font-semibold leading-tight text-teal transition-colors group-hover:text-coral">
@@ -248,13 +252,15 @@ function Home() {
               {upcoming.map((event) => (
                 <li key={event.id}>
                   <Link to="/luoghi/$poiId" params={{ poiId: event.id }} className="group block">
-                    <img
-                      src={poiImage(event, 400)}
-                      alt=""
-                      loading="lazy"
-                      className="aspect-[4/3] w-full object-cover grayscale transition duration-500 group-hover:grayscale-0"
-                    />
-                    <span className="mt-4 block font-serif text-sm italic text-mint">{formatOccurrence(event.next, event.allDay)}</span>
+                    {event.imageUrl && (
+                      <img
+                        src={event.imageUrl}
+                        alt=""
+                        loading="lazy"
+                        className="mb-4 aspect-[4/3] w-full object-cover grayscale transition duration-500 group-hover:grayscale-0"
+                      />
+                    )}
+                    <span className="block font-serif text-sm italic text-mint">{formatOccurrence(event.next, event.allDay)}</span>
                     {event.recurrence && (
                       <span className="block text-xs font-semibold uppercase tracking-wider text-mint/80">{formatRecurrence(event)}</span>
                     )}
@@ -285,12 +291,16 @@ function Home() {
                 <li key={place.id}>
                   <Link to="/luoghi/$poiId" params={{ poiId: place.id }} className="group block">
                     <span className="relative block">
-                      <img
-                        src={poiImage(place, 600)}
-                        alt=""
-                        loading="lazy"
-                        className="aspect-[3/2] w-full object-cover grayscale transition duration-500 group-hover:grayscale-0"
-                      />
+                      {place.imageUrl ? (
+                        <img
+                          src={place.imageUrl}
+                          alt=""
+                          loading="lazy"
+                          className="aspect-[3/2] w-full object-cover grayscale transition duration-500 group-hover:grayscale-0"
+                        />
+                      ) : (
+                        <span aria-hidden className="block h-12 border-b-[3px] border-mint" />
+                      )}
                       {place.number !== null && (
                         <span className="absolute -bottom-4 left-4 bg-paper px-2 font-display text-5xl font-light leading-none text-coral">
                           {poiNumber(place)}

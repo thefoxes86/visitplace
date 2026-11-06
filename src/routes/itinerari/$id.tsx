@@ -5,7 +5,6 @@ import { PageShell, SignpostNav } from '#/components/CategoryPage'
 import { CategoryIcon } from '#/components/tourist-map/CategoryIcon'
 import { useCategories } from '#/data/categories'
 import { itinerariesQuery, totalKm, useItineraries, useItineraryStops } from '#/data/itineraries'
-import { poiImage } from '#/data/pois'
 import { GOOGLE_TRAVEL_MODE, formatModes, mainMode } from '#/lib/itineraries'
 import { absoluteUrl, breadcrumbs, seo } from '#/lib/seo'
 
@@ -186,13 +185,15 @@ function ItineraryPage() {
                   {stop.fromPrevious !== null && (
                     <p className="-mt-1 mb-3 font-serif text-sm italic text-ink/70">a {km(stop.fromPrevious)} dalla tappa precedente</p>
                   )}
-                  <Link to="/luoghi/$poiId" params={{ poiId: stop.poi.id }} className="group grid gap-5 sm:grid-cols-[12rem_minmax(0,1fr)]">
-                    <img
-                      src={poiImage(stop.poi, 480)}
-                      alt=""
-                      loading="lazy"
-                      className="aspect-[4/3] w-full object-cover grayscale transition duration-500 group-hover:grayscale-0"
-                    />
+                  <Link to="/luoghi/$poiId" params={{ poiId: stop.poi.id }} className={`group grid gap-5 ${stop.poi.imageUrl ? 'sm:grid-cols-[12rem_minmax(0,1fr)]' : ''}`}>
+                    {stop.poi.imageUrl && (
+                      <img
+                        src={stop.poi.imageUrl}
+                        alt=""
+                        loading="lazy"
+                        className="aspect-[4/3] w-full object-cover grayscale transition duration-500 group-hover:grayscale-0"
+                      />
+                    )}
                     <span className="min-w-0">
                       <span className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider" style={{ color: category.color }}>
                         <span className="grid size-5 place-items-center rounded-sm text-white" style={{ backgroundColor: category.color }}>

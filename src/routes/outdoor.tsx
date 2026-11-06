@@ -6,7 +6,6 @@ import { OutdoorMap } from '#/components/OutdoorMap'
 import { TypeIcon } from '#/components/tourist-map/CategoryIcon'
 import { itinerariesQuery } from '#/data/itineraries'
 import { outdoorTracksQuery, useItineraryRoute, useOutdoorItems } from '#/data/outdoor'
-import { poiImage } from '#/data/pois'
 import { ITINERARY_MODES, ITINERARY_MODE_IDS } from '#/lib/itineraries'
 import { GRADES, LENGTHS, NO_FILTERS, OUTDOOR_KINDS, OUTDOOR_KIND_IDS, activeFilters, matches } from '#/lib/outdoor'
 import { breadcrumbs, seo } from '#/lib/seo'
@@ -196,9 +195,9 @@ function OutdoorPage() {
                 : { to: '/luoghi/$poiId' as const, params: { poiId: selected.id } })}
               className="group flex gap-4 p-3 pr-10 outline-none focus-visible:ring-2 focus-visible:ring-coral"
             >
-              {selected.imageOf && (
+              {selected.imageOf?.imageUrl && (
                 <img
-                  src={poiImage(selected.imageOf, 300)}
+                  src={selected.imageOf.imageUrl}
                   alt=""
                   className="aspect-square w-24 shrink-0 object-cover grayscale transition duration-500 group-hover:grayscale-0 sm:w-28"
                 />

@@ -1,7 +1,6 @@
 import { Link } from '@tanstack/react-router'
 
 import { totalKm, useItineraryStops } from '#/data/itineraries'
-import { poiImage } from '#/data/pois'
 import { formatModes } from '#/lib/itineraries'
 
 import type { Itinerary } from '#/lib/itineraries'
@@ -9,18 +8,23 @@ import type { Itinerary } from '#/lib/itineraries'
 /** A card opening an itinerary: the photo of its first stop that has one, how it is travelled, how long. */
 export function ItineraryCard({ itinerary, index }: { itinerary: Itinerary; index: number }) {
   const stops = useItineraryStops(itinerary)
-  const cover = stops.find((s) => s.poi.imageUrl)?.poi ?? stops[0]?.poi
+  const cover = stops.find((s) => s.poi.imageUrl)?.poi.imageUrl
   const km = totalKm(stops)
   return (
     <li>
       <Link to="/itinerari/$id" params={{ id: itinerary.id }} className="group block">
         <span className="relative block">
-          <img
-            src={cover ? poiImage(cover, 800) : `https://picsum.photos/seed/camaiore-itinerario-${itinerary.id}/800/600`}
-            alt=""
-            loading="lazy"
-            className="aspect-[3/2] w-full object-cover grayscale transition duration-500 group-hover:grayscale-0"
-          />
+          {/* The photo of its first stop that has one; without any, just a line. */}
+          {cover ? (
+            <img
+              src={cover}
+              alt=""
+              loading="lazy"
+              className="aspect-[3/2] w-full object-cover grayscale transition duration-500 group-hover:grayscale-0"
+            />
+          ) : (
+            <span aria-hidden className="block h-12 border-b-[3px] border-mint" />
+          )}
           <span className="absolute -bottom-4 left-4 bg-paper px-2 font-display text-5xl font-light leading-none text-coral">
             {String(index + 1).padStart(2, '0')}
           </span>

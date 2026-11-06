@@ -4,7 +4,7 @@ import { Link, createFileRoute } from '@tanstack/react-router'
 import { CategoryIcon } from '#/components/tourist-map/CategoryIcon'
 import { TouristMap } from '#/components/tourist-map/TouristMap'
 import { useCategories } from '#/data/categories'
-import { poiImage, poiNumber } from '#/data/pois'
+import { poiNumber } from '#/data/pois'
 import { usePois } from '#/data/use-pois'
 import { breadcrumbs, seo } from '#/lib/seo'
 
@@ -206,11 +206,13 @@ function MapPage() {
               params={{ poiId: selected.id }}
               className="group flex gap-4 p-3 pr-10 outline-none focus-visible:ring-2 focus-visible:ring-coral"
             >
-              <img
-                src={poiImage(selected, 300)}
-                alt=""
-                className="aspect-square w-24 shrink-0 object-cover grayscale transition duration-500 group-hover:grayscale-0 sm:w-28"
-              />
+              {selected.imageUrl && (
+                <img
+                  src={selected.imageUrl}
+                  alt=""
+                  className="aspect-square w-24 shrink-0 object-cover grayscale transition duration-500 group-hover:grayscale-0 sm:w-28"
+                />
+              )}
               <span className="min-w-0 py-1">
                 <span
                   className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.15em]"

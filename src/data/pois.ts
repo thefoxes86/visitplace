@@ -54,9 +54,8 @@ export type SeedPoi = Pick<Poi, 'id' | 'name' | 'category' | 'summary' | 'descri
 /** Map number of a point, the same everywhere on the site. */
 export const poiNumber = (poi: Pick<Poi, 'number'>) => (poi.number === null ? null : String(poi.number).padStart(2, '0'))
 
-/** The place's photo, or a demo image until one is set in the admin. */
-export const poiImage = (poi: Pick<Poi, 'id' | 'imageUrl'>, size = 800) =>
-  poi.imageUrl || `https://picsum.photos/seed/camaiore-${poi.id}/${size}/${size}`
+/** The place's photo, or null: places without one show no image on the site. */
+export const poiImage = (poi: Pick<Poi, 'imageUrl'>): string | null => poi.imageUrl || null
 
 /** Straight-line distance in kilometres. */
 export function distanceKm(a: Poi, b: Poi) {

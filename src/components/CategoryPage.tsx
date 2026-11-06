@@ -7,7 +7,7 @@ import { Skyline } from '#/components/Skyline'
 import { CategoryIcon } from '#/components/tourist-map/CategoryIcon'
 import { categoryLink, useCategories } from '#/data/categories'
 import { isListType } from '#/lib/category-types'
-import { poiImage, poiNumber } from '#/data/pois'
+import { poiNumber } from '#/data/pois'
 import { usePois } from '#/data/use-pois'
 import { getSection, sectionLink, sections } from '#/data/sections'
 
@@ -103,18 +103,23 @@ export function CategoryCards({ list, className = 'mt-12 sm:grid-cols-2' }: { li
       {list.map((child, i) => {
         const ids = subtree(child.id)
         const inside = pois.filter((poi) => ids.has(poi.category))
+        const cover = inside.find((poi) => poi.imageUrl)?.imageUrl
         const nested = categories.filter((c) => c.parentId === child.id).length
         return (
           <li key={child.id}>
             <Link {...categoryLink(child)} className="group block">
               <span className="relative block">
-                {/* The photo of its first place, or a demo image. */}
-                <img
-                  src={inside[0] ? poiImage(inside[0], 600) : `https://picsum.photos/seed/camaiore-categoria-${child.id}/600/600`}
-                  alt=""
-                  loading="lazy"
-                  className="aspect-[3/2] w-full object-cover grayscale transition duration-500 group-hover:grayscale-0"
-                />
+                {/* The photo of its first place that has one; without any, just a line. */}
+                {cover ? (
+                  <img
+                    src={cover}
+                    alt=""
+                    loading="lazy"
+                    className="aspect-[3/2] w-full object-cover grayscale transition duration-500 group-hover:grayscale-0"
+                  />
+                ) : (
+                  <span aria-hidden className="block h-12 border-b-[3px] border-mint" />
+                )}
                 <span className="absolute -bottom-4 left-4 bg-paper px-2 font-display text-5xl font-light leading-none text-coral">
                   {String(i + 1).padStart(2, '0')}
                 </span>
@@ -230,17 +235,19 @@ export function PoiList({ items }: { items: Poi[] }) {
             <Link
               to="/luoghi/$poiId"
               params={{ poiId: poi.id }}
-              className="group grid items-start gap-5 sm:grid-cols-[5rem_12rem_minmax(0,1fr)]"
+              className={`group grid items-start gap-5 ${poi.imageUrl ? 'sm:grid-cols-[5rem_12rem_minmax(0,1fr)]' : 'sm:grid-cols-[5rem_minmax(0,1fr)]'}`}
             >
               <span className="hidden border-b-2 border-coral text-right font-display text-6xl font-light leading-none text-coral sm:block">
                 {poiNumber(poi) ?? '·'}
               </span>
-              <img
-                src={poiImage(poi, 480)}
-                alt=""
-                loading="lazy"
-                className="aspect-[4/3] w-full object-cover grayscale transition duration-500 group-hover:grayscale-0"
-              />
+              {poi.imageUrl && (
+                <img
+                  src={poi.imageUrl}
+                  alt=""
+                  loading="lazy"
+                  className="aspect-[4/3] w-full object-cover grayscale transition duration-500 group-hover:grayscale-0"
+                />
+              )}
               <span className="min-w-0">
                 <span className="block font-display text-xl font-semibold text-teal transition-colors group-hover:text-coral">
                   {poi.number !== null && <span className="text-coral sm:hidden">{poiNumber(poi)} · </span>}
