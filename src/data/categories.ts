@@ -81,6 +81,7 @@ export function useCategories() {
       subtree: (id: string) => subtreeIds(categories, id),
       /** Whether a category holds events only, shown as a timeline. */
       isEventCategory: (id: string) => isEventCategory(categories, id),
+      isClimbingCategory: (id: string) => holdsOnly(categories, id, 'climbing'),
       /** The category of every event: the highest that holds events only. */
       eventsCategory: categoryTree(categories)
         .filter((c) => isEventCategory(categories, c.id))
@@ -90,10 +91,13 @@ export function useCategories() {
 }
 
 /** An event category, or a list whose categories are all event categories. */
-function isEventCategory(categories: Category[], id: string) {
+const isEventCategory = (categories: Category[], id: string) => holdsOnly(categories, id, 'event')
+
+/** A category of this type, or a list whose categories are all of it. */
+function holdsOnly(categories: Category[], id: string, type: string) {
   const ids = subtreeIds(categories, id)
   const holding = categories.filter((c) => ids.has(c.id) && !isListType(c.type))
-  return holding.length > 0 && holding.every((c) => c.type === 'event')
+  return holding.length > 0 && holding.every((c) => c.type === type)
 }
 
 export const categoryBySlug =(categories: Category[], slug: string) => categories.find((c) => c.slug === slug)

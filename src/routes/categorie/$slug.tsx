@@ -1,6 +1,7 @@
 import { Link, createFileRoute, notFound } from '@tanstack/react-router'
 
 import { CategoryContent, CategoryEyebrow, MapButton, PageShell, SignpostNav } from '#/components/CategoryPage'
+import { CragFinder } from '#/components/CragFinder'
 import { EventTimeline } from '#/components/EventTimeline'
 import { categoriesQuery, categoryBySlug, categoryLink, categoryPath, hiddenIds, useCategories } from '#/data/categories'
 import { getSection, sectionLink } from '#/data/sections'
@@ -46,12 +47,14 @@ export const Route = createFileRoute('/categorie/$slug')({
 
 function CategoryRoute() {
   const { category: loaded, section } = Route.useLoaderData()
-  const { categories, isEventCategory } = useCategories()
+  const { categories, isEventCategory, isClimbingCategory } = useCategories()
   const category = categories.find((c) => c.id === loaded.id) ?? loaded
   const parent = categories.find((c) => c.id === category.parentId)
   const siblings = categories.filter((c) => c.parentId === category.parentId && c.id !== category.id)
-  // Events go on a timeline across the whole page.
+  // Events go on a timeline, crags in a finder with filters: both across the whole page.
   const events = isEventCategory(category.id)
+  const crags = !events && isClimbingCategory(category.id)
+  const wide = events || crags
 
   return (
     <PageShell
@@ -65,9 +68,9 @@ function CategoryRoute() {
       eyebrow={<CategoryEyebrow category={category} />}
       title={category.label}
       tagline={parent ? `Una categoria di ${parent.label}` : (section?.tagline ?? 'Dalle Apuane al mare della Versilia')}
-      wide={events}
+      wide={wide}
       aside={
-        !events &&
+        !wide &&
         siblings.length > 0 && (
           <SignpostNav
             title={parent ? `Altro in ${parent.label}` : 'Altre categorie'}
@@ -82,7 +85,7 @@ function CategoryRoute() {
         )
       }
     >
-      {events ? <EventTimeline category={category} /> : <CategoryContent category={category} />}
+      {events ? <EventTimeline category={category} /> : crags ? <CragFinder category={category} /> : <CategoryContent category={category} />}
       <MapButton />
     </PageShell>
   )
