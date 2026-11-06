@@ -9,6 +9,18 @@ import type { HandleUploadBody } from '@vercel/blob/client'
 const IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/avif']
 const MAX_BYTES = 15 * 1024 * 1024
 
+/** Why uploads can't work right now, or null when they can. */
+async function unavailable() {
+  if (!(await currentUser())) return Response.json({ error: 'Accesso non autorizzato: accedi di nuovo al backoffice.' }, { status: 401 })
+  if (!process.env.BLOB_READ_WRITE_TOKEN) {
+    return Response.json(
+      { error: 'Caricamento foto non configurato: collega uno store Vercel Blob al progetto (manca BLOB_READ_WRITE_TOKEN).' },
+      { status: 503 },
+    )
+  }
+  return null
+}
+
 /**
  * Issues Vercel Blob tokens for the admin's photo uploads: the browser then sends the file
  * straight to Blob, past the size limit of server functions. Signed-in admins and editors only.
@@ -17,11 +29,11 @@ const MAX_BYTES = 15 * 1024 * 1024
 export const Route = createFileRoute('/api/upload')({
   server: {
     handlers: {
+      // The admin asks here why an upload failed: the Blob client only says it got no token.
+      GET: async () => (await unavailable()) ?? Response.json({ ok: true }),
       POST: async ({ request }) => {
-        if (!(await currentUser())) return Response.json({ error: 'Accesso non autorizzato' }, { status: 401 })
-        if (!process.env.BLOB_READ_WRITE_TOKEN) {
-          return Response.json({ error: 'Caricamento foto non configurato: manca BLOB_READ_WRITE_TOKEN.' }, { status: 500 })
-        }
+        const problem = await unavailable()
+        if (problem) return problem
         try {
           const body = (await request.json()) as HandleUploadBody
           const result = await handleUpload({

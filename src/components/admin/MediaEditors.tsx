@@ -15,12 +15,21 @@ export async function uploadPhoto(file: File, poiId: string) {
   const dot = file.name.lastIndexOf('.')
   const base = slugify(dot > 0 ? file.name.slice(0, dot) : file.name) || 'foto'
   const ext = dot > 0 ? file.name.slice(dot).toLowerCase() : ''
-  const blob = await upload(`luoghi/${poiId || 'nuovo'}/${base}${ext}`, file, {
-    access: 'public',
-    handleUploadUrl: '/api/upload',
-    contentType: file.type,
-  })
-  return blob.url
+  try {
+    const blob = await upload(`luoghi/${poiId || 'nuovo'}/${base}${ext}`, file, {
+      access: 'public',
+      handleUploadUrl: '/api/upload',
+      contentType: file.type,
+    })
+    return blob.url
+  } catch (error) {
+    // The Blob client hides our endpoint's answer: ask it what is wrong.
+    const reason = await fetch('/api/upload')
+      .then((r) => (r.ok ? null : r.json()))
+      .then((body: { error?: string } | null) => body?.error)
+      .catch(() => null)
+    throw reason ? new Error(reason) : error
+  }
 }
 
 interface GalleryEditorProps {
