@@ -141,6 +141,13 @@
       "when": 1794844882133,
       "tag": "0019_poi_recurrence_weeks",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1794845883594,
+      "tag": "0020_poi_own_photo",
+      "breakpoints": true
     }
   ]
 }

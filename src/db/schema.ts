@@ -140,6 +140,8 @@ export const pois = pgTable(
     /** Unpublished entries are only visible in the admin. */
     published: boolean().notNull().default(true),
     imageUrl: text('image_url'),
+    /** The main photo was taken by us: shown in the admin only, never on the site. */
+    ownPhoto: boolean('own_photo').notNull().default(false),
     /** Author, licence and source of the main photo, when it is not the site's own. */
     imageCredit: jsonb('image_credit').$type<PhotoCredit>(),
     address: text(),

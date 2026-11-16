@@ -132,10 +132,17 @@ function PoiList() {
                         params={{ category: categoryOf(poi.category).slug, id: poi.id }}
                         tabIndex={-1}
                         aria-hidden
-                        className="block h-12 w-16 overflow-hidden rounded-md bg-paper ring-1 ring-ink/10"
+                        className="relative block h-12 w-16 overflow-hidden rounded-md bg-paper ring-1 ring-ink/10"
                       >
                         {poi.imageUrl ? (
-                          <img src={poi.imageUrl} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" />
+                          <>
+                            <img src={poi.imageUrl} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" />
+                            {poi.ownPhoto && (
+                              <span title="Foto di mia proprietà" className="absolute bottom-0.5 right-0.5 rounded-sm bg-teal px-1 text-[9px] font-bold leading-4 text-white">
+                                MIA
+                              </span>
+                            )}
+                          </>
                         ) : (
                           <span className="flex h-full w-full items-center justify-center text-[10px] font-semibold uppercase tracking-wider text-ink/40">
                             No foto

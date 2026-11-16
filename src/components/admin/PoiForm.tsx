@@ -45,7 +45,7 @@ type Values = Record<
   | 'recurrence'
   | 'recurrenceUntil',
   string
-> & { lat: number | null; lon: number | null; featured: boolean; showOnMap: boolean; published: boolean; allDay: boolean; sortOrder: number; recurrenceWeeks: number[] }
+> & { lat: number | null; lon: number | null; featured: boolean; showOnMap: boolean; published: boolean; allDay: boolean; sortOrder: number; recurrenceWeeks: number[]; ownPhoto: boolean }
 
 /** Date ⇄ value of a datetime-local input (or a date input, with `dateOnly`), in the editor's time zone. */
 const toLocalInput = (date: Date | null, dateOnly = false) =>
@@ -63,6 +63,7 @@ const initialValues = (poi: AdminPoi | undefined, typeId: string): Values => ({
   description: poi?.description ?? '',
   area: poi?.area ?? '',
   imageUrl: poi?.imageUrl ?? '',
+  ownPhoto: poi?.ownPhoto ?? false,
   creditAuthor: poi?.imageCredit?.author ?? '',
   creditLicense: poi?.imageCredit?.license ?? '',
   creditSource: poi?.imageCredit?.sourceUrl ?? '',
@@ -170,7 +171,7 @@ export function PoiForm({ category: initialCategory, poi, areas }: PoiFormProps)
     clearError('startsAt', 'endsAt')
   }
 
-  const text = (key: Exclude<keyof Values, 'lat' | 'lon' | 'featured' | 'showOnMap' | 'published' | 'allDay' | 'sortOrder' | 'recurrenceWeeks'>) => ({
+  const text = (key: Exclude<keyof Values, 'lat' | 'lon' | 'featured' | 'showOnMap' | 'published' | 'allDay' | 'sortOrder' | 'recurrenceWeeks' | 'ownPhoto'>) => ({
     id: key,
     value: values[key] as string,
     onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => set(key, e.target.value),
@@ -563,11 +564,20 @@ export function PoiForm({ category: initialCategory, poi, areas }: PoiFormProps)
                   set('creditAuthor', '')
                   set('creditLicense', '')
                   set('creditSource', '')
+                  set('ownPhoto', false)
                 }}
                 className={`${buttonClass.danger} mt-2`}
               >
                 Rimuovi l'immagine
               </button>
+              <div className="mt-4">
+                <Toggle
+                  label="Foto di mia proprietà"
+                  hint="Solo per il backoffice: sul sito non compare."
+                  checked={values.ownPhoto}
+                  onChange={(v) => set('ownPhoto', v)}
+                />
+              </div>
             </>
           ) : (
             <p className="mt-4 rounded-md border border-dashed border-ink/20 p-6 text-center text-sm font-light italic">Nessuna immagine</p>

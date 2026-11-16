@@ -26,6 +26,7 @@ const poiFields = z.object({
   showOnMap: z.boolean(),
   published: z.boolean(),
   imageUrl: z.url('Indirizzo non valido').nullable(),
+  ownPhoto: z.boolean(),
   imageCredit: photoCreditSchema.nullable(),
   address: z.string().trim().nullable(),
   phone: z.string().trim().nullable(),

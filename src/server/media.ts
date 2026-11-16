@@ -98,7 +98,7 @@ export const deleteMedia = createServerFn({ method: 'POST' })
           await tx
             .update(pois)
             .set({
-              ...(row.imageUrl === data.url ? { imageUrl: null, imageCredit: null } : {}),
+              ...(row.imageUrl === data.url ? { imageUrl: null, imageCredit: null, ownPhoto: false } : {}),
               gallery: row.gallery.filter((photo) => photo.url !== data.url),
               updatedAt: new Date(),
             })

@@ -1,0 +1,1 @@
+ALTER TABLE "pois" ADD COLUMN "own_photo" boolean DEFAULT false NOT NULL;

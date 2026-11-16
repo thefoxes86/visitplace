@@ -35,7 +35,7 @@ export const listPublicPois = createServerFn({ method: 'GET' }).handler(async ()
   let number = 0
   return rows
     .filter((poi) => !hidden.has(poi.category))
-    .map(({ published, sortOrder, createdAt, updatedAt, track, ...poi }) => ({
+    .map(({ published, sortOrder, createdAt, updatedAt, track, ownPhoto, ...poi }) => ({
       ...poi,
       // A hidden category does not list it either.
       extraCategories: poi.extraCategories.filter((id) => !hidden.has(id)),
