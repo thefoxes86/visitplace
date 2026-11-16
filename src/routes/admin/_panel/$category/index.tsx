@@ -112,6 +112,9 @@ function PoiList() {
             <table className="w-full min-w-[40rem] text-left text-sm">
               <thead className="border-b border-ink/10 text-xs uppercase tracking-wider text-teal">
                 <tr>
+                  <th className="w-20 py-3 pl-4">
+                    <span className="sr-only">Immagine</span>
+                  </th>
                   <th className="px-4 py-3 font-semibold">Nome</th>
                   <th className="px-4 py-3 font-semibold">{isEvent ? 'Quando' : 'Zona'}</th>
                   <th className="px-4 py-3 font-semibold">Stato</th>
@@ -123,6 +126,23 @@ function PoiList() {
               <tbody className="divide-y divide-ink/10">
                 {list.map((poi) => (
                   <tr key={poi.id} className="hover:bg-paper/60">
+                    <td className="py-3 pl-4">
+                      <Link
+                        to="/admin/$category/$id"
+                        params={{ category: categoryOf(poi.category).slug, id: poi.id }}
+                        tabIndex={-1}
+                        aria-hidden
+                        className="block h-12 w-16 overflow-hidden rounded-md bg-paper ring-1 ring-ink/10"
+                      >
+                        {poi.imageUrl ? (
+                          <img src={poi.imageUrl} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" />
+                        ) : (
+                          <span className="flex h-full w-full items-center justify-center text-[10px] font-semibold uppercase tracking-wider text-ink/40">
+                            No foto
+                          </span>
+                        )}
+                      </Link>
+                    </td>
                     <td className="px-4 py-3">
                       <Link
                         to="/admin/$category/$id"
