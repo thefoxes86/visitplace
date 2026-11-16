@@ -182,7 +182,7 @@ function PoiPage() {
           <Skyline className="w-28 shrink-0 text-teal md:w-36 lg:w-44" />
           <div className="min-w-0 md:pb-3">
             <p
-              className="hero-fade flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em]"
+              className="hero-fade flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em]"
               style={{ color: category.color, animationDelay: '300ms' }}
             >
               <span className="grid size-6 place-items-center rounded-sm text-white" style={{ backgroundColor: category.color }}>
@@ -190,7 +190,16 @@ function PoiPage() {
               </span>
               <Link {...categoryLink(category)} className="hover:underline">
                 {category.label}
-              </Link>{' '}
+              </Link>
+              {/* The other categories it is listed in */}
+              {poi.extraCategories.map((id) => (
+                <span key={id}>
+                  {'· '}
+                  <Link {...categoryLink(categoryOf(id))} className="hover:underline" style={{ color: categoryOf(id).color }}>
+                    {categoryOf(id).label}
+                  </Link>
+                </span>
+              ))}{' '}
               · {poi.area}
             </p>
             <h1

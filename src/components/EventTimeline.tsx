@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link } from '@tanstack/react-router'
 
 import { useCategories } from '#/data/categories'
+import { inCategories } from '#/data/pois'
 import { usePois } from '#/data/use-pois'
 import {
   TIME_ZONE,
@@ -74,7 +75,8 @@ const shortMonthFormat = new Intl.DateTimeFormat('it-IT', { month: 'short', time
 export function EventTimeline({ category }: { category: Category }) {
   const { subtree, categoryOf } = useCategories()
   const ids = subtree(category.id)
-  const events = usePois().filter((poi) => ids.has(poi.category))
+  // Places listed here without dates of their own have no spot on the timeline.
+  const events = usePois().filter((poi) => inCategories(poi, ids) && poi.startsAt)
   const [filter, setFilter] = useState<FilterId>('upcoming')
   const [custom, setCustom] = useState({ from: '', to: '' })
 

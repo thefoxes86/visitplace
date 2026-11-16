@@ -127,6 +127,13 @@
       "when": 1793626329166,
       "tag": "0017_itinerary_drop_mode",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1794837358347,
+      "tag": "0018_poi_extra_categories",
+      "breakpoints": true
     }
   ]
 }

@@ -121,6 +121,11 @@ export const pois = pgTable(
       .notNull()
       // A category can't be deleted while places use it.
       .references(() => categories.id, { onUpdate: 'cascade', onDelete: 'restrict' }),
+    /**
+     * Other categories the place is listed in too. The main `category` still gives its type,
+     * colour and admin address; deleting a category takes it out of here (src/server/categories.ts).
+     */
+    extraCategories: text('extra_categories').array().notNull().default([]),
     name: text().notNull(),
     summary: text().notNull(),
     description: text().notNull(),

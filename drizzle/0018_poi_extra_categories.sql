@@ -1,0 +1,1 @@
+ALTER TABLE "pois" ADD COLUMN "extra_categories" text[] DEFAULT '{}' NOT NULL;

@@ -14,6 +14,8 @@ const poiFields = z.object({
     .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Solo lettere minuscole, numeri e trattini'),
   /** Id in the `categories` table (checked by its foreign key). */
   category: z.string().min(1),
+  /** Other categories it is listed in; the main one and repeats are dropped. */
+  extraCategories: z.array(z.string().min(1)).max(20),
   name: z.string().trim().min(1, 'Obbligatorio'),
   summary: z.string().trim().min(1, 'Obbligatorio').max(160, 'Al massimo 160 caratteri'),
   description: z.string().trim().min(1, 'Obbligatorio'),

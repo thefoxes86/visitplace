@@ -4,6 +4,7 @@ import { Link, createFileRoute } from '@tanstack/react-router'
 
 import { CategoryRows } from '#/components/admin/CategoryRows'
 import { adminPoisQuery } from '#/components/admin/queries'
+import { useDuplicatePoi } from '#/components/admin/useDuplicatePoi'
 import { Alert, PageHeader, buttonClass, errorMessage, inputClass } from '#/components/admin/ui'
 import { categoryPath, sectionOf, subtreeIds, useCategories } from '#/data/categories'
 import { getSection } from '#/data/sections'
@@ -27,12 +28,13 @@ function PoiList() {
   const [search, setSearch] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [deleting, setDeleting] = useState<string | null>(null)
+  const { duplicate, duplicating, error: duplicateError } = useDuplicatePoi()
 
   const { categories, tree, categoryOf } = useCategories()
   // Subcategories are listed above; the table holds the category's own places.
   const below = subtreeIds(categories, category.id)
   const subcategories = tree.filter((c) => c.id !== category.id && below.has(c.id))
-  const all = data.filter((poi) => poi.category === category.id)
+  const all = data.filter((poi) => poi.category === category.id || poi.extraCategories.includes(category.id))
   const query = search.trim().toLowerCase()
   const list = query ? all.filter((poi) => `${poi.name} ${poi.area}`.toLowerCase().includes(query)) : all
   const type = categoryType(category.type)
@@ -91,7 +93,7 @@ function PoiList() {
       )}
 
       <div className="mt-6 space-y-4">
-        {error && <Alert>{error}</Alert>}
+        {(error || duplicateError) && <Alert>{error ?? duplicateError}</Alert>}
         <input
           type="search"
           value={search}
@@ -135,6 +137,11 @@ function PoiList() {
                         </span>
                       )}
                       <span className="block max-w-md truncate text-xs font-light">{poi.summary}</span>
+                      {poi.category !== category.id && (
+                        <span className="mt-1 inline-block rounded-full bg-ink/5 px-2 py-0.5 text-[11px] font-semibold text-ink/70">
+                          Categoria principale: {categoryOf(poi.category).label}
+                        </span>
+                      )}
                     </td>
                     <td className="px-4 py-3 text-xs">
                       {isEvent ? (poi.startsAt ? formatEventDate(poi.startsAt) : '—') : poi.area}
@@ -167,6 +174,14 @@ function PoiList() {
                       >
                         Modifica
                       </Link>
+                      <button
+                        type="button"
+                        onClick={() => duplicate(poi, categoryOf(poi.category).slug)}
+                        disabled={duplicating !== null}
+                        className="px-3 py-2 text-sm font-semibold text-teal hover:text-coral disabled:opacity-50"
+                      >
+                        {duplicating === poi.id ? 'Duplico…' : 'Duplica'}
+                      </button>
                       <button
                         type="button"
                         onClick={() => remove(poi)}

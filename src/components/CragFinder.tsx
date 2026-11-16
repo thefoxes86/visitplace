@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { Link } from '@tanstack/react-router'
 
 import { useCategories } from '#/data/categories'
+import { inCategories } from '#/data/pois'
 import { usePois } from '#/data/use-pois'
 import { gradeValue } from '#/lib/outdoor'
 
@@ -100,7 +101,7 @@ export function CragFinder({ category }: { category: Category }) {
   const crags = useMemo(() => {
     const ids = subtree(category.id)
     return pois
-      .filter((poi) => ids.has(poi.category))
+      .filter((poi) => inCategories(poi, ids))
       .map(toCrag)
       .sort((a, b) => a.poi.name.localeCompare(b.poi.name, 'it'))
   }, [pois, category.id, subtree])

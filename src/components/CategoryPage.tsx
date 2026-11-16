@@ -7,7 +7,7 @@ import { Skyline } from '#/components/Skyline'
 import { CategoryIcon } from '#/components/tourist-map/CategoryIcon'
 import { categoryLink, useCategories } from '#/data/categories'
 import { isListType } from '#/lib/category-types'
-import { poiNumber } from '#/data/pois'
+import { inCategories, inCategory, poiNumber } from '#/data/pois'
 import { usePois } from '#/data/use-pois'
 import { getSection, sectionLink, sections } from '#/data/sections'
 
@@ -53,7 +53,7 @@ export const useSectionCategories = (sectionId: string) => useCategories().roots
 export function CategoryEyebrow({ category }: { category: Category }) {
   const { categories, subtree } = useCategories()
   const ids = subtree(category.id)
-  const count = usePois().filter((poi) => ids.has(poi.category)).length
+  const count = usePois().filter((poi) => inCategories(poi, ids)).length
   const children = categories.filter((c) => c.parentId === category.id).length
   return (
     <span className="flex items-center gap-2" style={{ color: category.color }}>
@@ -72,7 +72,7 @@ export function CategoryEyebrow({ category }: { category: Category }) {
  */
 export function CategoryContent({ category }: { category: Category }) {
   const children = useCategories().categories.filter((c) => c.parentId === category.id)
-  const own = usePois().filter((poi) => poi.category === category.id)
+  const own = usePois().filter((poi) => inCategory(poi, category.id))
   const comingSoon = (
     <p className="relative mt-14 border-2 border-coral px-5 py-6 font-serif italic text-coral">
       Stiamo raccogliendo i luoghi di questa categoria: torna presto.
@@ -102,7 +102,7 @@ export function CategoryCards({ list, className = 'mt-12 sm:grid-cols-2' }: { li
     <ul className={`grid gap-x-8 gap-y-10 ${className}`}>
       {list.map((child, i) => {
         const ids = subtree(child.id)
-        const inside = pois.filter((poi) => ids.has(poi.category))
+        const inside = pois.filter((poi) => inCategories(poi, ids))
         const cover = inside.find((poi) => poi.imageUrl)?.imageUrl
         const nested = categories.filter((c) => c.parentId === child.id).length
         return (

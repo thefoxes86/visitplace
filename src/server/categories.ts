@@ -1,5 +1,5 @@
 import { createServerFn } from '@tanstack/react-start'
-import { and, asc, count, eq, inArray, isNull, max, ne, or } from 'drizzle-orm'
+import { and, asc, count, eq, inArray, isNull, max, ne, or, sql } from 'drizzle-orm'
 
 import { db } from '#/db'
 import { categories, pois } from '#/db/schema'
@@ -113,8 +113,12 @@ export const updateCategory = createServerFn({ method: 'POST' })
         .where(eq(categories.id, id))
         .returning({ id: categories.id })
       if (!updated.length) throw new Error('Categoria non trovata')
+      // A list holds no places: it stops being one of their other categories too.
+      if (isListType(type)) {
+        await tx.update(pois).set({ extraCategories: sql`array_remove(${pois.extraCategories}, ${id})` })
+        return
+      }
       // Below a category that is not a list, every subcategory shares its type.
-      if (isListType(type)) return
       const all = await tx.select(treeColumns).from(categories)
       const below = [...subtreeIds(all, id)].filter((c) => c !== id)
       if (below.length) await tx.update(categories).set({ type }).where(inArray(categories.id, below))
@@ -148,9 +152,18 @@ export const deleteCategory = createServerFn({ method: 'POST' })
         const target = all.find((c) => c.id === data.placesTo)
         if (!target || removed.has(target.id)) throw new Error('Scegli una categoria che non viene eliminata')
         if (isListType(target.type)) throw new Error('Una lista non ha contenuti propri: scegli una sottocategoria')
-        await tx.update(pois).set({ category: target.id }).where(inArray(pois.category, removedIds))
+        await tx
+          .update(pois)
+          // Moved into a category they were already listed in: it is now their main one.
+          .set({ category: target.id, extraCategories: sql`array_remove(${pois.extraCategories}, ${target.id})` })
+          .where(inArray(pois.category, removedIds))
       } else {
         await tx.delete(pois).where(inArray(pois.category, removedIds))
+      }
+
+      // Places listed there among their other categories just leave it.
+      for (const id of removedIds) {
+        await tx.update(pois).set({ extraCategories: sql`array_remove(${pois.extraCategories}, ${id})` })
       }
 
       // Deepest first: a category can't go while its subcategories point to it.

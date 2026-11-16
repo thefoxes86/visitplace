@@ -8,7 +8,7 @@ import { useCategories } from '#/data/categories'
 import { useEventsLink, useUpcomingEvents } from '#/data/events'
 import { itinerariesQuery, useItineraries } from '#/data/itineraries'
 import { ItineraryCard } from '#/components/ItineraryCard'
-import { poiNumber } from '#/data/pois'
+import { inCategories, inCategory, poiNumber } from '#/data/pois'
 import { formatOccurrence, formatRecurrence } from '#/lib/event-dates'
 import { usePois } from '#/data/use-pois'
 import { sectionLink, sections } from '#/data/sections'
@@ -64,7 +64,7 @@ function Home() {
   const isEvent = (poi: Poi) => categoryOf(poi.category).type === 'event'
 
   // The first place of each category, from categories in random order.
-  const firstOfEach = categories.flatMap((c) => pois.find((poi) => poi.category === c.id) ?? [])
+  const firstOfEach = categories.flatMap((c) => pois.find((poi) => inCategory(poi, c.id)) ?? [])
   // Shuffled after hydration, so the server and the first client render agree.
   const [picks, setPicks] = useState(() => firstOfEach.slice(0, PICKS_SHOWN))
   useEffect(() => setPicks(shuffle(firstOfEach).slice(0, PICKS_SHOWN)), [pois, categories])
@@ -72,7 +72,7 @@ function Home() {
   const upcoming = useUpcomingEvents(EVENTS_SHOWN)
 
   const scopriIds = new Set(useSectionCategories('scopri').flatMap((c) => [...subtree(c.id)]))
-  const thingsToDo = pois.filter((poi) => scopriIds.has(poi.category) && !isEvent(poi)).slice(0, THINGS_TO_DO_SHOWN)
+  const thingsToDo = pois.filter((poi) => inCategories(poi, scopriIds) && !isEvent(poi)).slice(0, THINGS_TO_DO_SHOWN)
 
   const featuredCategories = categories.filter((c) => c.featured)
 

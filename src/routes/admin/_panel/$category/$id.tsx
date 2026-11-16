@@ -3,7 +3,8 @@ import { Link, createFileRoute, notFound } from '@tanstack/react-router'
 
 import { PoiForm } from '#/components/admin/PoiForm'
 import { adminPoisQuery } from '#/components/admin/queries'
-import { PageHeader } from '#/components/admin/ui'
+import { useDuplicatePoi } from '#/components/admin/useDuplicatePoi'
+import { Alert, PageHeader, buttonClass } from '#/components/admin/ui'
 
 export const Route = createFileRoute('/admin/_panel/$category/$id')({
   loader: async ({ context, params }) => {
@@ -20,6 +21,7 @@ function EditPoi() {
   const { data } = useSuspenseQuery(adminPoisQuery)
   const poi = data.find((p) => p.id === id)
   const areas = [...new Set(data.map((p) => p.area))].sort()
+  const { duplicate, duplicating, error } = useDuplicatePoi()
 
   return (
     <>
@@ -28,7 +30,26 @@ function EditPoi() {
       </Link>
       {poi ? (
         <>
-          <PageHeader title={poi.name} subtitle={`Modifica ${category.singular}`} />
+          <PageHeader
+            title={poi.name}
+            subtitle={`Modifica ${category.singular}`}
+            actions={
+              <button
+                type="button"
+                onClick={() => duplicate(poi, category.slug)}
+                disabled={duplicating !== null}
+                title="Crea una bozza uguale a questo contenuto, con le modifiche già salvate"
+                className={buttonClass.secondary}
+              >
+                {duplicating ? 'Duplico…' : 'Duplica'}
+              </button>
+            }
+          />
+          {error && (
+            <div className="mt-6">
+              <Alert>{error}</Alert>
+            </div>
+          )}
           {/* Remount when moving between places, so the form starts from the right values. */}
           <PoiForm key={poi.id} category={category.id} poi={poi} areas={areas} />
         </>

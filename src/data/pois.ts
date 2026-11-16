@@ -9,8 +9,10 @@ export interface Poi {
   /** Map number, the same everywhere on the site; null for places not on the map. */
   number: number | null
   name: string
-  /** Id in the `categories` table, see useCategories(). */
+  /** Id in the `categories` table, see useCategories(): gives the type, colour and icon. */
   category: string
+  /** Other categories the place is listed in too (see inCategories). */
+  extraCategories: string[]
   summary: string
   description: string
   /** Part of the comune the place is in. */
@@ -53,6 +55,14 @@ export type SeedPoi = Pick<Poi, 'id' | 'name' | 'category' | 'summary' | 'descri
 
 /** Map number of a point, the same everywhere on the site. */
 export const poiNumber = (poi: Pick<Poi, 'number'>) => (poi.number === null ? null : String(poi.number).padStart(2, '0'))
+
+/** Whether the place is listed in one of these categories, as its main one or another. */
+export const inCategories = (poi: Pick<Poi, 'category' | 'extraCategories'>, ids: ReadonlySet<string>) =>
+  ids.has(poi.category) || poi.extraCategories.some((id) => ids.has(id))
+
+/** Whether the place is listed in this category itself (not below it). */
+export const inCategory = (poi: Pick<Poi, 'category' | 'extraCategories'>, id: string) =>
+  poi.category === id || poi.extraCategories.includes(id)
 
 /** The place's photo, or null: places without one show no image on the site. */
 export const poiImage = (poi: Pick<Poi, 'imageUrl'>): string | null => poi.imageUrl || null

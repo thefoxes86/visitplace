@@ -2,6 +2,7 @@ import { Link } from '@tanstack/react-router'
 
 import { TypeIcon } from '#/components/tourist-map/CategoryIcon'
 import { hiddenIds, useCategories } from '#/data/categories'
+import { inCategories } from '#/data/pois'
 import { categoryType } from '#/lib/category-types'
 
 import type { AdminPoi } from '#/components/admin/queries'
@@ -29,7 +30,7 @@ export function CategoryRows({ list, pois, empty }: CategoryRowsProps) {
     <ul className="divide-y divide-ink/10 overflow-hidden rounded-lg border border-ink/10 bg-white shadow-sm">
       {list.map((category) => {
         const ids = subtree(category.id)
-        const places = pois.filter((poi) => ids.has(poi.category))
+        const places = pois.filter((poi) => inCategories(poi, ids))
         const drafts = places.filter((poi) => !poi.published).length
         const depth = category.depth - base
         return (

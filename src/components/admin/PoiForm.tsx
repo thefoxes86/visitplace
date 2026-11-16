@@ -7,7 +7,7 @@ import { GalleryEditor, LinksEditor, TrackEditor, uploadPhoto } from '#/componen
 import { MediaPicker } from '#/components/admin/MediaLibrary'
 import { Alert, Card, Field, Toggle, buttonClass, errorMessage, inputClass } from '#/components/admin/ui'
 import { categoryTree, useCategories } from '#/data/categories'
-import { categoryType } from '#/lib/category-types'
+import { categoryType, isListType } from '#/lib/category-types'
 import { RECURRENCES, RECURRENCE_IDS, formatRecurrence } from '#/lib/event-dates'
 import { poiInputFor, slugify } from '#/lib/poi-input'
 import { createPoi, updatePoi } from '#/server/pois'
@@ -133,6 +133,7 @@ export function PoiForm({ category: initialCategory, poi, areas }: PoiFormProps)
   const [details, setDetails] = useState(() => initialDetails(type.fields, poi?.details))
   const [gallery, setGallery] = useState<GalleryPhoto[]>(() => poi?.gallery ?? [])
   const [links, setLinks] = useState<PoiLink[]>(() => poi?.links ?? [])
+  const [extraCategories, setExtraCategories] = useState<string[]>(() => poi?.extraCategories ?? [])
   const [track, setTrack] = useState<Track | null>(() => poi?.track ?? null)
   const [imageUploading, setImageUploading] = useState(false)
   const [pickingImage, setPickingImage] = useState(false)
@@ -191,6 +192,7 @@ export function PoiForm({ category: initialCategory, poi, areas }: PoiFormProps)
     const parsed = poiInputFor(type).safeParse({
       ...values,
       category: categoryId,
+      extraCategories: extraCategories.filter((id) => id !== categoryId),
       lat: values.lat ?? undefined,
       lon: values.lon ?? undefined,
       imageUrl: orNull(values.imageUrl),
@@ -421,9 +423,9 @@ export function PoiForm({ category: initialCategory, poi, areas }: PoiFormProps)
       </div>
 
       <div className="min-w-0 space-y-6">
-        {categoryOptions.length > 1 && (
-          <Card title="Categoria">
-            <Field label="Categoria" htmlFor="category" hint="Tra le categorie dello stesso tipo, con gli stessi campi.">
+        <Card title="Categorie">
+          {categoryOptions.length > 1 && (
+            <Field label="Categoria principale" htmlFor="category" hint="Tra le categorie dello stesso tipo, con gli stessi campi.">
               <select id="category" value={categoryId} onChange={(e) => setCategoryId(e.target.value)} className={inputClass}>
                 {categoryOptions.map((c) => (
                   <option key={c.id} value={c.id}>
@@ -434,8 +436,9 @@ export function PoiForm({ category: initialCategory, poi, areas }: PoiFormProps)
                 ))}
               </select>
             </Field>
-          </Card>
-        )}
+          )}
+          <ExtraCategories main={categoryId} value={extraCategories} onChange={setExtraCategories} error={errors.extraCategories} />
+        </Card>
 
         <Card title="Pubblicazione">
           <div className="space-y-3">
@@ -597,3 +600,70 @@ function DetailInput({
   )
 }
 
+
+interface ExtraCategoriesProps {
+  /** The main category: always ticked, it can't be one of the others. */
+  main: string
+  value: string[]
+  onChange: (ids: string[]) => void
+  error?: string
+}
+
+/** Other categories the place is listed in too, as a tree of checkboxes; lists are only headings. */
+function ExtraCategories({ main, value, onChange, error }: ExtraCategoriesProps) {
+  const { categories, categoryOf } = useCategories()
+  const tree = categoryTree(categories)
+  const chosen = value.filter((id) => id !== main)
+  const toggle = (id: string) => onChange(chosen.includes(id) ? chosen.filter((c) => c !== id) : [...chosen, id])
+
+  return (
+    <div className="mt-4">
+      <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-teal">Compare anche in</p>
+      <p className="text-xs font-light text-ink/70">
+        Il contenuto compare anche nelle pagine e nei filtri di queste categorie. Tipo, campi e colore restano quelli della principale.
+      </p>
+      {chosen.length > 0 && (
+        <p className="mt-2 flex flex-wrap gap-1">
+          {chosen.map((id) => (
+            <span key={id} className="inline-flex items-center gap-1 rounded-full bg-mint-light px-2 py-0.5 text-xs font-semibold text-teal">
+              {categoryOf(id).label}
+              <button type="button" onClick={() => toggle(id)} aria-label={`Togli da ${categoryOf(id).label}`} className="hover:text-coral">
+                ×
+              </button>
+            </span>
+          ))}
+        </p>
+      )}
+      <ul className="mt-2 max-h-64 space-y-0.5 overflow-y-auto rounded-md border border-ink/10 p-2">
+        {tree.map((c) => {
+          const indent = { paddingLeft: `${c.depth * 1}rem` }
+          if (isListType(c.type)) {
+            return (
+              <li key={c.id} style={indent} className="pt-1 text-xs font-semibold uppercase tracking-wider text-ink/60">
+                {c.label}
+              </li>
+            )
+          }
+          const isMain = c.id === main
+          return (
+            <li key={c.id} style={indent}>
+              <label className={`flex items-center gap-2 rounded px-1 py-0.5 text-sm ${isMain ? 'text-ink/60' : 'cursor-pointer hover:bg-mint-light/60'}`}>
+                <input
+                  type="checkbox"
+                  checked={isMain || chosen.includes(c.id)}
+                  disabled={isMain}
+                  onChange={() => toggle(c.id)}
+                  className="accent-teal"
+                />
+                <span className="size-2.5 shrink-0 rounded-full" style={{ backgroundColor: c.color }} aria-hidden />
+                {c.label}
+                {isMain && <span className="text-xs italic">principale</span>}
+              </label>
+            </li>
+          )
+        })}
+      </ul>
+      {error && <p className="mt-1 text-xs font-semibold text-coral-dark">{error}</p>}
+    </div>
+  )
+}

@@ -4,7 +4,7 @@ import { Link, createFileRoute } from '@tanstack/react-router'
 import { CategoryIcon } from '#/components/tourist-map/CategoryIcon'
 import { TouristMap } from '#/components/tourist-map/TouristMap'
 import { useCategories } from '#/data/categories'
-import { poiNumber } from '#/data/pois'
+import { inCategories, poiNumber } from '#/data/pois'
 import { usePois } from '#/data/use-pois'
 import { breadcrumbs, seo } from '#/lib/seo'
 
@@ -37,7 +37,7 @@ function MapPage() {
   // The legend lists only categories with something on the map.
   const tree = fullTree.filter((category) => {
     const ids = subtree(category.id)
-    return pois.some((p) => ids.has(p.category))
+    return pois.some((p) => inCategories(p, ids))
   })
   const [active, setActive] = useState<Set<string>>(() => new Set(categories.map((c) => c.id)))
   const allOn = tree.every((c) => active.has(c.id))
@@ -45,7 +45,7 @@ function MapPage() {
   const [selected, setSelected] = useState<Poi | null>(() => (luogo && pois.find((p) => p.id === luogo)) || null)
   const [target, setTarget] = useState<MapTarget | null>(() => (selected ? { poi: selected } : null))
 
-  const visible = useMemo(() => pois.filter((poi) => active.has(poi.category)), [active, pois])
+  const visible = useMemo(() => pois.filter((poi) => inCategories(poi, active)), [active, pois])
 
   // Frame what is on the map whenever the filter changes (but not over a place opened by link).
   const initialVisible = useRef(visible)
@@ -59,15 +59,14 @@ function MapPage() {
   const toggle = (id: string) => {
     const ids = subtree(id)
     const on = !active.has(id)
-    setActive((prev) => {
-      const next = new Set(prev)
-      for (const c of ids) {
-        if (on) next.add(c)
-        else next.delete(c)
-      }
-      return next
-    })
-    if (!on && selected && ids.has(selected.category)) setSelected(null)
+    const next = new Set(active)
+    for (const c of ids) {
+      if (on) next.add(c)
+      else next.delete(c)
+    }
+    setActive(next)
+    // The open card closes once none of the place's categories is on.
+    if (!on && selected && !inCategories(selected, next)) setSelected(null)
   }
 
   /** Every category on, or every one off. */
@@ -125,7 +124,7 @@ function MapPage() {
           {tree.map((category) => {
             const on = active.has(category.id)
             const ids = subtree(category.id)
-            const count = pois.filter((p) => ids.has(p.category)).length
+            const count = pois.filter((p) => inCategories(p, ids)).length
             return (
               <li
                 key={category.id}

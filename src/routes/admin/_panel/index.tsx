@@ -5,6 +5,7 @@ import { adminPoisQuery } from '#/components/admin/queries'
 import { Card, PageHeader } from '#/components/admin/ui'
 import { CategoryIcon } from '#/components/tourist-map/CategoryIcon'
 import { useCategories } from '#/data/categories'
+import { inCategories } from '#/data/pois'
 
 export const Route = createFileRoute('/admin/_panel/')({
   loader: ({ context }) => context.queryClient.ensureQueryData(adminPoisQuery),
@@ -24,7 +25,7 @@ function Dashboard() {
       <ul className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {roots.map((category) => {
           const ids = subtree(category.id)
-          const list = pois.filter((poi) => ids.has(poi.category))
+          const list = pois.filter((poi) => inCategories(poi, ids))
           const drafts = list.filter((poi) => !poi.published).length
           return (
             <li key={category.id}>
