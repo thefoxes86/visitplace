@@ -1,0 +1,1 @@
+ALTER TABLE "pois" ADD COLUMN "recurrence_weeks" integer[] DEFAULT '{}' NOT NULL;

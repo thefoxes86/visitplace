@@ -1,7 +1,7 @@
 import { z } from 'zod'
 
 import { detailsSchema } from '#/lib/category-types'
-import { RECURRENCE_IDS } from '#/lib/event-dates'
+import { MONTH_WEEKS, RECURRENCE_IDS } from '#/lib/event-dates'
 import { gallerySchema, linksSchema, photoCreditSchema, trackSchema } from '#/lib/media'
 
 import type { CategoryType } from '#/lib/category-types'
@@ -36,6 +36,7 @@ const poiFields = z.object({
   allDay: z.boolean(),
   recurrence: z.enum(RECURRENCE_IDS).nullable(),
   recurrenceUntil: z.date().nullable(),
+  recurrenceWeeks: z.array(z.number().int().refine((week) => (MONTH_WEEKS as readonly number[]).includes(week), 'Settimana non valida')),
   gallery: gallerySchema,
   links: linksSchema,
   track: trackSchema.nullable(),
@@ -62,6 +63,10 @@ export const poiInputFor = (type: CategoryType) =>
       path: ['recurrenceUntil'],
       error: "Deve essere dopo l'inizio",
     })
+    .refine((poi) => poi.recurrence !== 'monthlyWeekday' || poi.recurrenceWeeks.length > 0, {
+      path: ['recurrenceWeeks'],
+      error: 'Scegli almeno una settimana',
+    })
     // Clear what the type doesn't use, so switching type leaves nothing stale behind.
     .transform((poi) => ({
       ...poi,
@@ -70,6 +75,7 @@ export const poiInputFor = (type: CategoryType) =>
       allDay: type.dates ? poi.allDay : false,
       recurrence: type.dates ? poi.recurrence : null,
       recurrenceUntil: type.dates && poi.recurrence ? poi.recurrenceUntil : null,
+      recurrenceWeeks: type.dates && poi.recurrence === 'monthlyWeekday' ? [...new Set(poi.recurrenceWeeks)] : [],
       address: type.contacts.includes('address') ? poi.address : null,
       phone: type.contacts.includes('phone') ? poi.phone : null,
       email: type.contacts.includes('email') ? poi.email : null,

@@ -134,6 +134,13 @@
       "when": 1794837358347,
       "tag": "0018_poi_extra_categories",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1794844882133,
+      "tag": "0019_poi_recurrence_weeks",
+      "breakpoints": true
     }
   ]
 }

@@ -163,6 +163,8 @@ export const pois = pgTable(
     recurrence: text().$type<RecurrenceId>(),
     /** Events only: last day a repetition can start on; null repeats forever. */
     recurrenceUntil: timestamp('recurrence_until'),
+    /** Events repeating `monthlyWeekday`: the weeks of the month, 1–4 and -1 for the last. */
+    recurrenceWeeks: integer('recurrence_weeks').array().notNull().default([]),
     /** Order on the map, which gives each place its number. */
     sortOrder: integer('sort_order').notNull().default(0),
     createdAt: timestamp('created_at').notNull().defaultNow(),

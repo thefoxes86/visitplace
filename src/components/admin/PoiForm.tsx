@@ -8,7 +8,7 @@ import { MediaPicker } from '#/components/admin/MediaLibrary'
 import { Alert, Card, Field, Toggle, buttonClass, errorMessage, inputClass } from '#/components/admin/ui'
 import { categoryTree, useCategories } from '#/data/categories'
 import { categoryType, isListType } from '#/lib/category-types'
-import { RECURRENCES, RECURRENCE_IDS, formatRecurrence } from '#/lib/event-dates'
+import { MONTH_WEEKS, RECURRENCES, RECURRENCE_IDS, formatMonthWeeks, formatRecurrence, weekOfMonth, weekday } from '#/lib/event-dates'
 import { poiInputFor, slugify } from '#/lib/poi-input'
 import { createPoi, updatePoi } from '#/server/pois'
 
@@ -45,7 +45,7 @@ type Values = Record<
   | 'recurrence'
   | 'recurrenceUntil',
   string
-> & { lat: number | null; lon: number | null; featured: boolean; showOnMap: boolean; published: boolean; allDay: boolean; sortOrder: number }
+> & { lat: number | null; lon: number | null; featured: boolean; showOnMap: boolean; published: boolean; allDay: boolean; sortOrder: number; recurrenceWeeks: number[] }
 
 /** Date ⇄ value of a datetime-local input (or a date input, with `dateOnly`), in the editor's time zone. */
 const toLocalInput = (date: Date | null, dateOnly = false) =>
@@ -75,6 +75,7 @@ const initialValues = (poi: AdminPoi | undefined, typeId: string): Values => ({
   allDay: poi?.allDay ?? false,
   recurrence: poi?.recurrence ?? '',
   recurrenceUntil: toLocalInput(poi?.recurrenceUntil ?? null, true),
+  recurrenceWeeks: poi?.recurrenceWeeks ?? [],
   lat: poi?.lat ?? null,
   lon: poi?.lon ?? null,
   featured: poi?.featured ?? false,
@@ -169,7 +170,7 @@ export function PoiForm({ category: initialCategory, poi, areas }: PoiFormProps)
     clearError('startsAt', 'endsAt')
   }
 
-  const text = (key: Exclude<keyof Values, 'lat' | 'lon' | 'featured' | 'showOnMap' | 'published' | 'allDay' | 'sortOrder'>) => ({
+  const text = (key: Exclude<keyof Values, 'lat' | 'lon' | 'featured' | 'showOnMap' | 'published' | 'allDay' | 'sortOrder' | 'recurrenceWeeks'>) => ({
     id: key,
     value: values[key] as string,
     onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => set(key, e.target.value),
@@ -183,7 +184,21 @@ export function PoiForm({ category: initialCategory, poi, areas }: PoiFormProps)
     allDay: values.allDay,
     recurrence: (values.recurrence || null) as RecurrenceId | null,
     recurrenceUntil: fromLocalInput(values.recurrenceUntil),
+    recurrenceWeeks: values.recurrenceWeeks,
   })
+  const startDate = fromLocalInput(values.startsAt)
+
+  /** Choosing "by week of the month" starts from the week of the first date. */
+  const setRecurrence = (recurrence: string) => {
+    setValues((prev) => {
+      const start = fromLocalInput(prev.startsAt)
+      const weeks = recurrence === 'monthlyWeekday' && !prev.recurrenceWeeks.length && start ? [weekOfMonth(start)] : prev.recurrenceWeeks
+      return { ...prev, recurrence, recurrenceWeeks: weeks }
+    })
+    clearError('recurrence', 'recurrenceWeeks')
+  }
+  const toggleWeek = (week: number) =>
+    set('recurrenceWeeks', values.recurrenceWeeks.includes(week) ? values.recurrenceWeeks.filter((w) => w !== week) : [...values.recurrenceWeeks, week])
 
   async function submit(e: React.FormEvent) {
     e.preventDefault()
@@ -318,7 +333,7 @@ export function PoiForm({ category: initialCategory, poi, areas }: PoiFormProps)
                 <input {...text('endsAt')} type={values.allDay ? 'date' : 'datetime-local'} min={values.startsAt || undefined} />
               </Field>
               <Field label="Ripetizione" htmlFor="recurrence" error={errors.recurrence}>
-                <select {...text('recurrence')}>
+                <select {...text('recurrence')} onChange={(e) => setRecurrence(e.target.value)}>
                   <option value="">Non si ripete</option>
                   {RECURRENCE_IDS.map((id) => (
                     <option key={id} value={id}>
@@ -333,6 +348,33 @@ export function PoiForm({ category: initialCategory, poi, areas }: PoiFormProps)
                 </Field>
               )}
             </div>
+            {values.recurrence === 'monthlyWeekday' && (
+              <fieldset className="mt-4">
+                <legend className="text-sm font-semibold">Quali settimane del mese</legend>
+                <p className="mt-0.5 text-xs font-light text-ink/70">
+                  {startDate
+                    ? `Il giorno della settimana è quello della data di inizio (${startDate.toLocaleDateString('it-IT', { weekday: 'long' })}).`
+                    : 'Scegli prima la data di inizio: il giorno della settimana è il suo.'}
+                </p>
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  {MONTH_WEEKS.map((week) => {
+                    const on = values.recurrenceWeeks.includes(week)
+                    return (
+                      <button
+                        key={week}
+                        type="button"
+                        aria-pressed={on}
+                        onClick={() => toggleWeek(week)}
+                        className={`rounded-full px-3 py-1.5 text-sm font-semibold ring-1 transition ${on ? 'bg-teal text-white ring-teal' : 'ring-ink/20 hover:ring-teal'}`}
+                      >
+                        {startDate ? formatMonthWeeks([week], weekday(startDate)) : week === -1 ? 'ultima settimana' : `${week}ª settimana`}
+                      </button>
+                    )
+                  })}
+                </div>
+                {errors.recurrenceWeeks && <p className="mt-1 text-xs font-semibold text-coral-dark">{errors.recurrenceWeeks}</p>}
+              </fieldset>
+            )}
             {recurrenceLabel && <p className="mt-4 rounded-md bg-mint-light px-3 py-2 text-xs font-semibold text-teal">{recurrenceLabel}</p>}
           </Card>
         )}

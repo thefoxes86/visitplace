@@ -12,13 +12,21 @@ const DAY = 24 * 60 * 60_000
 export const RECURRENCES = {
   daily: 'Ogni giorno',
   weekly: 'Ogni settimana',
-  monthly: 'Ogni mese',
+  monthly: 'Ogni mese, stesso giorno',
+  monthlyWeekday: 'Ogni mese, per settimana (es. 1° sabato)',
   yearly: 'Ogni anno',
 } as const
 
 export type RecurrenceId = keyof typeof RECURRENCES
 
 export const RECURRENCE_IDS = Object.keys(RECURRENCES) as [RecurrenceId, ...RecurrenceId[]]
+
+/** The weeks of the month a `monthlyWeekday` event can fall on: the 1st to 4th, and the last. */
+export const LAST_WEEK = -1
+export const MONTH_WEEKS = [1, 2, 3, 4, LAST_WEEK] as const
+
+/** Which week of its month the date's weekday is: the 2nd Saturday is 2. */
+export const weekOfMonth = (date: Date) => Math.ceil(toWallClock(date).day / 7)
 
 /** The date fields of an event, as stored in `pois`. */
 export interface EventDates {
@@ -29,6 +37,8 @@ export interface EventDates {
   recurrence: RecurrenceId | null
   /** Last day a repetition can start on; null repeats forever. */
   recurrenceUntil: Date | null
+  /** For `monthlyWeekday`: the weeks of the month (MONTH_WEEKS) on the weekday of `startsAt`. */
+  recurrenceWeeks: number[]
 }
 
 /** One time the event takes place. */
@@ -107,8 +117,19 @@ export function weekday(date: Date) {
 
 const daysInMonth = (year: number, month: number) => new Date(Date.UTC(year, month + 1, 0)).getUTCDate()
 
+/** The day of the month of the `week`-th `day` of the week (0 Sunday) in the month; LAST_WEEK is the last one. */
+function nthWeekday(year: number, month: number, day: number, week: number) {
+  const days = daysInMonth(year, month)
+  if (week === LAST_WEEK) {
+    const lastWeekday = new Date(Date.UTC(year, month, days)).getUTCDay()
+    return days - ((lastWeekday - day + 7) % 7)
+  }
+  const firstWeekday = new Date(Date.UTC(year, month, 1)).getUTCDay()
+  return 1 + ((day - firstWeekday + 7) % 7) + 7 * (week - 1)
+}
+
 /** The time `n` repetitions later; on the 31st, a monthly event falls on the last day of shorter months. */
-function repeat(w: WallClock, recurrence: RecurrenceId, n: number): WallClock {
+function repeat(w: WallClock, recurrence: Exclude<RecurrenceId, 'monthlyWeekday'>, n: number): WallClock {
   if (recurrence === 'daily') return { ...w, day: w.day + n }
   if (recurrence === 'weekly') return { ...w, day: w.day + 7 * n }
   const months = w.month + (recurrence === 'monthly' ? n : 12 * n)
@@ -118,22 +139,45 @@ function repeat(w: WallClock, recurrence: RecurrenceId, n: number): WallClock {
 }
 
 /** Fewest days between two repetitions, to skip ahead without missing one. */
-const MAX_DAYS_APART: Record<RecurrenceId, number> = { daily: 1, weekly: 7, monthly: 31, yearly: 366 }
+const MAX_DAYS_APART: Record<RecurrenceId, number> = { daily: 1, weekly: 7, monthly: 31, monthlyWeekday: 31, yearly: 366 }
 
 // ── Occurrences ──────────────────────────────────────────────────────────────
 
-/** The `n`-th time the event takes place, the first being 0. */
-function occurrence(event: EventDates & { startsAt: Date }, n: number): Occurrence {
-  const start = n === 0 || !event.recurrence ? event.startsAt : fromWallClock(repeat(toWallClock(event.startsAt), event.recurrence, n))
+/** The occurrence starting at `start`, lasting as long as the first one. */
+function occurrenceAt(event: EventDates & { startsAt: Date }, start: Date): Occurrence {
   const last = new Date(start.getTime() + Math.max(0, (event.endsAt ?? event.startsAt).getTime() - event.startsAt.getTime()))
   return { start, end: event.allDay ? endOfDay(last) : last }
+}
+
+const firstOccurrence = (event: EventDates & { startsAt: Date }) => occurrenceAt(event, event.startsAt)
+
+/** When the repetitions start, in order, from the `skip`-th step on (a step is a repetition, or a month for `monthlyWeekday`). */
+function* repetitionStarts(event: EventDates & { startsAt: Date; recurrence: RecurrenceId }, skip: number): Generator<Date> {
+  const w = toWallClock(event.startsAt)
+  if (event.recurrence !== 'monthlyWeekday') {
+    for (let n = skip; ; n++) yield n === 0 ? event.startsAt : fromWallClock(repeat(w, event.recurrence, n))
+  }
+  const day = weekday(event.startsAt)
+  // Without weeks, the one of the first date.
+  const weeks = event.recurrenceWeeks.length ? event.recurrenceWeeks : [weekOfMonth(event.startsAt)]
+  for (let m = skip; ; m++) {
+    const months = w.month + m
+    const year = w.year + Math.floor(months / 12)
+    const month = months % 12
+    const days = [...new Set(weeks.map((week) => nthWeekday(year, month, day, week)))].sort((a, b) => a - b)
+    for (const d of days) {
+      const start = fromWallClock({ ...w, year, month, day: d })
+      // Days of the first month before the first date don't count.
+      if (start >= event.startsAt) yield start
+    }
+  }
 }
 
 /** The times the event takes place that are not over at `now`, in order; endless for events that always repeat. */
 function* occurrencesFrom(event: EventDates, now: Date): Generator<Occurrence> {
   if (!event.startsAt) return
   const dated = { ...event, startsAt: event.startsAt }
-  const first = occurrence(dated, 0)
+  const first = firstOccurrence(dated)
   if (!event.recurrence) {
     if (first.end >= now) yield first
     return
@@ -142,9 +186,11 @@ function* occurrencesFrom(event: EventDates, now: Date): Generator<Occurrence> {
   const until = event.recurrenceUntil ? endOfDay(event.recurrenceUntil) : null
   // Jump close to now, one step short, so an old daily event doesn't walk through years.
   const behind = now.getTime() - first.end.getTime()
-  let n = Math.max(0, Math.floor(behind / (MAX_DAYS_APART[event.recurrence] * DAY)) - 1)
-  for (let skipped = 0; skipped < 1000; n++) {
-    const o = occurrence(dated, n)
+  const skip = Math.max(0, Math.floor(behind / (MAX_DAYS_APART[event.recurrence] * DAY)) - 1)
+  let skipped = 0
+  for (const start of repetitionStarts({ ...dated, recurrence: event.recurrence }, skip)) {
+    if (skipped >= 1000) return
+    const o = occurrenceAt(dated, start)
     if (until && o.start >= until) return
     if (o.end >= now) yield o
     else skipped++
@@ -168,7 +214,7 @@ export function occurrencesBetween(event: EventDates, from: Date, to: Date, limi
 }
 
 /** The next time the event takes place, or its first one once it is over. */
-export const currentOccurrence = (event: EventDates & { startsAt: Date }) => nextOccurrence(event) ?? occurrence(event, 0)
+export const currentOccurrence = (event: EventDates & { startsAt: Date }) => nextOccurrence(event) ?? firstOccurrence(event)
 
 // ── Labels ───────────────────────────────────────────────────────────────────
 
@@ -199,14 +245,36 @@ export function formatOccurrenceTime({ start, end }: Occurrence, allDay: boolean
   return `${timeFormat.format(start)} · fino al ${dayFormat.format(end)}, ${timeFormat.format(end)}`
 }
 
+const ORDINALS: Record<number, [masculine: string, feminine: string]> = {
+  1: ['primo', 'prima'],
+  2: ['secondo', 'seconda'],
+  3: ['terzo', 'terza'],
+  4: ['quarto', 'quarta'],
+  [LAST_WEEK]: ['ultimo', 'ultima'],
+}
+
+/** "primo, terzo e ultimo" */
+const listWords = (words: string[]) => (words.length < 2 ? words.join('') : `${words.slice(0, -1).join(', ')} e ${words.at(-1)}`)
+
+/** "primo e terzo sabato", "ultima domenica": `day` is 0 for Sunday. */
+export function formatMonthWeeks(weeks: number[], day: number) {
+  const name = new Date(Date.UTC(2026, 0, 4 + day)).toLocaleDateString('it-IT', { weekday: 'long', timeZone: 'UTC' })
+  const feminine = day === 0 // la domenica
+  const sorted = MONTH_WEEKS.filter((week) => weeks.includes(week))
+  return `${listWords(sorted.map((week) => ORDINALS[week][feminine ? 1 : 0]))} ${name}`
+}
+
 /** "Ogni sabato, fino al 30 settembre 2026" */
 export function formatRecurrence(event: EventDates) {
   if (!event.startsAt || !event.recurrence) return null
   const start = event.startsAt
+  const day = weekday(start)
+  const weeks = event.recurrenceWeeks.length ? event.recurrenceWeeks : [weekOfMonth(start)]
   const rule = {
     daily: 'Ogni giorno',
     weekly: `Ogni ${start.toLocaleDateString('it-IT', { weekday: 'long', timeZone: TIME_ZONE })}`,
     monthly: `Ogni mese, il giorno ${start.toLocaleDateString('it-IT', { day: 'numeric', timeZone: TIME_ZONE })}`,
+    monthlyWeekday: `Ogni ${formatMonthWeeks(weeks, day)} del mese`,
     yearly: `Ogni anno, il ${start.toLocaleDateString('it-IT', { day: 'numeric', month: 'long', timeZone: TIME_ZONE })}`,
   }[event.recurrence]
   return event.recurrenceUntil ? `${rule}, fino al ${dayFormat.format(event.recurrenceUntil)}` : rule

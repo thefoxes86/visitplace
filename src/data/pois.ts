@@ -38,6 +38,7 @@ export interface Poi {
   allDay: boolean
   recurrence: RecurrenceId | null
   recurrenceUntil: Date | null
+  recurrenceWeeks: number[]
   /** Photos of the place's page, in order. */
   gallery: GalleryPhoto[]
   /** Pages about the place elsewhere, each with its name. */
