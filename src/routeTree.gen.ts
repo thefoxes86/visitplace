@@ -22,6 +22,7 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as ViviRouteImport } from './routes/vivi'
 import { Route as AdminPanelRouteImport } from './routes/admin/_panel'
 import { Route as AdminLoginRouteImport } from './routes/admin/login'
+import { Route as ApiEventsRouteImport } from './routes/api/events'
 import { Route as ApiUploadRouteImport } from './routes/api/upload'
 import { Route as CategorieSlugRouteImport } from './routes/categorie/$slug'
 import { Route as ItinerariIndexRouteImport } from './routes/itinerari/index'
@@ -111,6 +112,11 @@ const AdminPanelRoute = AdminPanelRouteImport.update({
 const AdminLoginRoute = AdminLoginRouteImport.update({
   id: '/admin/login',
   path: '/admin/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiEventsRoute = ApiEventsRouteImport.update({
+  id: '/api/events',
+  path: '/api/events',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiUploadRoute = ApiUploadRouteImport.update({
@@ -259,6 +265,7 @@ export interface FileRoutesByFullPath {
   '/vivi': typeof ViviRoute
   '/admin': typeof AdminPanelRouteWithChildren
   '/admin/login': typeof AdminLoginRoute
+  '/api/events': typeof ApiEventsRoute
   '/api/upload': typeof ApiUploadRoute
   '/categorie/$slug': typeof CategorieSlugRoute
   '/itinerari/$id': typeof ItinerariIdRoute
@@ -298,6 +305,7 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/vivi': typeof ViviRoute
   '/admin/login': typeof AdminLoginRoute
+  '/api/events': typeof ApiEventsRoute
   '/api/upload': typeof ApiUploadRoute
   '/categorie/$slug': typeof CategorieSlugRoute
   '/itinerari/$id': typeof ItinerariIdRoute
@@ -337,6 +345,7 @@ export interface FileRoutesById {
   '/vivi': typeof ViviRoute
   '/admin/_panel': typeof AdminPanelRouteWithChildren
   '/admin/login': typeof AdminLoginRoute
+  '/api/events': typeof ApiEventsRoute
   '/api/upload': typeof ApiUploadRoute
   '/categorie/$slug': typeof CategorieSlugRoute
   '/itinerari/$id': typeof ItinerariIdRoute
@@ -379,6 +388,7 @@ export interface FileRouteTypes {
     | '/vivi'
     | '/admin'
     | '/admin/login'
+    | '/api/events'
     | '/api/upload'
     | '/categorie/$slug'
     | '/itinerari/$id'
@@ -418,6 +428,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/vivi'
     | '/admin/login'
+    | '/api/events'
     | '/api/upload'
     | '/categorie/$slug'
     | '/itinerari/$id'
@@ -456,6 +467,7 @@ export interface FileRouteTypes {
     | '/vivi'
     | '/admin/_panel'
     | '/admin/login'
+    | '/api/events'
     | '/api/upload'
     | '/categorie/$slug'
     | '/itinerari/$id'
@@ -497,6 +509,7 @@ export interface RootRouteChildren {
   ViviRoute: typeof ViviRoute
   AdminPanelRoute: typeof AdminPanelRouteWithChildren
   AdminLoginRoute: typeof AdminLoginRoute
+  ApiEventsRoute: typeof ApiEventsRoute
   ApiUploadRoute: typeof ApiUploadRoute
   CategorieSlugRoute: typeof CategorieSlugRoute
   ItinerariIdRoute: typeof ItinerariIdRoute
@@ -597,6 +610,13 @@ declare module '@tanstack/react-router' {
       path: '/admin/login'
       fullPath: '/admin/login'
       preLoaderRoute: typeof AdminLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/events': {
+      id: '/api/events'
+      path: '/api/events'
+      fullPath: '/api/events'
+      preLoaderRoute: typeof ApiEventsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/upload': {
@@ -861,6 +881,7 @@ const rootRouteChildren: RootRouteChildren = {
   ViviRoute: ViviRoute,
   AdminPanelRoute: AdminPanelRouteWithChildren,
   AdminLoginRoute: AdminLoginRoute,
+  ApiEventsRoute: ApiEventsRoute,
   ApiUploadRoute: ApiUploadRoute,
   CategorieSlugRoute: CategorieSlugRoute,
   ItinerariIdRoute: ItinerariIdRoute,

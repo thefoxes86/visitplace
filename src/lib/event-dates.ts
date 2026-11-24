@@ -103,6 +103,15 @@ export function parseDay(value: string) {
   return fromWallClock({ year, month: month - 1, day, hour: 0, minute: 0, second: 0 })
 }
 
+/** "2026-10-17T21:00" → that time on the clock of Camaiore; "2026-10-17" → midnight starting that day. Null if malformed. */
+export function parseWallTime(value: string) {
+  const match = value.match(/^(\d{4})-(\d{2})-(\d{2})(?:[T ](\d{2}):(\d{2}))?$/)
+  if (!match) return null
+  const [year, month, day, hour = 0, minute = 0] = match.slice(1).map((part) => (part === undefined ? undefined : Number(part)))
+  if (month! < 1 || month! > 12 || day! < 1 || day! > 31 || hour! > 23 || minute! > 59) return null
+  return fromWallClock({ year: year!, month: month! - 1, day: day!, hour: hour!, minute: minute!, second: 0 })
+}
+
 /** The day of the date in Camaiore, as "2026-10-17". */
 export function dayKey(date: Date) {
   const { year, month, day } = toWallClock(date)

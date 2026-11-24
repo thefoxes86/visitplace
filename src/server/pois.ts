@@ -106,14 +106,25 @@ async function validateForCategory(input: PoiInput) {
 export const createPoi = createServerFn({ method: 'POST' })
   .middleware([requireEditor])
   .validator(poiInput)
-  .handler(async ({ data: input }) => {
-    const data = await validateForCategory(input)
-    const [existing] = await db.select({ id: pois.id }).from(pois).where(eq(pois.id, data.id))
-    if (existing) throw new Error(`L'indirizzo "${data.id}" è già usato da un altro contenuto`)
-    const [{ last }] = await db.select({ last: max(pois.sortOrder) }).from(pois)
-    await db.insert(pois).values({ ...data, sortOrder: data.sortOrder || (last ?? 0) + 1 })
-    return { id: data.id }
-  })
+  .handler(({ data }) => insertPoi(data))
+
+/** Checks a new place against its category and saves it, last in map order unless it has its own. Used by the admin and /api/events. */
+export async function insertPoi(input: PoiInput) {
+  const data = await validateForCategory(input)
+  const [existing] = await db.select({ id: pois.id }).from(pois).where(eq(pois.id, data.id))
+  if (existing) throw new Error(`L'indirizzo "${data.id}" è già usato da un altro contenuto`)
+  const [{ last }] = await db.select({ last: max(pois.sortOrder) }).from(pois)
+  await db.insert(pois).values({ ...data, sortOrder: data.sortOrder || (last ?? 0) + 1 })
+  return { id: data.id }
+}
+
+/** `base` if no place uses it, otherwise the first free among base-2, base-3… */
+export async function freePoiId(base: string) {
+  const taken = new Set((await db.select({ id: pois.id }).from(pois).where(like(pois.id, `${base}%`))).map((p) => p.id))
+  let id = base
+  for (let n = 2; taken.has(id); n++) id = `${base}-${n}`
+  return id
+}
 
 export const updatePoi = createServerFn({ method: 'POST' })
   .middleware([requireEditor])

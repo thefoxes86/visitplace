@@ -23,7 +23,8 @@
     "db:pull": "drizzle-kit pull",
     "db:studio": "drizzle-kit studio",
     "db:seed": "dotenv -e .env.local -- node scripts/seed.ts",
-    "db:create-admin": "dotenv -e .env.local -- node scripts/create-admin.ts"
+    "db:create-admin": "dotenv -e .env.local -- node scripts/create-admin.ts",
+    "event:add": "dotenv -e .env.local -- node scripts/add-event.ts"
   },
   "dependencies": {
     "@sentry/tanstackstart-react": "^10.67.0",
