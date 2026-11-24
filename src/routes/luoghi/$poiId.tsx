@@ -54,6 +54,8 @@ export const Route = createFileRoute('/luoghi/$poiId')({
   component: PoiPage,
   notFoundComponent: () => (
     <main className="grid min-h-dvh place-items-center bg-paper p-8 text-center font-sans text-ink">
+      {/* React puts it in the <head>: missing pages stay out of search results. */}
+      <meta name="robots" content="noindex" />
       <div>
         <h1 className="font-display text-3xl font-extrabold uppercase text-coral">Luogo non trovato</h1>
         <Link to="/mappa" className="mt-4 inline-block font-serif italic text-teal underline">
@@ -329,11 +331,6 @@ function PoiPage() {
             </ul>
           </section>
         </div>
-
-        <footer className="mt-12 flex flex-wrap justify-between gap-2 text-xs italic text-ink/70">
-          <span>Camaiore · Versilia, Toscana</span>
-          <span>43.94° N · 10.30° E</span>
-        </footer>
       </div>
     </main>
   )

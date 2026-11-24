@@ -34,6 +34,8 @@ export function getRouter() {
 function NotFound() {
   return (
     <main className="grid min-h-dvh place-items-center bg-paper p-8 text-center font-sans text-ink">
+      {/* React puts it in the <head>: missing pages stay out of search results. */}
+      <meta name="robots" content="noindex" />
       <div>
         <h1 className="font-display text-3xl font-extrabold uppercase text-coral">Pagina non trovata</h1>
         <Link to="/" className="mt-4 inline-block font-serif italic text-teal underline">
@@ -47,6 +49,8 @@ function NotFound() {
 function ErrorPage({ error, reset }: ErrorComponentProps) {
   return (
     <main className="grid min-h-dvh place-items-center bg-paper p-8 text-center font-sans text-ink">
+      {/* React puts it in the <head>: missing pages stay out of search results. */}
+      <meta name="robots" content="noindex" />
       <div>
         <h1 className="font-display text-3xl font-extrabold uppercase text-coral">Qualcosa è andato storto</h1>
         <p className="mt-2 text-sm font-normal">{error instanceof Error ? error.message : String(error)}</p>

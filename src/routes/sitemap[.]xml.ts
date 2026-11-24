@@ -76,6 +76,7 @@ export const Route = createFileRoute('/sitemap.xml')({
             priority: 0.7,
           })),
           { path: '/itinerari', lastmod: lastItinerary, changefreq: 'weekly' as const, priority: 0.8 },
+          { path: '/contatti', changefreq: 'monthly' as const, priority: 0.4 },
           ...itineraryPages.map((itinerary) => ({
             path: `/itinerari/${itinerary.id}`,
             lastmod: itinerary.updatedAt,

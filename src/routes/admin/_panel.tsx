@@ -1,7 +1,8 @@
 import { useState } from 'react'
-import { useQueryClient } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link, Outlet, createFileRoute, redirect, useParams, useRouter } from '@tanstack/react-router'
 
+import { contactMessagesQuery } from '#/components/admin/queries'
 import { Skyline } from '#/components/Skyline'
 import { AllCategories, sectionOf, useCategories } from '#/data/categories'
 import { sections } from '#/data/sections'
@@ -39,6 +40,7 @@ function AdminLayout() {
   const router = useRouter()
   const queryClient = useQueryClient()
   const [open, setOpen] = useState(false)
+  const unread = useQuery({ ...contactMessagesQuery, select: (messages) => messages.filter((m) => !m.read).length }).data ?? 0
 
   async function signOut() {
     await authClient.signOut()
@@ -99,6 +101,15 @@ function AdminLayout() {
           <Link to="/admin/media" activeProps={activeNavLink} onClick={close} className={navLink}>
             <span aria-hidden className="grid size-5 place-items-center">▣</span>
             Media
+          </Link>
+          <Link to="/admin/messaggi" activeProps={activeNavLink} onClick={close} className={navLink}>
+            <span aria-hidden className="grid size-5 place-items-center">✉</span>
+            Messaggi
+            {unread > 0 && (
+              <span aria-label={`${unread} da leggere`} className="ml-auto rounded-full bg-coral px-2 py-0.5 text-xs font-bold text-white">
+                {unread}
+              </span>
+            )}
           </Link>
           {user.role === 'admin' && (
             <>

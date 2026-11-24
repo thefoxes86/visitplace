@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { APIProvider, Map, useMap } from '@vis.gl/react-google-maps'
 
+import { ExternalContent } from '#/components/ExternalContent'
 import { useCategories } from '#/data/categories'
 
 import type { Poi } from '#/data/pois'
@@ -60,25 +61,27 @@ export function TouristMap(props: TouristMapProps) {
     )
   }
   return (
-    <APIProvider apiKey={API_KEY} language="it" region="IT">
-      <div className="relative size-full bg-paper">
-        <Map
-          defaultCenter={CAMAIORE}
-          defaultZoom={13}
-          styles={MAP_STYLES}
-          disableDefaultUI
-          gestureHandling="greedy"
-          clickableIcons={false}
-          backgroundColor={PAPER}
-          className="size-full"
-        >
-          <Markers {...props} />
-          <Camera target={props.target} />
-        </Map>
-        <ZoomControls />
-        <Compass className="pointer-events-none absolute bottom-6 left-4 size-20 sm:size-28" />
-      </div>
-    </APIProvider>
+    <ExternalContent service="Google Maps">
+      <APIProvider apiKey={API_KEY} language="it" region="IT">
+        <div className="relative size-full bg-paper">
+          <Map
+            defaultCenter={CAMAIORE}
+            defaultZoom={13}
+            styles={MAP_STYLES}
+            disableDefaultUI
+            gestureHandling="greedy"
+            clickableIcons={false}
+            backgroundColor={PAPER}
+            className="size-full"
+          >
+            <Markers {...props} />
+            <Camera target={props.target} />
+          </Map>
+          <ZoomControls />
+          <Compass className="pointer-events-none absolute bottom-6 left-4 size-20 sm:size-28" />
+        </div>
+      </APIProvider>
+    </ExternalContent>
   )
 }
 

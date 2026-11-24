@@ -1,6 +1,7 @@
 import { queryOptions } from '@tanstack/react-query'
 
 import { adminListCategories } from '#/server/categories'
+import { listContactMessages } from '#/server/contact'
 import { adminListItineraries } from '#/server/itineraries'
 import { listMedia } from '#/server/media'
 import { adminListPois } from '#/server/pois'
@@ -38,3 +39,11 @@ export const mediaQuery = queryOptions({
   queryKey: ['admin', 'media'],
   queryFn: () => listMedia(),
 })
+
+/** Messages from the contact page, newest first. */
+export const contactMessagesQuery = queryOptions({
+  queryKey: ['admin', 'messages'],
+  queryFn: () => listContactMessages(),
+})
+
+export type AdminContactMessage = Awaited<ReturnType<typeof listContactMessages>>[number]

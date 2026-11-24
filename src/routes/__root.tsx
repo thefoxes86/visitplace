@@ -12,6 +12,8 @@ import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
 
 import TanStackQueryDevtools from '../integrations/tanstack-query/devtools'
+import { CookieBanner } from '../components/CookieBanner'
+import { SiteFooter } from '../components/SiteFooter'
 import { SiteMenu } from '../components/SiteMenu'
 
 import { categoriesQuery } from '#/data/categories'
@@ -23,6 +25,8 @@ import { getLocale } from '#/paraglide/runtime'
 import appCss from '../styles.css?url'
 
 import type { QueryClient } from '@tanstack/react-query'
+
+const GOOGLE_SITE_VERIFICATION = import.meta.env.VITE_GOOGLE_SITE_VERIFICATION as string | undefined
 
 interface MyRouterContext {
   queryClient: QueryClient
@@ -59,15 +63,24 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
         name: 'viewport',
         content: 'width=device-width, initial-scale=1',
       },
-      { name: 'theme-color', content: '#2a9d8f' },
+      { name: 'theme-color', content: '#2f6e60' },
+      { name: 'application-name', content: SITE_NAME },
+      { name: 'apple-mobile-web-app-title', content: SITE_NAME },
+      { name: 'format-detection', content: 'telephone=no' },
       { property: 'og:site_name', content: SITE_NAME },
       { property: 'og:locale', content: 'it_IT' },
+      // Search Console ownership, when the code is set (Settings > Ownership verification > HTML tag).
+      ...(GOOGLE_SITE_VERIFICATION ? [{ name: 'google-site-verification', content: GOOGLE_SITE_VERIFICATION }] : []),
       // Pages add their own title, description, canonical and Open Graph tags with seo().
       { title: SITE_NAME },
       { name: 'description', content: DEFAULT_DESCRIPTION },
     ],
     links: [
       { rel: 'sitemap', type: 'application/xml', href: '/sitemap.xml' },
+      { rel: 'icon', href: '/favicon.ico', sizes: '48x48' },
+      { rel: 'icon', href: '/favicon.svg', type: 'image/svg+xml' },
+      { rel: 'apple-touch-icon', href: '/apple-touch-icon.png' },
+      { rel: 'manifest', href: '/site.webmanifest' },
       { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
       { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossOrigin: 'anonymous' },
       {
@@ -84,14 +97,21 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
   component: RootLayout,
 })
 
+/** Pages taking the whole screen, as apps. */
+const FULL_SCREEN = ['/mappa', '/outdoor']
+
 function RootLayout() {
   const pathname = useLocation({ select: (location) => location.pathname })
   const inSite = !pathname.startsWith('/admin') && pathname !== '/manutenzione'
+  // The maps fill the screen: no footer under them.
+  const withFooter = inSite && !FULL_SCREEN.includes(pathname)
   return (
     <>
       {inSite && <SiteMenu />}
       {inSite && <MaintenanceBanner />}
       <Outlet />
+      {withFooter && <SiteFooter />}
+      {inSite && <CookieBanner />}
     </>
   )
 }

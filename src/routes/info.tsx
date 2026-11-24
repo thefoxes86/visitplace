@@ -2,6 +2,7 @@ import { Link, createFileRoute } from '@tanstack/react-router'
 
 import type { ReactNode } from 'react'
 
+import { ExternalContent } from '#/components/ExternalContent'
 import { CategoryCards, OtherSections, PageShell, SignpostNav, useSectionCategories } from '#/components/CategoryPage'
 import { gettingAround, gettingHere, guides, touristOffices, webcams } from '#/data/info'
 import { getSection } from '#/data/sections'
@@ -94,7 +95,9 @@ function InfoPage() {
           <li key={cam.name}>
             <div className="relative aspect-video overflow-hidden bg-mint-light">
               {cam.url ? (
-                <iframe src={cam.url} title={`Webcam ${cam.name}`} className="size-full" loading="lazy" allowFullScreen />
+                <ExternalContent service="un sito esterno" what="la webcam">
+                  <iframe src={cam.url} title={`Webcam ${cam.name}`} className="size-full" loading="lazy" allowFullScreen />
+                </ExternalContent>
               ) : (
                 <span className="grid size-full place-items-center font-serif text-sm italic text-teal">In arrivo</span>
               )}

@@ -12,7 +12,7 @@ import { inCategories, inCategory, poiNumber } from '#/data/pois'
 import { formatOccurrence, formatRecurrence } from '#/lib/event-dates'
 import { usePois } from '#/data/use-pois'
 import { sectionLink, sections } from '#/data/sections'
-import { DEFAULT_DESCRIPTION, SITE_NAME, absoluteUrl, seo } from '#/lib/seo'
+import { DEFAULT_DESCRIPTION, LOGO_URL, SITE_NAME, absoluteUrl, seo } from '#/lib/seo'
 
 import type { Poi } from '#/data/pois'
 
@@ -23,7 +23,22 @@ export const Route = createFileRoute('/')({
       path: '/',
       jsonLd: {
         '@graph': [
-          { '@type': 'WebSite', name: SITE_NAME, url: absoluteUrl('/'), inLanguage: 'it-IT' },
+          {
+            '@type': 'WebSite',
+            '@id': absoluteUrl('/#website'),
+            name: SITE_NAME,
+            url: absoluteUrl('/'),
+            inLanguage: 'it-IT',
+            publisher: { '@id': absoluteUrl('/#organization') },
+          },
+          {
+            '@type': 'Organization',
+            '@id': absoluteUrl('/#organization'),
+            name: SITE_NAME,
+            url: absoluteUrl('/'),
+            logo: absoluteUrl(LOGO_URL),
+            contactPoint: { '@type': 'ContactPoint', contactType: 'customer support', url: absoluteUrl('/contatti'), availableLanguage: 'Italian' },
+          },
           {
             '@type': 'TouristDestination',
             name: 'Camaiore',
@@ -348,11 +363,6 @@ function Home() {
             <CategoryCards list={featuredCategories} className="mt-10 sm:grid-cols-2 lg:grid-cols-3" />
           </section>
         )}
-
-        <footer className="mt-16 flex flex-wrap justify-between gap-2 text-xs italic text-ink/70">
-          <span>Camaiore · Versilia, Toscana</span>
-          <span>43.94° N · 10.30° E</span>
-        </footer>
       </div>
     </main>
   )

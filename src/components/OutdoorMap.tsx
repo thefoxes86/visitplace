@@ -2,6 +2,7 @@
 import { useEffect } from 'react'
 import { APIProvider, Map, useMap } from '@vis.gl/react-google-maps'
 
+import { ExternalContent } from '#/components/ExternalContent'
 import { TypeIcon } from '#/components/tourist-map/CategoryIcon'
 import { API_KEY, CAMAIORE, CORAL, HtmlMarker, MAP_STYLES, PAPER, RouteLine, ZoomControls } from '#/components/tourist-map/TouristMap'
 
@@ -33,60 +34,62 @@ export function OutdoorMap(props: OutdoorMapProps) {
   const { items, selected, onSelect, tracks, route, frameKey } = props
   const shown = new Set(items.filter((i) => i.kind === 'trekking').map((i) => i.id))
   return (
-    <APIProvider apiKey={API_KEY} language="it" region="IT">
-      <div className="relative size-full bg-paper">
-        <Map
-          defaultCenter={CAMAIORE}
-          defaultZoom={12}
-          styles={MAP_STYLES}
-          mapTypeId="terrain"
-          disableDefaultUI
-          gestureHandling="greedy"
-          clickableIcons={false}
-          backgroundColor={PAPER}
-          className="size-full"
-        >
-          {tracks
-            .filter((t) => shown.has(t.id))
-            .map((t) => (
-              <Track key={t.id} points={t.points} strong={selected?.kind === 'trekking' && selected.id === t.id} />
-            ))}
-          {route.length > 1 && <RouteLine path={route} />}
-          {items.map((item) => {
-            const active = selected?.key === item.key
-            return (
-              <HtmlMarker key={item.key} lat={item.lat} lng={item.lon} zIndex={active ? 2 : 1}>
-                <button
-                  type="button"
-                  aria-label={item.name}
-                  aria-pressed={active}
-                  onClick={() => onSelect(item)}
-                  className="group relative grid -translate-x-1/2 -translate-y-1/2 cursor-pointer place-items-center outline-none"
-                >
-                  {active && <span className="absolute size-12 animate-ping rounded-full opacity-30" style={{ backgroundColor: item.color }} />}
-                  <span
-                    className={`relative grid place-items-center text-white shadow ring-[2.5px] ring-paper transition-all duration-300 group-focus-visible:ring-coral ${
-                      item.kind === 'itinerary' ? 'rounded-sm' : 'rounded-full'
-                    } ${active ? 'size-9' : 'size-7'}`}
-                    style={{ backgroundColor: item.color }}
+    <ExternalContent service="Google Maps">
+      <APIProvider apiKey={API_KEY} language="it" region="IT">
+        <div className="relative size-full bg-paper">
+          <Map
+            defaultCenter={CAMAIORE}
+            defaultZoom={12}
+            styles={MAP_STYLES}
+            mapTypeId="terrain"
+            disableDefaultUI
+            gestureHandling="greedy"
+            clickableIcons={false}
+            backgroundColor={PAPER}
+            className="size-full"
+          >
+            {tracks
+              .filter((t) => shown.has(t.id))
+              .map((t) => (
+                <Track key={t.id} points={t.points} strong={selected?.kind === 'trekking' && selected.id === t.id} />
+              ))}
+            {route.length > 1 && <RouteLine path={route} />}
+            {items.map((item) => {
+              const active = selected?.key === item.key
+              return (
+                <HtmlMarker key={item.key} lat={item.lat} lng={item.lon} zIndex={active ? 2 : 1}>
+                  <button
+                    type="button"
+                    aria-label={item.name}
+                    aria-pressed={active}
+                    onClick={() => onSelect(item)}
+                    className="group relative grid -translate-x-1/2 -translate-y-1/2 cursor-pointer place-items-center outline-none"
                   >
-                    <TypeIcon type={ICON[item.kind]} className={active ? 'size-5' : 'size-4'} />
-                  </span>
-                  {active && (
-                    <span className="absolute bottom-full mb-1 whitespace-nowrap font-display text-sm font-semibold text-ink [paint-order:stroke] [-webkit-text-stroke:4px_var(--color-paper)]">
-                      {item.name}
+                    {active && <span className="absolute size-12 animate-ping rounded-full opacity-30" style={{ backgroundColor: item.color }} />}
+                    <span
+                      className={`relative grid place-items-center text-white shadow ring-[2.5px] ring-paper transition-all duration-300 group-focus-visible:ring-coral ${
+                        item.kind === 'itinerary' ? 'rounded-sm' : 'rounded-full'
+                      } ${active ? 'size-9' : 'size-7'}`}
+                      style={{ backgroundColor: item.color }}
+                    >
+                      <TypeIcon type={ICON[item.kind]} className={active ? 'size-5' : 'size-4'} />
                     </span>
-                  )}
-                </button>
-              </HtmlMarker>
-            )
-          })}
-          <Frame items={items} frameKey={frameKey} />
-          <Focus selected={selected} />
-        </Map>
-        <ZoomControls />
-      </div>
-    </APIProvider>
+                    {active && (
+                      <span className="absolute bottom-full mb-1 whitespace-nowrap font-display text-sm font-semibold text-ink [paint-order:stroke] [-webkit-text-stroke:4px_var(--color-paper)]">
+                        {item.name}
+                      </span>
+                    )}
+                  </button>
+                </HtmlMarker>
+              )
+            })}
+            <Frame items={items} frameKey={frameKey} />
+            <Focus selected={selected} />
+          </Map>
+          <ZoomControls />
+        </div>
+      </APIProvider>
+    </ExternalContent>
   )
 }
 

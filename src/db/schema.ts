@@ -1,10 +1,11 @@
-import { boolean, doublePrecision, index, integer, jsonb, pgTable, text, timestamp } from 'drizzle-orm/pg-core'
+import { boolean, doublePrecision, index, integer, jsonb, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core'
 import type { AnyPgColumn } from 'drizzle-orm/pg-core'
 
 import type { DetailValues } from '../lib/category-types.ts'
 import type { RecurrenceId } from '../lib/event-dates.ts'
 import type { GalleryPhoto, PhotoCredit, PoiLink, Track } from '../lib/media.ts'
 import type { ItineraryModeId, ItineraryStop } from '../lib/itineraries.ts'
+import type { ContactTopic } from '../lib/contact.ts'
 
 // ── Auth (Better Auth + its admin plugin) ────────────────────────────────────
 
@@ -204,6 +205,29 @@ export const itineraries = pgTable('itineraries', {
     .defaultNow()
     .$onUpdate(() => new Date()),
 })
+
+// ── Contact messages ─────────────────────────────────────────────────────────
+
+/** Messages sent from the contact page (src/lib/contact.ts), read in the admin. */
+export const contactMessages = pgTable(
+  'contact_messages',
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    topic: text().$type<ContactTopic>().notNull(),
+    name: text().notNull(),
+    email: text().notNull(),
+    phone: text(),
+    /** Name of the business or of the event; null for other messages. */
+    subject: text(),
+    /** Events: when it takes place, as written by the sender. */
+    eventDate: text('event_date'),
+    website: text(),
+    message: text().notNull(),
+    read: boolean().notNull().default(false),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+  },
+  (table) => [index('contact_messages_created_at_idx').on(table.createdAt)],
+)
 
 // ── Settings ─────────────────────────────────────────────────────────────────
 

@@ -53,6 +53,8 @@ export const Route = createFileRoute('/itinerari/$id')({
   component: ItineraryPage,
   notFoundComponent: () => (
     <main className="grid min-h-dvh place-items-center bg-paper p-8 text-center font-sans text-ink">
+      {/* React puts it in the <head>: missing pages stay out of search results. */}
+      <meta name="robots" content="noindex" />
       <div>
         <h1 className="font-display text-3xl font-extrabold uppercase text-coral">Itinerario non trovato</h1>
         <Link to="/itinerari" className="mt-4 inline-block font-serif italic text-teal underline">

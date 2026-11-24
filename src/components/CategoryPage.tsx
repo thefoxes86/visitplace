@@ -209,11 +209,6 @@ export function PageShell({ back: { label, ...back }, eyebrow, title, tagline, a
             </div>
           </div>
         )}
-
-        <footer className="mt-12 flex flex-wrap justify-between gap-2 text-xs italic text-ink/70">
-          <span>Camaiore · Versilia, Toscana</span>
-          <span>43.94° N · 10.30° E</span>
-        </footer>
       </div>
     </main>
   )

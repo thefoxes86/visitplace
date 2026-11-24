@@ -2,6 +2,7 @@
 import { useEffect } from 'react'
 import { APIProvider, Map, useMap } from '@vis.gl/react-google-maps'
 
+import { ExternalContent } from '#/components/ExternalContent'
 import { API_KEY, CORAL, MAP_STYLES, PAPER } from '#/components/tourist-map/TouristMap'
 import { distances, toGpx } from '#/lib/media'
 import { slugify } from '#/lib/poi-input'
@@ -30,22 +31,24 @@ export function TrackMap({ track, name }: { track: Track; name: string }) {
       <h2 className="font-display text-2xl font-semibold uppercase tracking-[0.15em] text-teal">Il percorso</h2>
       <div className="mt-6 aspect-[4/3] w-full overflow-hidden border-2 border-teal sm:aspect-[16/9]">
         {API_KEY ? (
-          <APIProvider apiKey={API_KEY} language="it" region="IT">
-            <Map
-              defaultCenter={{ lat: track.points[0][0], lng: track.points[0][1] }}
-              defaultZoom={13}
-              styles={MAP_STYLES}
-              mapTypeId="terrain"
-              disableDefaultUI
-              zoomControl
-              gestureHandling="cooperative"
-              clickableIcons={false}
-              backgroundColor={PAPER}
-              className="size-full"
-            >
-              <Route track={track} />
-            </Map>
-          </APIProvider>
+          <ExternalContent service="Google Maps">
+            <APIProvider apiKey={API_KEY} language="it" region="IT">
+              <Map
+                defaultCenter={{ lat: track.points[0][0], lng: track.points[0][1] }}
+                defaultZoom={13}
+                styles={MAP_STYLES}
+                mapTypeId="terrain"
+                disableDefaultUI
+                zoomControl
+                gestureHandling="cooperative"
+                clickableIcons={false}
+                backgroundColor={PAPER}
+                className="size-full"
+              >
+                <Route track={track} />
+              </Map>
+            </APIProvider>
+          </ExternalContent>
         ) : (
           <p className="grid size-full place-items-center p-8 text-center font-serif italic text-teal">
             Imposta VITE_GOOGLE_MAPS_API_KEY in .env.local per vedere il percorso.

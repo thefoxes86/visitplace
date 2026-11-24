@@ -10,6 +10,8 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ContattiRouteImport } from './routes/contatti'
+import { Route as CookiePolicyRouteImport } from './routes/cookie-policy'
 import { Route as GustaRouteImport } from './routes/gusta'
 import { Route as InfoRouteImport } from './routes/info'
 import { Route as ManutenzioneRouteImport } from './routes/manutenzione'
@@ -31,6 +33,7 @@ import { Route as AdminPanelCategoryRouteRouteImport } from './routes/admin/_pan
 import { Route as AdminPanelCategorieRouteRouteImport } from './routes/admin/_panel/categorie/route'
 import { Route as AdminPanelImpostazioniRouteImport } from './routes/admin/_panel/impostazioni'
 import { Route as AdminPanelMediaRouteImport } from './routes/admin/_panel/media'
+import { Route as AdminPanelMessaggiRouteImport } from './routes/admin/_panel/messaggi'
 import { Route as AdminPanelUtentiRouteImport } from './routes/admin/_panel/utenti'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as AdminPanelCategoryIndexRouteImport } from './routes/admin/_panel/$category/index'
@@ -47,6 +50,16 @@ import { Route as AdminPanelSezioneSectionRouteImport } from './routes/admin/_pa
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContattiRoute = ContattiRouteImport.update({
+  id: '/contatti',
+  path: '/contatti',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CookiePolicyRoute = CookiePolicyRouteImport.update({
+  id: '/cookie-policy',
+  path: '/cookie-policy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GustaRoute = GustaRouteImport.update({
@@ -155,6 +168,11 @@ const AdminPanelMediaRoute = AdminPanelMediaRouteImport.update({
   path: '/media',
   getParentRoute: () => AdminPanelRoute,
 } as any)
+const AdminPanelMessaggiRoute = AdminPanelMessaggiRouteImport.update({
+  id: '/messaggi',
+  path: '/messaggi',
+  getParentRoute: () => AdminPanelRoute,
+} as any)
 const AdminPanelUtentiRoute = AdminPanelUtentiRouteImport.update({
   id: '/utenti',
   path: '/utenti',
@@ -223,6 +241,8 @@ const AdminPanelSezioneSectionRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/contatti': typeof ContattiRoute
+  '/cookie-policy': typeof CookiePolicyRoute
   '/gusta': typeof GustaRoute
   '/info': typeof InfoRoute
   '/manutenzione': typeof ManutenzioneRoute
@@ -243,6 +263,7 @@ export interface FileRoutesByFullPath {
   '/admin/categorie': typeof AdminPanelCategorieRouteRouteWithChildren
   '/admin/impostazioni': typeof AdminPanelImpostazioniRoute
   '/admin/media': typeof AdminPanelMediaRoute
+  '/admin/messaggi': typeof AdminPanelMessaggiRoute
   '/admin/utenti': typeof AdminPanelUtentiRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/admin/': typeof AdminPanelIndexRoute
@@ -259,6 +280,8 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/contatti': typeof ContattiRoute
+  '/cookie-policy': typeof CookiePolicyRoute
   '/gusta': typeof GustaRoute
   '/info': typeof InfoRoute
   '/manutenzione': typeof ManutenzioneRoute
@@ -276,6 +299,7 @@ export interface FileRoutesByTo {
   '/scopri': typeof ScopriIndexRoute
   '/admin/impostazioni': typeof AdminPanelImpostazioniRoute
   '/admin/media': typeof AdminPanelMediaRoute
+  '/admin/messaggi': typeof AdminPanelMessaggiRoute
   '/admin/utenti': typeof AdminPanelUtentiRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/admin': typeof AdminPanelIndexRoute
@@ -293,6 +317,8 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/contatti': typeof ContattiRoute
+  '/cookie-policy': typeof CookiePolicyRoute
   '/gusta': typeof GustaRoute
   '/info': typeof InfoRoute
   '/manutenzione': typeof ManutenzioneRoute
@@ -313,6 +339,7 @@ export interface FileRoutesById {
   '/admin/_panel/categorie': typeof AdminPanelCategorieRouteRouteWithChildren
   '/admin/_panel/impostazioni': typeof AdminPanelImpostazioniRoute
   '/admin/_panel/media': typeof AdminPanelMediaRoute
+  '/admin/_panel/messaggi': typeof AdminPanelMessaggiRoute
   '/admin/_panel/utenti': typeof AdminPanelUtentiRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/admin/_panel/': typeof AdminPanelIndexRoute
@@ -331,6 +358,8 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/contatti'
+    | '/cookie-policy'
     | '/gusta'
     | '/info'
     | '/manutenzione'
@@ -351,6 +380,7 @@ export interface FileRouteTypes {
     | '/admin/categorie'
     | '/admin/impostazioni'
     | '/admin/media'
+    | '/admin/messaggi'
     | '/admin/utenti'
     | '/api/auth/$'
     | '/admin/'
@@ -367,6 +397,8 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/contatti'
+    | '/cookie-policy'
     | '/gusta'
     | '/info'
     | '/manutenzione'
@@ -384,6 +416,7 @@ export interface FileRouteTypes {
     | '/scopri'
     | '/admin/impostazioni'
     | '/admin/media'
+    | '/admin/messaggi'
     | '/admin/utenti'
     | '/api/auth/$'
     | '/admin'
@@ -400,6 +433,8 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/contatti'
+    | '/cookie-policy'
     | '/gusta'
     | '/info'
     | '/manutenzione'
@@ -420,6 +455,7 @@ export interface FileRouteTypes {
     | '/admin/_panel/categorie'
     | '/admin/_panel/impostazioni'
     | '/admin/_panel/media'
+    | '/admin/_panel/messaggi'
     | '/admin/_panel/utenti'
     | '/api/auth/$'
     | '/admin/_panel/'
@@ -437,6 +473,8 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ContattiRoute: typeof ContattiRoute
+  CookiePolicyRoute: typeof CookiePolicyRoute
   GustaRoute: typeof GustaRoute
   InfoRoute: typeof InfoRoute
   ManutenzioneRoute: typeof ManutenzioneRoute
@@ -463,6 +501,20 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contatti': {
+      id: '/contatti'
+      path: '/contatti'
+      fullPath: '/contatti'
+      preLoaderRoute: typeof ContattiRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cookie-policy': {
+      id: '/cookie-policy'
+      path: '/cookie-policy'
+      fullPath: '/cookie-policy'
+      preLoaderRoute: typeof CookiePolicyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/gusta': {
@@ -612,6 +664,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminPanelMediaRouteImport
       parentRoute: typeof AdminPanelRoute
     }
+    '/admin/_panel/messaggi': {
+      id: '/admin/_panel/messaggi'
+      path: '/messaggi'
+      fullPath: '/admin/messaggi'
+      preLoaderRoute: typeof AdminPanelMessaggiRouteImport
+      parentRoute: typeof AdminPanelRoute
+    }
     '/admin/_panel/utenti': {
       id: '/admin/_panel/utenti'
       path: '/utenti'
@@ -740,6 +799,7 @@ interface AdminPanelRouteChildren {
   AdminPanelCategorieRouteRoute: typeof AdminPanelCategorieRouteRouteWithChildren
   AdminPanelImpostazioniRoute: typeof AdminPanelImpostazioniRoute
   AdminPanelMediaRoute: typeof AdminPanelMediaRoute
+  AdminPanelMessaggiRoute: typeof AdminPanelMessaggiRoute
   AdminPanelUtentiRoute: typeof AdminPanelUtentiRoute
   AdminPanelIndexRoute: typeof AdminPanelIndexRoute
   AdminPanelItinerariIdRoute: typeof AdminPanelItinerariIdRoute
@@ -753,6 +813,7 @@ const AdminPanelRouteChildren: AdminPanelRouteChildren = {
   AdminPanelCategorieRouteRoute: AdminPanelCategorieRouteRouteWithChildren,
   AdminPanelImpostazioniRoute: AdminPanelImpostazioniRoute,
   AdminPanelMediaRoute: AdminPanelMediaRoute,
+  AdminPanelMessaggiRoute: AdminPanelMessaggiRoute,
   AdminPanelUtentiRoute: AdminPanelUtentiRoute,
   AdminPanelIndexRoute: AdminPanelIndexRoute,
   AdminPanelItinerariIdRoute: AdminPanelItinerariIdRoute,
@@ -767,6 +828,8 @@ const AdminPanelRouteWithChildren = AdminPanelRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ContattiRoute: ContattiRoute,
+  CookiePolicyRoute: CookiePolicyRoute,
   GustaRoute: GustaRoute,
   InfoRoute: InfoRoute,
   ManutenzioneRoute: ManutenzioneRoute,
