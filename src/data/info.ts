@@ -15,12 +15,6 @@ export interface InfoItem {
   text: string
 }
 
-export interface Webcam {
-  name: string
-  area: string
-  /** Embeddable live stream or still image; without it the camera shows as coming soon. */
-  url?: string
-}
 
 export const touristOffices: TouristOffice[] = [
   { name: 'Ufficio turistico di Camaiore', area: 'Centro storico' },
@@ -74,10 +68,4 @@ export const guides: InfoItem[] = [
     title: 'Materiale informativo',
     text: 'Mappe, opuscoli e calendari degli eventi sono disponibili negli uffici turistici.',
   },
-]
-
-export const webcams: Webcam[] = [
-  { name: 'Pontile', area: 'Lido di Camaiore' },
-  { name: 'Spiaggia', area: 'Lido di Camaiore' },
-  { name: 'Piazza San Bernardino', area: 'Centro storico' },
 ]

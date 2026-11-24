@@ -35,6 +35,7 @@ import { Route as AdminPanelImpostazioniRouteImport } from './routes/admin/_pane
 import { Route as AdminPanelMediaRouteImport } from './routes/admin/_panel/media'
 import { Route as AdminPanelMessaggiRouteImport } from './routes/admin/_panel/messaggi'
 import { Route as AdminPanelUtentiRouteImport } from './routes/admin/_panel/utenti'
+import { Route as AdminPanelWebcamRouteImport } from './routes/admin/_panel/webcam'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as AdminPanelCategoryIndexRouteImport } from './routes/admin/_panel/$category/index'
 import { Route as AdminPanelCategoryIdRouteImport } from './routes/admin/_panel/$category/$id'
@@ -178,6 +179,11 @@ const AdminPanelUtentiRoute = AdminPanelUtentiRouteImport.update({
   path: '/utenti',
   getParentRoute: () => AdminPanelRoute,
 } as any)
+const AdminPanelWebcamRoute = AdminPanelWebcamRouteImport.update({
+  id: '/webcam',
+  path: '/webcam',
+  getParentRoute: () => AdminPanelRoute,
+} as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
@@ -265,6 +271,7 @@ export interface FileRoutesByFullPath {
   '/admin/media': typeof AdminPanelMediaRoute
   '/admin/messaggi': typeof AdminPanelMessaggiRoute
   '/admin/utenti': typeof AdminPanelUtentiRoute
+  '/admin/webcam': typeof AdminPanelWebcamRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/admin/': typeof AdminPanelIndexRoute
   '/admin/$category/$id': typeof AdminPanelCategoryIdRoute
@@ -301,6 +308,7 @@ export interface FileRoutesByTo {
   '/admin/media': typeof AdminPanelMediaRoute
   '/admin/messaggi': typeof AdminPanelMessaggiRoute
   '/admin/utenti': typeof AdminPanelUtentiRoute
+  '/admin/webcam': typeof AdminPanelWebcamRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/admin': typeof AdminPanelIndexRoute
   '/admin/$category/$id': typeof AdminPanelCategoryIdRoute
@@ -341,6 +349,7 @@ export interface FileRoutesById {
   '/admin/_panel/media': typeof AdminPanelMediaRoute
   '/admin/_panel/messaggi': typeof AdminPanelMessaggiRoute
   '/admin/_panel/utenti': typeof AdminPanelUtentiRoute
+  '/admin/_panel/webcam': typeof AdminPanelWebcamRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/admin/_panel/': typeof AdminPanelIndexRoute
   '/admin/_panel/$category/$id': typeof AdminPanelCategoryIdRoute
@@ -382,6 +391,7 @@ export interface FileRouteTypes {
     | '/admin/media'
     | '/admin/messaggi'
     | '/admin/utenti'
+    | '/admin/webcam'
     | '/api/auth/$'
     | '/admin/'
     | '/admin/$category/$id'
@@ -418,6 +428,7 @@ export interface FileRouteTypes {
     | '/admin/media'
     | '/admin/messaggi'
     | '/admin/utenti'
+    | '/admin/webcam'
     | '/api/auth/$'
     | '/admin'
     | '/admin/$category/$id'
@@ -457,6 +468,7 @@ export interface FileRouteTypes {
     | '/admin/_panel/media'
     | '/admin/_panel/messaggi'
     | '/admin/_panel/utenti'
+    | '/admin/_panel/webcam'
     | '/api/auth/$'
     | '/admin/_panel/'
     | '/admin/_panel/$category/$id'
@@ -678,6 +690,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminPanelUtentiRouteImport
       parentRoute: typeof AdminPanelRoute
     }
+    '/admin/_panel/webcam': {
+      id: '/admin/_panel/webcam'
+      path: '/webcam'
+      fullPath: '/admin/webcam'
+      preLoaderRoute: typeof AdminPanelWebcamRouteImport
+      parentRoute: typeof AdminPanelRoute
+    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
@@ -801,6 +820,7 @@ interface AdminPanelRouteChildren {
   AdminPanelMediaRoute: typeof AdminPanelMediaRoute
   AdminPanelMessaggiRoute: typeof AdminPanelMessaggiRoute
   AdminPanelUtentiRoute: typeof AdminPanelUtentiRoute
+  AdminPanelWebcamRoute: typeof AdminPanelWebcamRoute
   AdminPanelIndexRoute: typeof AdminPanelIndexRoute
   AdminPanelItinerariIdRoute: typeof AdminPanelItinerariIdRoute
   AdminPanelItinerariNuovoRoute: typeof AdminPanelItinerariNuovoRoute
@@ -815,6 +835,7 @@ const AdminPanelRouteChildren: AdminPanelRouteChildren = {
   AdminPanelMediaRoute: AdminPanelMediaRoute,
   AdminPanelMessaggiRoute: AdminPanelMessaggiRoute,
   AdminPanelUtentiRoute: AdminPanelUtentiRoute,
+  AdminPanelWebcamRoute: AdminPanelWebcamRoute,
   AdminPanelIndexRoute: AdminPanelIndexRoute,
   AdminPanelItinerariIdRoute: AdminPanelItinerariIdRoute,
   AdminPanelItinerariNuovoRoute: AdminPanelItinerariNuovoRoute,

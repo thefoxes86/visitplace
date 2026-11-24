@@ -5,6 +5,7 @@ import { listContactMessages } from '#/server/contact'
 import { adminListItineraries } from '#/server/itineraries'
 import { listMedia } from '#/server/media'
 import { adminListPois } from '#/server/pois'
+import { adminListWebcams } from '#/server/settings'
 import { listUsers } from '#/server/users'
 
 /** Every place, published or not. */
@@ -47,3 +48,9 @@ export const contactMessagesQuery = queryOptions({
 })
 
 export type AdminContactMessage = Awaited<ReturnType<typeof listContactMessages>>[number]
+
+/** Every webcam of the Info page, published or not, in order. */
+export const adminWebcamsQuery = queryOptions({
+  queryKey: ['admin', 'webcams'],
+  queryFn: () => adminListWebcams(),
+})

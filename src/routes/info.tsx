@@ -1,14 +1,18 @@
+import { useEffect, useState } from 'react'
+import { useSuspenseQuery } from '@tanstack/react-query'
 import { Link, createFileRoute } from '@tanstack/react-router'
 
 import type { ReactNode } from 'react'
 
 import { ExternalContent } from '#/components/ExternalContent'
 import { CategoryCards, OtherSections, PageShell, SignpostNav, useSectionCategories } from '#/components/CategoryPage'
-import { gettingAround, gettingHere, guides, touristOffices, webcams } from '#/data/info'
+import { gettingAround, gettingHere, guides, touristOffices } from '#/data/info'
+import { webcamsQuery } from '#/data/webcams'
 import { getSection } from '#/data/sections'
 import { breadcrumbs, seo } from '#/lib/seo'
 
 import type { InfoItem } from '#/data/info'
+import type { PublicWebcam } from '#/data/webcams'
 
 export const Route = createFileRoute('/info')({
   head: () =>
@@ -19,6 +23,7 @@ export const Route = createFileRoute('/info')({
       path: '/info',
       jsonLd: breadcrumbs([['Info', '/info']]),
     }),
+  loader: ({ context }) => context.queryClient.ensureQueryData(webcamsQuery),
   component: InfoPage,
 })
 
@@ -37,6 +42,7 @@ const mapsSearch = (query: string) => `https://www.google.com/maps/search/?api=1
 function InfoPage() {
   const section = getSection('info')!
   const categories = useSectionCategories('info')
+  const { data: webcams } = useSuspenseQuery(webcamsQuery)
 
   const content: Record<BlockId, ReactNode> = {
     'uffici-turistici': (
@@ -89,30 +95,14 @@ function InfoPage() {
         </Link>
       </>
     ),
-    webcam: (
+    webcam: webcams.length ? (
       <ul className="grid gap-6 sm:grid-cols-3">
         {webcams.map((cam) => (
-          <li key={cam.name}>
-            <div className="relative aspect-video overflow-hidden bg-mint-light">
-              {cam.url ? (
-                <ExternalContent service="un sito esterno" what="la webcam">
-                  <iframe src={cam.url} title={`Webcam ${cam.name}`} className="size-full" loading="lazy" allowFullScreen />
-                </ExternalContent>
-              ) : (
-                <span className="grid size-full place-items-center font-serif text-sm italic text-teal">In arrivo</span>
-              )}
-              {cam.url && (
-                <span className="absolute left-2 top-2 flex items-center gap-1 bg-coral px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-widest text-white">
-                  <span className="size-1.5 animate-pulse rounded-full bg-white" />
-                  Live
-                </span>
-              )}
-            </div>
-            <p className="mt-2 font-semibold text-teal">{cam.name}</p>
-            <p className="text-xs font-normal">{cam.area}</p>
-          </li>
+          <WebcamCard key={cam.id} cam={cam} />
         ))}
       </ul>
+    ) : (
+      <p className="font-serif italic text-teal">Le webcam arriveranno presto.</p>
     ),
   }
 
@@ -176,5 +166,72 @@ function ItemList({ items }: { items: InfoItem[] }) {
         </div>
       ))}
     </dl>
+  )
+}
+
+/** How often a still webcam image is fetched again. */
+const IMAGE_REFRESH = 60_000
+
+/** The latest picture of a still webcam, fetched again every minute while the page is open. */
+function WebcamImage({ cam }: { cam: PublicWebcam }) {
+  const [tick, setTick] = useState(0)
+  useEffect(() => {
+    const timer = setInterval(() => setTick((n) => n + 1), IMAGE_REFRESH)
+    return () => clearInterval(timer)
+  }, [])
+  const src = tick ? `${cam.url}${cam.url.includes('?') ? '&' : '?'}t=${tick}` : cam.url
+  return <img src={src} alt={`Webcam ${cam.name}, ultima immagine`} loading="lazy" className="size-full object-cover" />
+}
+
+function WebcamCard({ cam }: { cam: PublicWebcam }) {
+  const live = Boolean(cam.url) && cam.kind !== 'link'
+  return (
+    <li>
+      <div className="relative aspect-video overflow-hidden bg-mint-light">
+        {!cam.url ? (
+          <span className="grid size-full place-items-center font-serif text-sm italic text-teal">In arrivo</span>
+        ) : cam.kind === 'link' ? (
+          <a
+            href={cam.url}
+            target="_blank"
+            rel="noreferrer noopener"
+            className="group grid size-full place-items-center bg-teal text-center text-white transition hover:bg-coral"
+          >
+            <span>
+              <span aria-hidden className="block text-3xl">
+                ◉
+              </span>
+              <span className="mt-1 inline-flex items-center gap-1 text-sm font-semibold">
+                Guarda la webcam <span aria-hidden>↗</span>
+              </span>
+            </span>
+          </a>
+        ) : (
+          <ExternalContent service={cam.sourceName || 'un sito esterno'} what="la webcam">
+            {cam.kind === 'image' ? (
+              <WebcamImage cam={cam} />
+            ) : (
+              <iframe src={cam.url} title={`Webcam ${cam.name}`} className="size-full" loading="lazy" allowFullScreen />
+            )}
+          </ExternalContent>
+        )}
+        {live && (
+          <span className="pointer-events-none absolute left-2 top-2 flex items-center gap-1 bg-coral px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-widest text-white">
+            <span className="size-1.5 animate-pulse rounded-full bg-white" />
+            Live
+          </span>
+        )}
+      </div>
+      <p className="mt-2 font-semibold text-teal">{cam.name}</p>
+      {cam.area && <p className="text-xs font-normal">{cam.area}</p>}
+      {cam.sourceName &&
+        (cam.sourceUrl ? (
+          <a href={cam.sourceUrl} target="_blank" rel="noreferrer noopener" className="text-xs font-light text-ink/70 hover:text-coral hover:underline">
+            Fonte: {cam.sourceName}
+          </a>
+        ) : (
+          <p className="text-xs font-light text-ink/70">Fonte: {cam.sourceName}</p>
+        ))}
+    </li>
   )
 }

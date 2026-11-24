@@ -102,6 +102,10 @@ function AdminLayout() {
             <span aria-hidden className="grid size-5 place-items-center">▣</span>
             Media
           </Link>
+          <Link to="/admin/webcam" activeProps={activeNavLink} onClick={close} className={navLink}>
+            <span aria-hidden className="grid size-5 place-items-center">◉</span>
+            Webcam
+          </Link>
           <Link to="/admin/messaggi" activeProps={activeNavLink} onClick={close} className={navLink}>
             <span aria-hidden className="grid size-5 place-items-center">✉</span>
             Messaggi

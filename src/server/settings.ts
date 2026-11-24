@@ -3,11 +3,11 @@ import { eq } from 'drizzle-orm'
 
 import { db } from '#/db'
 import { settings } from '#/db/schema'
-import { DEFAULT_MAINTENANCE, DEFAULT_MAINTENANCE_MESSAGE, maintenanceSetting } from '#/lib/settings'
+import { DEFAULT_MAINTENANCE, DEFAULT_MAINTENANCE_MESSAGE, DEFAULT_WEBCAMS, maintenanceSetting, webcamsSetting } from '#/lib/settings'
 import { currentUser } from '#/server/current-user'
-import { requireAdmin } from '#/server/session'
+import { requireAdmin, requireEditor } from '#/server/session'
 
-import type { MaintenanceSetting } from '#/lib/settings'
+import type { MaintenanceSetting, Webcam } from '#/lib/settings'
 
 async function readMaintenance(): Promise<MaintenanceSetting> {
   const [row] = await db.select({ value: settings.value }).from(settings).where(eq(settings.key, 'maintenance'))
@@ -38,5 +38,33 @@ export const updateMaintenance = createServerFn({ method: 'POST' })
     await db
       .insert(settings)
       .values({ key: 'maintenance', value: data })
+      .onConflictDoUpdate({ target: settings.key, set: { value: data, updatedAt: new Date() } })
+  })
+
+// ── Webcams ──────────────────────────────────────────────────────────────────
+
+async function readWebcams(): Promise<Webcam[]> {
+  const [row] = await db.select({ value: settings.value }).from(settings).where(eq(settings.key, 'webcams'))
+  if (!row) return DEFAULT_WEBCAMS
+  const parsed = webcamsSetting.safeParse(row.value)
+  return parsed.success ? parsed.data : DEFAULT_WEBCAMS
+}
+
+/** The webcams shown on the Info page, in order. */
+export const listPublicWebcams = createServerFn({ method: 'GET' }).handler(async () =>
+  (await readWebcams()).filter((cam) => cam.published).map(({ published, ...cam }) => cam),
+)
+
+export const adminListWebcams = createServerFn({ method: 'GET' })
+  .middleware([requireEditor])
+  .handler(() => readWebcams())
+
+export const saveWebcams = createServerFn({ method: 'POST' })
+  .middleware([requireEditor])
+  .validator(webcamsSetting)
+  .handler(async ({ data }) => {
+    await db
+      .insert(settings)
+      .values({ key: 'webcams', value: data })
       .onConflictDoUpdate({ target: settings.key, set: { value: data, updatedAt: new Date() } })
   })
