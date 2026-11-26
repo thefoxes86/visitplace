@@ -5,12 +5,13 @@ import { sections } from '#/data/sections'
 import { db } from '#/db'
 import { categories, itineraries, pois } from '#/db/schema'
 import { hiddenIds } from '#/lib/category-tree'
+import { nextOccurrence } from '#/lib/event-dates'
 import { absoluteUrl } from '#/lib/seo'
 
 interface SitemapEntry {
   path: string
   lastmod?: Date
-  changefreq: 'daily' | 'weekly' | 'monthly'
+  changefreq: 'daily' | 'weekly' | 'monthly' | 'yearly'
   priority: number
 }
 
@@ -31,7 +32,7 @@ function toXml(entries: SitemapEntry[]) {
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.join('\n')}\n</urlset>\n`
 }
 
-/** Every public page: the sections, the categories' own pages and each published place. */
+/** Every public page: the sections, the categories' own pages, each published place and the events still to come. */
 export const Route = createFileRoute('/sitemap.xml')({
   server: {
     handlers: {
@@ -42,11 +43,24 @@ export const Route = createFileRoute('/sitemap.xml')({
         )
         const places = (
           await db
-            .select({ id: pois.id, category: pois.category, updatedAt: pois.updatedAt })
+            .select({
+              id: pois.id,
+              category: pois.category,
+              updatedAt: pois.updatedAt,
+              startsAt: pois.startsAt,
+              endsAt: pois.endsAt,
+              allDay: pois.allDay,
+              recurrence: pois.recurrence,
+              recurrenceUntil: pois.recurrenceUntil,
+              recurrenceWeeks: pois.recurrenceWeeks,
+            })
             .from(pois)
             .where(eq(pois.published, true))
             .orderBy(desc(pois.updatedAt))
-        ).filter((place) => !hidden.has(place.category))
+        )
+          .filter((place) => !hidden.has(place.category))
+          // Events that are over keep their page, but there is no point asking to index them.
+          .filter((place) => !place.startsAt || nextOccurrence(place))
         const categoryPages = (
           await db.select({ id: categories.id, slug: categories.slug, updatedAt: categories.updatedAt }).from(categories)
         ).filter((category) => !hidden.has(category.id))
@@ -77,6 +91,7 @@ export const Route = createFileRoute('/sitemap.xml')({
           })),
           { path: '/itinerari', lastmod: lastItinerary, changefreq: 'weekly' as const, priority: 0.8 },
           { path: '/contatti', changefreq: 'monthly' as const, priority: 0.4 },
+          { path: '/cookie-policy', changefreq: 'yearly' as const, priority: 0.1 },
           ...itineraryPages.map((itinerary) => ({
             path: `/itinerari/${itinerary.id}`,
             lastmod: itinerary.updatedAt,
