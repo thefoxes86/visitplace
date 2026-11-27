@@ -12,6 +12,7 @@ import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
 
 import TanStackQueryDevtools from '../integrations/tanstack-query/devtools'
+import { Analytics } from '#/components/Analytics'
 import { CookieBanner } from '../components/CookieBanner'
 import { SiteFooter } from '../components/SiteFooter'
 import { SiteMenu } from '../components/SiteMenu'
@@ -112,6 +113,7 @@ function RootLayout() {
       <Outlet />
       {withFooter && <SiteFooter />}
       {inSite && <CookieBanner />}
+      {inSite && <Analytics />}
     </>
   )
 }

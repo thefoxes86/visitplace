@@ -9,13 +9,14 @@ const choice = `${button} border-2 border-teal text-teal hover:bg-teal hover:tex
 
 /**
  * Asks for consent on the first visit, and again from the footer's "Preferenze cookie".
- * Closing it with the × keeps only the technical cookies, as rejecting does.
+ * Closing it with the × keeps the current choice, or only the technical cookies on the first visit.
  */
 export function CookieBanner() {
   const consent = useConsent()
   const [reopened, setReopened] = useState(false)
   const [customizing, setCustomizing] = useState(false)
   const [external, setExternal] = useState(false)
+  const [analytics, setAnalytics] = useState(false)
   const panel = useRef<HTMLDivElement>(null)
 
   useEffect(
@@ -27,10 +28,12 @@ export function CookieBanner() {
     [],
   )
 
-  // The toggle starts from the choice already made.
+  // The toggles start from the choice already made.
   useEffect(() => {
-    if (customizing) setExternal(consent?.external ?? false)
-  }, [customizing, consent?.external])
+    if (!customizing) return
+    setExternal(consent?.external ?? false)
+    setAnalytics(consent?.analytics ?? false)
+  }, [customizing, consent?.external, consent?.analytics])
 
   useEffect(() => {
     if (reopened) panel.current?.focus()
@@ -40,8 +43,8 @@ export function CookieBanner() {
   const open = consent === null || reopened
   if (consent === undefined || !open) return null
 
-  const decide = (externalContent: boolean) => {
-    saveConsent({ external: externalContent })
+  const decide = (choice: { external: boolean; analytics: boolean }) => {
+    saveConsent(choice)
     setReopened(false)
     setCustomizing(false)
   }
@@ -57,7 +60,7 @@ export function CookieBanner() {
     >
       <button
         type="button"
-        onClick={() => decide(consent?.external ?? false)}
+        onClick={() => decide({ external: consent?.external ?? false, analytics: consent?.analytics ?? false })}
         aria-label="Chiudi: continua con i soli cookie tecnici"
         title="Chiudi e continua senza accettare"
         className="absolute right-2 top-2 grid size-9 place-items-center rounded-full text-xl text-ink/70 transition hover:bg-ink/5 hover:text-ink"
@@ -66,13 +69,14 @@ export function CookieBanner() {
       </button>
       <div className="max-h-[80dvh] overflow-y-auto px-5 py-5 sm:px-7 sm:py-6">
         <h2 id="cookie-title" className="pr-8 font-display text-lg font-semibold text-teal">
-          Cookie e contenuti esterni
+          Cookie, statistiche e contenuti esterni
         </h2>
         <p className="mt-2 text-sm font-normal leading-relaxed">
-          Usiamo solo cookie tecnici, necessari al funzionamento del sito. Con il tuo consenso carichiamo anche le mappe di{' '}
-          <strong className="font-semibold">Google Maps</strong> e le <strong className="font-semibold">webcam</strong>: sono servizi
-          esterni che possono impostare cookie propri. Niente pubblicità né statistiche. Puoi cambiare idea quando vuoi da «Preferenze
-          cookie» in fondo alla pagina.{' '}
+          Usiamo cookie tecnici, necessari al funzionamento del sito. Con il tuo consenso usiamo anche{' '}
+          <strong className="font-semibold">Google Analytics</strong>, per sapere in forma aggregata quali pagine vengono visitate, e
+          carichiamo le mappe di <strong className="font-semibold">Google Maps</strong> e le{' '}
+          <strong className="font-semibold">webcam</strong>: sono servizi esterni che possono impostare cookie propri. Niente pubblicità.
+          Puoi cambiare idea quando vuoi da «Preferenze cookie» in fondo alla pagina.{' '}
           <Link to="/cookie-policy" className="font-semibold text-teal underline underline-offset-2 hover:text-coral">
             Cookie policy
           </Link>
@@ -102,18 +106,33 @@ export function CookieBanner() {
                 </span>
               </span>
             </label>
+            <label className="flex cursor-pointer items-start gap-3 text-sm">
+              <input
+                type="checkbox"
+                checked={analytics}
+                onChange={(e) => setAnalytics(e.target.checked)}
+                className="mt-0.5 size-4 shrink-0 accent-teal"
+              />
+              <span>
+                <span className="block font-semibold">Statistiche</span>
+                <span className="font-light text-ink/80">
+                  Google Analytics (Google Ireland Ltd.): pagine visitate e provenienza delle visite, in forma aggregata, per migliorare il
+                  sito.
+                </span>
+              </span>
+            </label>
           </fieldset>
         )}
 
         <div className="mt-5 flex flex-wrap items-center gap-2">
-          <button type="button" onClick={() => decide(false)} className={choice}>
+          <button type="button" onClick={() => decide({ external: false, analytics: false })} className={choice}>
             Rifiuta
           </button>
-          <button type="button" onClick={() => decide(true)} className={choice}>
+          <button type="button" onClick={() => decide({ external: true, analytics: true })} className={choice}>
             Accetta tutti
           </button>
           {customizing ? (
-            <button type="button" onClick={() => decide(external)} className={`${button} bg-coral text-white hover:bg-coral-dark`}>
+            <button type="button" onClick={() => decide({ external, analytics })} className={`${button} bg-coral text-white hover:bg-coral-dark`}>
               Salva le scelte
             </button>
           ) : (

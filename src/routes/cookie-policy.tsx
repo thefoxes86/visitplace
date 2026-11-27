@@ -10,7 +10,7 @@ export const Route = createFileRoute('/cookie-policy')({
   head: () =>
     seo({
       title: 'Cookie policy',
-      description: 'Quali cookie usa Visit Camaiore, a cosa servono e come cambiare le tue scelte su Google Maps e sugli altri contenuti esterni.',
+      description: 'Quali cookie usa Visit Camaiore, a cosa servono e come cambiare le tue scelte su statistiche, Google Maps e contenuti esterni.',
       path: '/cookie-policy',
       jsonLd: breadcrumbs([['Cookie policy', '/cookie-policy']]),
     }),
@@ -18,7 +18,7 @@ export const Route = createFileRoute('/cookie-policy')({
 })
 
 /** Last change to this text: update it with the text. */
-const UPDATED = '24 novembre 2026'
+const UPDATED = '27 novembre 2026'
 
 const COOKIES: { name: string; who: string; purpose: string; duration: string }[] = [
   {
@@ -32,6 +32,12 @@ const COOKIES: { name: string; who: string; purpose: string; duration: string }[
     who: 'Visit Camaiore (tecnico)',
     purpose: "Tiene aperto l'accesso al backoffice, solo per chi gestisce i contenuti.",
     duration: 'Fino all’uscita, al massimo 7 giorni',
+  },
+  {
+    name: '_ga, _ga_<id>',
+    who: 'Google Ireland Ltd. (terza parte, solo con consenso)',
+    purpose: 'Google Analytics: distinguono le visite per contare in forma aggregata le pagine viste.',
+    duration: '2 anni',
   },
   {
     name: 'Cookie di Google',
@@ -75,9 +81,9 @@ function CookiePolicy() {
 
         <Block title="In breve">
           <p>
-            Visit Camaiore non usa cookie di profilazione, pubblicità o statistiche. Usa solo cookie tecnici, necessari al funzionamento
-            del sito, e, se lo accetti, carica contenuti esterni come le mappe di Google Maps e le webcam, che possono impostare cookie
-            propri.
+            Visit Camaiore non usa cookie di profilazione o pubblicità. Usa cookie tecnici, necessari al funzionamento del sito, e, solo se
+            lo accetti, Google Analytics per le statistiche di visita e contenuti esterni come le mappe di Google Maps e le webcam, che
+            possono impostare cookie propri.
           </p>
         </Block>
 
@@ -114,6 +120,20 @@ function CookiePolicy() {
           </div>
         </Block>
 
+        <Block title="Statistiche">
+          <p>
+            Se accetti le statistiche, il sito carica <strong className="font-semibold">Google Analytics</strong> tramite Google Tag
+            Manager, di Google Ireland Ltd., per sapere quali pagine vengono visitate, da quali siti si arriva e con quali dispositivi. I
+            dati sono usati in forma aggregata per migliorare il sito, non per pubblicità: le funzioni pubblicitarie di Google restano
+            disattivate. Senza il tuo consenso Google Analytics non viene caricato. Google tratta i dati secondo la propria{' '}
+            <a href="https://policies.google.com/privacy?hl=it" target="_blank" rel="noreferrer noopener" className={outLink}>
+              informativa privacy
+            </a>
+            ; i dati possono essere trasferiti negli Stati Uniti, nell'ambito dell'EU-US Data Privacy Framework.
+          </p>
+          <p>Se ritiri il consenso, i cookie di Google Analytics vengono cancellati e il servizio non viene più caricato.</p>
+        </Block>
+
         <Block title="Contenuti esterni">
           <p>
             Le mappe sono fornite da <strong className="font-semibold">Google Maps</strong>. Finché non dai il consenso, al loro posto vedi
@@ -140,9 +160,13 @@ function CookiePolicy() {
               ? 'Puoi cambiare le tue scelte quando vuoi.'
               : consent === null
                 ? 'Non hai ancora fatto una scelta.'
-                : consent.external
-                  ? 'Al momento hai accettato i contenuti esterni.'
-                  : 'Al momento hai scelto i soli cookie tecnici.'}{' '}
+                : consent.external && consent.analytics
+                  ? 'Al momento hai accettato statistiche e contenuti esterni.'
+                  : consent.analytics
+                    ? 'Al momento hai accettato le statistiche, non i contenuti esterni.'
+                    : consent.external
+                      ? 'Al momento hai accettato i contenuti esterni, non le statistiche.'
+                      : 'Al momento hai scelto i soli cookie tecnici.'}{' '}
             Puoi cambiarla quando vuoi da «Preferenze cookie» in fondo a ogni pagina, o da qui:
           </p>
           <p>
